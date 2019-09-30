@@ -3,6 +3,7 @@ import datetime
 import sys
 import os
 from .db_config import DATABASE as dbconf
+from .table_utils.taxonomy import *
 import logging
 import pymysql
 import pymysql.cursors
@@ -82,7 +83,7 @@ class Gene:
             JOIN diseases ON diseases.id = disease_taxonomy.parent_id
 
             """)
-            filter_clauses.append( "  AND diseases.do_id = '%s'" % disease_id)
+            filter_clauses.append( "diseases.do_id = '%s'" % disease_id)
         if go_id and go_id != "undefined":
             join_clauses.append( """
             JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
@@ -93,7 +94,8 @@ class Gene:
             filter_clauses.append( "go_categories.go_id = '%s'" % go_id)
         if name_prefix and name_prefix != "undefined":
             filter_clauses.append("LOWER(genes.symbol) like LOWER('%s')" % (name_prefix + "%"))
-        query = select_clause + " ".join(join_clauses) + " WHERE "  + " AND ".join(filter_clauses)
+        print(filter_clauses)
+        query = select_clause + " ".join(join_clauses) + (" WHERE "  + " AND ".join(filter_clauses)) if filter_clauses else ""
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -111,6 +113,22 @@ class Disease:
         """ % entrez_id
         cursor = Base.execute_query(query)
         return cursor.fetchall()
+
+class DiseaseTaxonomy:
+
+    @staticmethod
+    def construct_taxonomy(root_node):
+        start_time = datetime.datetime.now()
+        query = """
+            SELECT DISTINCT diseases.id, diseases.do_id AS external_id,
+                diseases.name, disease_taxonomy.child_id, disease_taxonomy.distance
+            FROM diseases
+            JOIN disease_taxonomy ON disease_taxonomy.parent_id = diseases.id AND disease_taxonomy.distance IN (0, 1)
+            JOIN disease_taxonomy dt2 on diseases.id = dt2.child_id and dt2.parent_id = %s
+        """ % root_node
+        cursor = Base.execute_query(query)
+        db_results = cursor.fetchall()
+        return build_taxonomy(db_results, root_node)
 
 class Article:
     @staticmethod
@@ -159,33 +177,15 @@ class GoTaxonomy:
     def construct_taxonomy(root_node):
         start_time = datetime.datetime.now()
         query = """
-            SELECT DISTINCT go_categories.id, go_categories.go_id, go_categories.name, go_taxonomy.child_id, go_taxonomy.distance
+            SELECT DISTINCT go_categories.id, go_categories.go_id AS external_id,
+                go_categories.name, go_taxonomy.child_id, go_taxonomy.distance
             FROM go_categories
             JOIN go_taxonomy ON go_taxonomy.parent_id = go_categories.id AND go_taxonomy.distance IN (0, 1)
-        """
+            JOIN go_taxonomy gt2 on go_categories.id = gt2.child_id and gt2.parent_id = %s
+        """ % root_node
         cursor = Base.execute_query(query)
         db_results = cursor.fetchall()
-        result_dict = {}
-        id_to_node = {x["id"] : x for x in db_results}
-        print("\n\nretrieved results ", datetime.datetime.now() - start_time)
-        for node in db_results:
-            if node["distance"] == 1:
-                if node["id"] in result_dict:
-                    result_dict[node["id"]].append(node["child_id"])
-                elif node["id"] != node["child_id"]:
-                    result_dict[node["id"]] = [node["child_id"]]
-        print("\n\nbuilt dicts ", datetime.datetime.now() - start_time)
-        def represent_node(node_id):
-            return " - ".join([id_to_node[node_id]["go_id"], id_to_node[node_id]["name"]])
-        def build_children(node_id):
-            if node_id in result_dict:
-                return {"id": id_to_node[node_id]["go_id"], "name": represent_node(node_id),
-                        "childnodes": [build_children(x) for x in result_dict[node_id]]
-                        }
-            return {"id": id_to_node[node_id]["go_id"], "name": represent_node(node_id), "childnodes":[]}
-        results = build_children(root_node)
-        print("\n\nbuilt taxonomy ", datetime.datetime.now() - start_time)
-        return results
+        return build_taxonomy(db_results, root_node)
 
 
 if __name__ == '__main__':

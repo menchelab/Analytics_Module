@@ -15,12 +15,6 @@ def hello():
 def sepptest():
     return ",".join([str(x) for x in range(200000)])
 
-@app.route("/jentest/<int:somearg>",  methods=['GET'])
-def jentest(somearg):
-    if somearg > 10:
-        return "I am so awesome"
-    return "1,2,3,4,5,6,7"
-
 ########
 # Gene #
 ########
@@ -28,13 +22,14 @@ def jentest(somearg):
 @app.route("/api/gene/prefix/<string:name_prefix>",  methods=['GET'])
 @cross_origin()
 def genes_for_prefix(name_prefix):
-    return jsonify(Gene.genes_for_autocomplete(disease_id))
+    return jsonify(Gene.genes_for_autocomplete(name_prefix))
 
 @app.route("/api/gene/search", methods=['GET', 'POST'])
 @cross_origin()
 def search_for_genes():
     data = request.form
-    results = Gene.gene_search(data["name_prefix"], data["disease_id"], None)
+    print(data)
+    results = Gene.gene_search(data["name_prefix"], data["disease_id"], data["go_category_id"])
     return jsonify(results)
 
 @app.route("/api/gene/disease/<string:disease_id>",  methods=['GET'])
@@ -62,6 +57,12 @@ def get_random_genes():
 def diseases_for_gene(entrez_id):
     return jsonify(Disease.diseases_for_gene(entrez_id))
 
+@app.route("/api/disease_taxonomy/<int:root_node_id>", methods=['GET'])
+@cross_origin()
+def do_taxonomy(root_node_id):
+    return jsonify(
+        DiseaseTaxonomy.construct_taxonomy(5840))
+
 ###########
 # Article #
 ###########
@@ -88,11 +89,7 @@ def go_category_for_gene(namespace, entrez_id):
 @app.route("/api/go_taxonomy/<int:root_node_id>")
 @cross_origin()
 def go_taxonomy(root_node_id):
-    return jsonify(
-        [GoTaxonomy.construct_taxonomy(2740),
-         GoTaxonomy.construct_taxonomy(4298),
-         GoTaxonomy.construct_taxonomy(6288),
-         ])
+    return jsonify(GoTaxonomy.construct_taxonomy(root_node_id))
 
 
 
