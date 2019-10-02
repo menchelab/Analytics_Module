@@ -71,33 +71,36 @@ class Gene:
         return cursor.fetchall()
 
     @staticmethod
-    def gene_search(name_prefix, disease_id, go_id):
-        select_clause = "SELECT DISTINCT genes.name, genes.entrez_id FROM genes"
+    def search(clauses):
         filter_clauses = []
-        join_clauses = []
+        def filter_clause(predicate, subject, object):
+            if subject == "name_like":
+                return " %s LOWER(genes.symbol) like LOWER('%s') " % (predicate, object + "%")
+            column = "diseases.do_id" if subject == "disease" else "go_categories.go_id"
+            return " %s %s = '%s' " % (predicate, column, object)
 
-        if disease_id and disease_id !="undefined":
-            join_clauses.append( """
+
+        select_clause = """
+            SELECT DISTINCT genes.name, genes.entrez_id FROM genes
             JOIN genes_diseases ON genes_diseases.gene_id = genes.id
             JOIN disease_taxonomy ON genes_diseases.disease_id = disease_taxonomy.child_id
             JOIN diseases ON diseases.id = disease_taxonomy.parent_id
-
-            """)
-            filter_clauses.append( "diseases.do_id = '%s'" % disease_id)
-        if go_id and go_id != "undefined":
-            join_clauses.append( """
             JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
             JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
             JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
+            WHERE TRUE
 
-            """)
-            filter_clauses.append( "go_categories.go_id = '%s'" % go_id)
-        if name_prefix and name_prefix != "undefined":
-            filter_clauses.append("LOWER(genes.symbol) like LOWER('%s')" % (name_prefix + "%"))
-        print(filter_clauses)
-        query = select_clause + " ".join(join_clauses) + (" WHERE "  + " AND ".join(filter_clauses)) if filter_clauses else ""
+        """
+        for x in range(5):
+            print("!!!!!!!!")
+            print(x)
+            if "subject%d" % x in clauses and clauses["subject%d" % x] != "undefined":
+                filter_clauses.append(
+                    filter_clause(clauses["predicate%d" % x], clauses["subject%d" % x], clauses["object%d" % x] ))
+        query = select_clause + " ".join(filter_clauses)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
+
 
 
 class Disease:

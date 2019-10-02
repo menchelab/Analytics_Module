@@ -26,10 +26,10 @@ def genes_for_prefix(name_prefix):
 
 @app.route("/api/gene/search", methods=['GET', 'POST'])
 @cross_origin()
-def search_for_genes():
+def search():
     data = request.form
     print(data)
-    results = Gene.gene_search(data["name_prefix"], data["disease_id"], data["go_category_id"])
+    results = Gene.search(data)
     return jsonify(results)
 
 @app.route("/api/gene/disease/<string:disease_id>",  methods=['GET'])
