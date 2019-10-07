@@ -92,11 +92,11 @@ class Gene:
 
         """
         for x in range(5):
-            print("!!!!!!!!")
-            print(x)
-            if "subject%d" % x in clauses and clauses["subject%d" % x] != "undefined":
+            andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
+            if "subject%d" % x in clauses and clauses["subject%d" % x] != "undefined" \
+            and "object%d" % x in clauses and clauses["object%d" % x] != "undefined":
                 filter_clauses.append(
-                    filter_clause(clauses["predicate%d" % x], clauses["subject%d" % x], clauses["object%d" % x] ))
+                    filter_clause(andor, clauses["subject%d" % x], clauses["object%d" % x] ))
         query = select_clause + " ".join(filter_clauses)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
