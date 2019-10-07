@@ -73,11 +73,11 @@ class Gene:
     @staticmethod
     def search(clauses):
         filter_clauses = []
-        def filter_clause(predicate, subject, object):
+        def filter_clause(subject, object):
             if subject == "name_like":
-                return " %s LOWER(genes.symbol) like LOWER('%s') " % (predicate, object + "%")
+                return " LOWER(genes.symbol) like LOWER('%s') " % (object + "%")
             column = "diseases.do_id" if subject == "disease" else "go_categories.go_id"
-            return " %s %s = '%s' " % (predicate, column, object)
+            return " %s = '%s' " % (column, object)
 
 
         select_clause = """
@@ -88,16 +88,21 @@ class Gene:
             JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
             JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
             JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
-            WHERE TRUE
+            WHERE
 
         """
         for x in range(5):
             andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
-            if "subject%d" % x in clauses and clauses["subject%d" % x] != "undefined" \
-            and "object%d" % x in clauses and clauses["object%d" % x] != "undefined":
-                filter_clauses.append(
-                    filter_clause(andor, clauses["subject%d" % x], clauses["object%d" % x] ))
-        query = select_clause + " ".join(filter_clauses)
+            if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
+            or "object%d" % x not in clauses or clauses["object%d" % x] == "undefined":
+                break
+            new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
+            if andor == "AND":
+                filter_clauses.append(new_clause)
+            else:
+                filter_clauses[-1] = filter_clauses[-1] + " OR " + new_clause
+        filter_clauses = [" (" + clause + ") " for clause in filter_clauses]
+        query = select_clause + " AND ".join(filter_clauses)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
