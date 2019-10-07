@@ -1,11 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
 from .tables import *
+from werkzeug.contrib.cache import SimpleCache
 
 
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+cache = SimpleCache()
+
+
+
 
 
 @app.route("/")
@@ -56,11 +61,21 @@ def get_random_genes():
 def diseases_for_gene(entrez_id):
     return jsonify(Disease.diseases_for_gene(entrez_id))
 
+# Cache database call for disease taxonomy to prevent repeated queries.
+def get_disease_taxonomy(root_node_id):
+    zkey = 'disease_taxonomy_parents-%d' % root_node_id
+    dtc = cache.get(zkey)
+    if dtc is None:
+        dtc = DiseaseTaxonomy.construct_taxonomy(root_node_id)
+        cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
+    return dtc
+
 @app.route("/api/disease_taxonomy/<int:root_node_id>", methods=['GET'])
 @cross_origin()
 def do_taxonomy(root_node_id):
     return jsonify(
-        DiseaseTaxonomy.construct_taxonomy(5840))
+        get_disease_taxonomy(root_node_id))
+
 
 ###########
 # Article #
@@ -85,10 +100,19 @@ def articles_for_gene(entrez_id):
 def go_category_for_gene(namespace, entrez_id):
     return jsonify(GoCategory.go_categories_for_gene(entrez_id, namespace))
 
+# Cache database call for go taxonomy to prevent repeated queries.
+def get_go_taxonomy(root_node_id):
+    zkey = 'go_taxonomy_parents-%d' % root_node_id
+    dtc = cache.get(zkey)
+    if dtc is None:
+        dtc = GoTaxonomy.construct_taxonomy(root_node_id)
+        cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
+    return dtc
+
 @app.route("/api/go_taxonomy/<int:root_node_id>")
 @cross_origin()
 def go_taxonomy(root_node_id):
-    return jsonify(GoTaxonomy.construct_taxonomy(root_node_id))
+    return jsonify(get_go_taxonomy(root_node_id))
 
 
 
