@@ -28,7 +28,6 @@ def genes_for_prefix(name_prefix):
 @cross_origin()
 def search():
     data = request.form
-    print(data)
     results = Gene.search(data)
     return jsonify(results)
 
