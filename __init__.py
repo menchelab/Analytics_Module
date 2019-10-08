@@ -52,6 +52,7 @@ def get_random_genes():
     return jsonify(Gene.show_random(10))
 
 
+
 ###########
 # Disease #
 ###########
@@ -75,6 +76,11 @@ def get_disease_taxonomy(root_node_id):
 def do_taxonomy(root_node_id):
     return jsonify(
         get_disease_taxonomy(root_node_id))
+
+@app.route("/api/disease/prefix/<string:name_prefix>", methods=['GET'])
+@cross_origin()
+def diseases_for_prefix(name_prefix):
+    return jsonify(Disease.diseases_for_autocomplete(name_prefix))
 
 
 ###########
@@ -113,6 +119,11 @@ def get_go_taxonomy(root_node_id):
 @cross_origin()
 def go_taxonomy(root_node_id):
     return jsonify(get_go_taxonomy(root_node_id))
+
+@app.route("/api/go_category/prefix/<string:name_prefix>", methods=['GET'])
+@cross_origin()
+def go_categories_for_prefix(name_prefix):
+    return jsonify(GoCategory.go_categories_for_autocomplete(name_prefix))
 
 
 

@@ -122,6 +122,16 @@ class Disease:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
+    @staticmethod
+    def diseases_for_autocomplete(name_prefix):
+        query = """
+            SELECT diseases.name
+            FROM diseases
+            WHERE LOWER(diseases.name) like LOWER('%s')
+        """ % (name_prefix + '%')
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
 class DiseaseTaxonomy:
 
     @staticmethod
@@ -177,6 +187,16 @@ class GoCategory:
             AND go_categories.go_id NOT IN ("GO:0003674", "GO:0005575", "GO:0008150")
             %s
         """ % (entrez_id, namespace_filter)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def go_categories_for_autocomplete(name_prefix):
+        query = """
+            SELECT go_categories.name
+            FROM go_categories
+            WHERE LOWER(go_categories.name) like LOWER('%s')
+        """ % (name_prefix + '%')
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
