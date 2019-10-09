@@ -62,7 +62,7 @@ class Gene:
     @staticmethod
     def genes_for_autocomplete(name_prefix):
         query = """
-            SELECT genes.symbol
+            SELECT genes.entrez_id, genes.symbol
             FROM genes
             WHERE LOWER(genes.symbol) like LOWER('%s')
             AND genes.holo_id IS NOT NULL
@@ -125,7 +125,7 @@ class Disease:
     @staticmethod
     def diseases_for_autocomplete(name_prefix):
         query = """
-            SELECT diseases.name
+            SELECT diseases.do_id, diseases.name
             FROM diseases
             WHERE LOWER(diseases.name) like LOWER('%s')
         """ % (name_prefix + '%')
@@ -193,7 +193,7 @@ class GoCategory:
     @staticmethod
     def go_categories_for_autocomplete(name_prefix):
         query = """
-            SELECT go_categories.name
+            SELECT go_categories.go_id, go_categories.name
             FROM go_categories
             WHERE LOWER(go_categories.name) like LOWER('%s')
         """ % (name_prefix + '%')
