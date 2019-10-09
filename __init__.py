@@ -125,6 +125,15 @@ def go_taxonomy(root_node_id):
 def go_categories_for_prefix(name_prefix):
     return jsonify(GoCategory.go_categories_for_autocomplete(name_prefix))
 
+#######
+# PPI #
+#######
+
+@app.route("/api/ppi/all")
+@cross_origin()
+def get_ppi():
+    return jsonify(PPI.all())
+
 
 
 if __name__ == "__main__":

@@ -215,6 +215,21 @@ class GoTaxonomy:
         db_results = cursor.fetchall()
         return build_taxonomy(db_results, root_node)
 
+class PPI:
+    @staticmethod
+    def all():
+        query = """
+        SELECT ppi.gene1_id, ppi.gene2_id,
+               genes1.entrez_id as gene1_entrez_id,
+               genes2.entrez_id as gene2_entrez_id
+        FROM ppi
+        JOIN genes genes1 on ppi.gene1_id = genes1.id
+        JOIN genes genes2 on ppi.gene2_id = genes2.id
+        WHERE ppi.gene1_id < ppi.gene2_id
+        """
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
 
 if __name__ == '__main__':
     #logging.getLogger('sqlalchemy').setLevel(logging.CRITICAL)
