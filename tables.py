@@ -23,7 +23,19 @@ class Base:
         cursor.execute(query)
         return cursor
 
+    @staticmethod
+    def sanitize_string(string):
+        string = string.replace("'", r"\'")
+        print("helloz", string)
+        return string
+
 class Gene:
+
+    @staticmethod
+    def all():
+        query = """
+
+        """
 
     @staticmethod
     def show_random(num_to_show):
@@ -66,45 +78,135 @@ class Gene:
             FROM genes
             WHERE LOWER(genes.symbol) like LOWER('%s')
             AND genes.holo_id IS NOT NULL
-        """ % (name_prefix + '%')
+        """ % (Base.sanitize_string(name_prefix) + '%')
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
     def search(clauses):
+        have_name = False
+        have_diseases = False
+        have_go_categories = False
         filter_clauses = []
+        select_clauses = []
+
         def filter_clause(subject, object):
+            print(subject)
             if subject == "name_like":
-                return " LOWER(genes.symbol) like LOWER('%s') " % (object + "%")
-            column = "diseases.do_id" if subject == "disease" else "go_categories.go_id"
-            return " %s = '%s' " % (column, object)
+                have_name = True
+                return [" LOWER(genes.symbol) like LOWER('%s') " % (Base.sanitize_string(object) + "%"),
+                        ["name", object.lower()]]
+            column = ""
+            if subject == "disease":
+                column = "do_id"
+                have_diseases = True
+            else:
+                column = "go_id"
+                have_go_categories = True
 
+            return ["%s = '%s'" % (column, object),
+                    [column, object]]
 
-        select_clause = """
-            SELECT DISTINCT genes.name, genes.entrez_id FROM genes
+        for x in range(5):
+            andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
+            if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
+            or "object%d" % x not in clauses or clauses["object%d" % x] == "undefined":
+                break
+            if clauses["subject%d" % x] == "disease":
+                have_diseases = True
+            elif clauses["subject%d" % x] == "name_like":
+                pass
+            else:
+                have_go_categories = True
+            new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
+            if andor == "AND":
+                filter_clauses.append(new_clause[0])
+                select_clauses.append([new_clause[1]])
+            else:
+                filter_clauses[-1]= filter_clauses[-1] + " OR " + new_clause[0]
+                select_clauses[-1].append(new_clause[1])
+        if not filter_clauses:
+            print("no filter clauses!")
+            return([])
+        if have_name and not have_diseases and not have_go_categories:
+            name_select_clause = """
+                SELECT name, symbol, entrez_id FROM genes WHERE
+            """
+            query = name_select_clause + " AND ".join(filter_clauses)
+            cursor = Base.execute_query(query)
+            return cursor.fetchall()
+
+        print(filter_clauses)
+        print(have_diseases, have_go_categories)
+        genes_to_names = {}
+        if have_diseases and have_go_categories:
+            name_disease_select_clause = """
+            SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
+                GROUP_CONCAT(DISTINCT diseases.do_id) AS do_id,
+                GROUP_CONCAT(DISTINCT go_categories.go_id) as go_id
+            FROM genes
             JOIN genes_diseases ON genes_diseases.gene_id = genes.id
             JOIN disease_taxonomy ON genes_diseases.disease_id = disease_taxonomy.child_id
             JOIN diseases ON diseases.id = disease_taxonomy.parent_id
             JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
             JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
             JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
-            WHERE
-
-        """
-        for x in range(5):
-            andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
-            if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
-            or "object%d" % x not in clauses or clauses["object%d" % x] == "undefined":
-                break
-            new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
-            if andor == "AND":
-                filter_clauses.append(new_clause)
-            else:
-                filter_clauses[-1] = filter_clauses[-1] + " OR " + new_clause
-        filter_clauses = [" (" + clause + ") " for clause in filter_clauses]
-        query = select_clause + " AND ".join(filter_clauses)
+            WHERE %s
+            GROUP BY 1, 2, 3
+            """ % " OR ".join(filter_clauses)
+        elif have_diseases:
+            name_disease_select_clause = """
+            SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
+                GROUP_CONCAT(DISTINCT diseases.do_id) AS do_id,
+                "" as go_id
+            FROM genes
+            JOIN genes_diseases ON genes_diseases.gene_id = genes.id
+            JOIN disease_taxonomy ON genes_diseases.disease_id = disease_taxonomy.child_id
+            JOIN diseases ON diseases.id = disease_taxonomy.parent_id
+            WHERE %s
+            GROUP BY 1, 2, 3
+            """ % " OR ".join(filter_clauses)
+        else:
+            name_disease_select_clause = """
+            SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
+                "" as do_id,
+                GROUP_CONCAT(DISTINCT go_categories.go_id) as go_id
+            FROM genes
+            JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
+            JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
+            JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
+            WHERE %s
+            GROUP BY 1, 2, 3
+            """ % " OR ".join(filter_clauses)
+        query = name_disease_select_clause
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        disease_table = cursor.fetchall()
+        genes_to_diseases = {x["entrez_id"]: x["do_id"].split(",") for x in disease_table}
+        genes_to_go_categories = {x["entrez_id"]: x["go_id"].split(",") for x in disease_table}
+        genes_to_names_d = {x["entrez_id"]: {'name': x['name'], 'symbol': x['symbol']} for x in disease_table}
+        genes_to_names = {**genes_to_names, **genes_to_names_d}
+
+        candidate_genes = set(genes_to_names.keys())
+        for clause in select_clauses:
+            keep_genes = set()
+            for subclause in clause:
+                print(clause)
+                print(subclause)
+                if subclause[0] == "name":
+                    new_candidates = [x for x in candidate_genes if subclause[1].lower() in genes_to_names[x]["name"]]
+                elif subclause[0] == "do_id":
+                    new_candidates = [x for x in candidate_genes if subclause[1] in genes_to_diseases[x]]
+                else:
+                    new_candidates = [x for x in candidate_genes if subclause[1] in genes_to_go_categories[x]]
+                for x in new_candidates:
+                    keep_genes.add(x)
+            candidate_genes = keep_genes
+        return[{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
+
+
+
+
+
 
 
 
@@ -128,7 +230,7 @@ class Disease:
             SELECT diseases.do_id, diseases.name
             FROM diseases
             WHERE LOWER(diseases.name) like LOWER('%s')
-        """ % (name_prefix + '%')
+        """ % (Base.sanitize_string(name_prefix) + '%')
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
