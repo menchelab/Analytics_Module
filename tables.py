@@ -203,13 +203,6 @@ class Gene:
             candidate_genes = keep_genes
         return[{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
 
-
-
-
-
-
-
-
 class Disease:
     @staticmethod
     def diseases_for_gene(entrez_id):
@@ -231,6 +224,15 @@ class Disease:
             FROM diseases
             WHERE LOWER(diseases.name) like LOWER('%s')
         """ % (Base.sanitize_string(name_prefix) + '%')
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def all_disease_names():
+        query = """
+            SElECT DISTINCT diseases.do_id, diseases.name
+            FROM diseases
+        """
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -257,7 +259,7 @@ class Article:
             SELECT articles.authors_list, articles.abstract
             FROM articles
             WHERE articles.type = "pubmed"
-            AND article.external_id = '%s'
+            AND articles.external_id = '%s'
         """ % pub_id
         cursor = Base.execute_query(query)
         return cursor.fetchone()
@@ -299,6 +301,15 @@ class GoCategory:
             FROM go_categories
             WHERE LOWER(go_categories.name) like LOWER('%s')
         """ % (name_prefix + '%')
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    def go_category_names_for_branch(branch_name):
+        query = """
+            SELECT go_categories.go_id, go_categories.name
+            FROM go_categories
+            WHERE namespace = '%s'
+        """ % branch_name
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
