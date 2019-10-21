@@ -262,7 +262,7 @@ class Article:
             FROM articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
-        """ % pub_id
+        """ % ("%Y-%m-%d", pub_id)
         cursor = Base.execute_query(query)
         return cursor.fetchone()
 
