@@ -256,7 +256,7 @@ class Article:
     @staticmethod
     def article_for_pubid(pub_id):
         query = """
-            SELECT articles.authors_list, articles.abstract
+            SELECT articles.authors_list, articles.abstract, articles.title, articles.publication_date
             FROM articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
@@ -273,6 +273,7 @@ class Article:
             JOIN genes ON genes.id = genes_articles.gene_id
             WHERE articles.type = 'pubmed'
             AND genes.entrez_id = '%s'
+            ORDER BY articles.publication_date desc
         """ % entrez_id
         cursor = Base.execute_query(query)
         return cursor.fetchall()
