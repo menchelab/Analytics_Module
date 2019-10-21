@@ -256,7 +256,9 @@ class Article:
     @staticmethod
     def article_for_pubid(pub_id):
         query = """
-            SELECT articles.authors_list, articles.abstract, articles.title, articles.publication_date
+            SELECT articles.authors_list, articles.abstract, articles.title,
+                DATE_FORMAT(CURDATE(), '%s') AS publication_date,
+                "Fake Journal" AS publication, 10000 as citation_count
             FROM articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
@@ -267,14 +269,16 @@ class Article:
     @staticmethod
     def articles_for_gene(entrez_id):
         query = """
-            SELECT articles.external_id, articles.title
+            SELECT articles.external_id, articles.title,
+                DATE_FORMAT(CURDATE(), '%s') AS publication_date,
+                "Fake Journal" AS publication, 10000 as citation_count
             FROM articles
             JOIN genes_articles ON genes_articles.article_id = articles.id
             JOIN genes ON genes.id = genes_articles.gene_id
             WHERE articles.type = 'pubmed'
             AND genes.entrez_id = '%s'
             ORDER BY articles.publication_date desc
-        """ % entrez_id
+        """ % ("%Y-%m-%d", entrez_id)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
