@@ -34,8 +34,10 @@ class Gene:
     @staticmethod
     def all():
         query = """
-
+            SELECT DISTINCT name, symbol, entrez_id FROM genes
         """
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
 
     @staticmethod
     def show_random(num_to_show):
@@ -115,7 +117,7 @@ class Gene:
             if clauses["subject%d" % x] == "disease":
                 have_diseases = True
             elif clauses["subject%d" % x] == "name_like":
-                pass
+                have_name = True
             else:
                 have_go_categories = True
             new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
@@ -132,6 +134,7 @@ class Gene:
             name_select_clause = """
                 SELECT name, symbol, entrez_id FROM genes WHERE
             """
+            print("hello! I'm just a name")
             query = name_select_clause + " AND ".join(filter_clauses)
             cursor = Base.execute_query(query)
             return cursor.fetchall()
@@ -166,7 +169,7 @@ class Gene:
             WHERE %s
             GROUP BY 1, 2, 3
             """ % " OR ".join(filter_clauses)
-        else:
+        elif have_go_categories:
             name_disease_select_clause = """
             SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
                 "" as do_id,
