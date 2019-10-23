@@ -8,7 +8,7 @@ def build_taxonomy(db_results, root_node):
             elif node["id"] != node["child_id"]:
                 result_dict[node["id"]] = [node["child_id"]]
     def represent_node(node_id):
-        return " - ".join([id_to_node[node_id]["external_id"], id_to_node[node_id]["name"]])
+        return id_to_node[node_id]["name"]
     def build_children(node_id):
         if node_id in result_dict:
             return {"id": id_to_node[node_id]["external_id"], "name": represent_node(node_id),
