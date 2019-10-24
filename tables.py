@@ -246,6 +246,8 @@ class Disease:
         query = """
             SElECT DISTINCT diseases.do_id, diseases.name
             FROM diseases
+            JOIN disease_taxonomy ON disease_taxonomy.parent_id = diseases.id
+            JOIN genes_diseases on genes_diseases.disease_id = disease_taxonomy.child_id
         """
         cursor = Base.execute_query(query)
         return cursor.fetchall()
@@ -337,8 +339,10 @@ class GoCategory:
 
     def go_category_names_for_branch(branch_name):
         query = """
-            SELECT go_categories.go_id, go_categories.name
-            FROM go_categories
+            SELECT DISTINCT go_categories.go_id, go_categories.name
+            FROM genes_go_categories
+            JOIN go_taxonomy on go_taxonomy.child_id = genes_go_categories.go_category_id
+            JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
             WHERE namespace = '%s'
         """ % branch_name
         cursor = Base.execute_query(query)
