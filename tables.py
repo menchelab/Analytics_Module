@@ -210,7 +210,7 @@ class Disease:
     @staticmethod
     def diseases_for_gene(entrez_id):
         query = """
-            SELECT DISTINCT diseases.do_id, diseases.name
+            SELECT DISTINCT diseases.do_id, diseases.name, genes_diseases.disease_id, distance
             FROM diseases
             JOIN disease_taxonomy ON diseases.id = disease_taxonomy.parent_id
             JOIN genes_diseases ON genes_diseases.disease_id = disease_taxonomy.child_id
@@ -218,7 +218,18 @@ class Disease:
             WHERE genes.entrez_id = %s
         """ % entrez_id
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        results = cursor.fetchall()
+        diseases = {}
+        for result in results:
+            if result["disease_id"] in diseases:
+                diseases[result["disease_id"]] = diseases[result["disease_id"]] + [""] * (result["distance"] + 1 - len(diseases[result["disease_id"]]))
+                print(result["disease_id"])
+                print(diseases[result["disease_id"]])
+                print(result["distance"])
+                diseases[result["disease_id"]][result["distance"]] = result["name"]
+            else:
+                diseases[result["disease_id"]] = [""] * (result["distance"]) + [result["name"]]
+        return [{"id": key, "name": "/".join(value[:-1][::-1])} for key, value in diseases.items()]
 
     @staticmethod
     def diseases_for_autocomplete(name_prefix):
@@ -290,7 +301,7 @@ class GoCategory:
     def go_categories_for_gene(entrez_id, namespace):
         namespace_filter =  "" if namespace ==  'all' else "AND go_categories.namespace = '%s'" % namespace
         query = """
-            SELECT DISTINCT go_categories.go_id, go_categories.name
+            SELECT DISTINCT go_categories.go_id, go_categories.name, distance, genes_go_categories.go_category_id
             FROM go_categories
             JOIN go_taxonomy ON go_categories.id = go_taxonomy.parent_id
             JOIN genes_go_categories ON genes_go_categories.go_category_id = go_taxonomy.child_id
@@ -300,7 +311,19 @@ class GoCategory:
             %s
         """ % (entrez_id, namespace_filter)
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        results = cursor.fetchall()
+        gos = {}
+        for result in results:
+            print(result)
+            if result["go_category_id"] in gos:
+                gos[result["go_category_id"]] = gos[result["go_category_id"]] + [""] * (result["distance"] + 1 - len(gos[result["go_category_id"]]))
+                print(result["go_category_id"])
+                print(gos[result["go_category_id"]])
+                print(result["distance"])
+                gos[result["go_category_id"]][result["distance"]] = result["name"]
+            else:
+                gos[result["go_category_id"]] = [""] * (result["distance"]) + [result["name"]]
+        return [{"id": key, "name": "/".join(value[:-1][::-1])} for key, value in gos.items()]
 
     @staticmethod
     def go_categories_for_autocomplete(name_prefix):
