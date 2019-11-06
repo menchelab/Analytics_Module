@@ -403,12 +403,12 @@ class PPI:
 
 class SavedView:
     @staticmethod
-    def get_saved_view(username, view_name):
+    def get(username, view_name):
         query = """
         SELECT saved_views.username, saved_views.view_name, saved_views.session_info
         FROM Datadivr_sessions.saved_views
-        WHERE saved_views.username = %s
-        AND saved_views.view_name = %s
+        WHERE saved_views.username = '%s'
+        AND saved_views.view_name = '%s'
         """ % (username, view_name)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
@@ -420,7 +420,7 @@ class SavedView:
         session_info = data["session_info"]
         query = """
         INSERT INTO Datadivr_sessions.saved_views (username, view_name, session_info)
-        VALUES (%s, %s, %s)
+        VALUES ('%s', '%s', '%s)
         """ % (username, view_name, session_info)
 
 

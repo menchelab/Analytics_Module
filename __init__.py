@@ -150,10 +150,10 @@ def get_ppi():
 #############
 # SavedView #
 #############
-@app.route("/api/saved_views/<string:username>/string:view_name", methods=['GET'])
+@app.route("/api/saved_views/<string:username>/<string:view_name>", methods=['GET'])
 @cross_origin()
-def get_saved_view(username, viewname):
-    return jsonify(SavedView.get(username, viewname))
+def get_saved_view(username, view_name):
+    return jsonify(SavedView.get(username, view_name))
 
 @app.route("/api/saved_views/create", methods=['POST'])
 @cross_origin()
