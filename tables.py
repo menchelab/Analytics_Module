@@ -41,7 +41,7 @@ class Gene:
 
     @staticmethod
     def show_random(num_to_show):
-        query = "SELECT name, entrez_id FROM genes ORDER BY RAND() LIMIT %d" % num_to_show
+        query = "SELECT name, symbol, entrez_id FROM genes ORDER BY RAND() LIMIT %d" % num_to_show
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -86,6 +86,7 @@ class Gene:
 
     @staticmethod
     def search(clauses):
+        print(clauses)
         have_name = False
         have_diseases = False
         have_go_categories = False
@@ -109,6 +110,26 @@ class Gene:
             return ["%s = '%s'" % (column, object),
                     [column, object]]
 
+        def get_summary_stats(gene_set):
+            query = """
+            SELECT diseases.name, prevalence, count(distinct jgenes.id) as gene_number
+            FROM diseases
+            JOIN disease_taxonomy on diseases.id = parent_id
+            JOIN genes_diseases ON genes_diseases.disease_id = child_id
+            JOIN (select * from genes  where entrez_id in (%s)) jgenes ON jgenes.id = genes_diseases.gene_id
+            JOIN disease_counts on disease_counts.disease_id = diseases.id
+            WHERE prevalence > 25
+            GROUP BY 1, 2
+            ORDER BY 3 DESC
+            LIMIT 200
+            """ % ",".join([str(gene["entrez_id"]) for gene in gene_set])
+            cursor = Base.execute_query(query)
+            results = cursor.fetchall()
+            results = [{"name": x["name"], "gene_number": round(x["gene_number"]/x["prevalence"]* len(results), 2)} for x in results]
+            results.sort(reverse=True, key=lambda x: x["gene_number"])
+            return results[:10]
+
+
         for x in range(5):
             andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
             if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
@@ -129,7 +150,7 @@ class Gene:
                 select_clauses[-1].append(new_clause[1])
         if not filter_clauses:
             print("no filter clauses!")
-            return([])
+            return({"genes": [], "summary_stats": []})
         if have_name and not have_diseases and not have_go_categories:
             name_select_clause = """
                 SELECT name, symbol, entrez_id FROM genes WHERE
@@ -137,7 +158,8 @@ class Gene:
             print("hello! I'm just a name")
             query = name_select_clause + " AND ".join(filter_clauses)
             cursor = Base.execute_query(query)
-            return cursor.fetchall()
+            genes = cursor.fetchall()
+            return({"genes": genes, "summary_stats": get_summary_stats(genes)})
 
         print(filter_clauses)
         print(have_diseases, have_go_categories)
@@ -204,7 +226,8 @@ class Gene:
                 for x in new_candidates:
                     keep_genes.add(x)
             candidate_genes = keep_genes
-        return[{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
+        genes = [{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
+        return({"genes": genes, "summary_stats": get_summary_stats(genes)})
 
 class Disease:
     @staticmethod
