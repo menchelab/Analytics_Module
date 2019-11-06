@@ -147,6 +147,20 @@ def go_category_names_for_branch(branch_name):
 def get_ppi():
     return jsonify(PPI.all())
 
+#############
+# SavedView #
+#############
+@app.route("/api/saved_views/<string:username>/string:view_name", methods=['GET'])
+@cross_origin()
+def get_saved_view(username, viewname):
+    return jsonify(SavedView.get(username, viewname))
+
+@app.route("/api/saved_views/create", methods=['POST'])
+@cross_origin()
+def create_saved_view():
+    data = request.form
+    return jsonify(SavedView.create(data))
+
 
 
 if __name__ == "__main__":
