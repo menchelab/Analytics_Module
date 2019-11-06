@@ -34,12 +34,14 @@ class Gene:
     @staticmethod
     def all():
         query = """
-
+            SELECT DISTINCT name, symbol, entrez_id FROM genes
         """
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
 
     @staticmethod
     def show_random(num_to_show):
-        query = "SELECT name, entrez_id FROM genes ORDER BY RAND() LIMIT %d" % num_to_show
+        query = "SELECT name, symbol, entrez_id FROM genes ORDER BY RAND() LIMIT %d" % num_to_show
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -84,6 +86,7 @@ class Gene:
 
     @staticmethod
     def search(clauses):
+        print(clauses)
         have_name = False
         have_diseases = False
         have_go_categories = False
@@ -107,6 +110,26 @@ class Gene:
             return ["%s = '%s'" % (column, object),
                     [column, object]]
 
+        def get_summary_stats(gene_set):
+            query = """
+            SELECT diseases.name, prevalence, count(distinct jgenes.id) as gene_number
+            FROM diseases
+            JOIN disease_taxonomy on diseases.id = parent_id
+            JOIN genes_diseases ON genes_diseases.disease_id = child_id
+            JOIN (select * from genes  where entrez_id in (%s)) jgenes ON jgenes.id = genes_diseases.gene_id
+            JOIN disease_counts on disease_counts.disease_id = diseases.id
+            WHERE prevalence > 25
+            GROUP BY 1, 2
+            ORDER BY 3 DESC
+            LIMIT 200
+            """ % ",".join([str(gene["entrez_id"]) for gene in gene_set])
+            cursor = Base.execute_query(query)
+            results = cursor.fetchall()
+            results = [{"name": x["name"], "gene_number": round(x["gene_number"]/x["prevalence"]* len(results), 2)} for x in results]
+            results.sort(reverse=True, key=lambda x: x["gene_number"])
+            return results[:10]
+
+
         for x in range(5):
             andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
             if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
@@ -115,7 +138,7 @@ class Gene:
             if clauses["subject%d" % x] == "disease":
                 have_diseases = True
             elif clauses["subject%d" % x] == "name_like":
-                pass
+                have_name = True
             else:
                 have_go_categories = True
             new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
@@ -127,14 +150,16 @@ class Gene:
                 select_clauses[-1].append(new_clause[1])
         if not filter_clauses:
             print("no filter clauses!")
-            return([])
+            return({"genes": [], "summary_stats": []})
         if have_name and not have_diseases and not have_go_categories:
             name_select_clause = """
                 SELECT name, symbol, entrez_id FROM genes WHERE
             """
+            print("hello! I'm just a name")
             query = name_select_clause + " AND ".join(filter_clauses)
             cursor = Base.execute_query(query)
-            return cursor.fetchall()
+            genes = cursor.fetchall()
+            return({"genes": genes, "summary_stats": get_summary_stats(genes)})
 
         print(filter_clauses)
         print(have_diseases, have_go_categories)
@@ -166,7 +191,7 @@ class Gene:
             WHERE %s
             GROUP BY 1, 2, 3
             """ % " OR ".join(filter_clauses)
-        else:
+        elif have_go_categories:
             name_disease_select_clause = """
             SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
                 "" as do_id,
@@ -201,13 +226,14 @@ class Gene:
                 for x in new_candidates:
                     keep_genes.add(x)
             candidate_genes = keep_genes
-        return[{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
+        genes = [{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
+        return({"genes": genes, "summary_stats": get_summary_stats(genes)})
 
 class Disease:
     @staticmethod
     def diseases_for_gene(entrez_id):
         query = """
-            SELECT DISTINCT diseases.do_id, diseases.name
+            SELECT DISTINCT diseases.do_id, diseases.name, genes_diseases.disease_id, distance
             FROM diseases
             JOIN disease_taxonomy ON diseases.id = disease_taxonomy.parent_id
             JOIN genes_diseases ON genes_diseases.disease_id = disease_taxonomy.child_id
@@ -215,7 +241,18 @@ class Disease:
             WHERE genes.entrez_id = %s
         """ % entrez_id
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        results = cursor.fetchall()
+        diseases = {}
+        for result in results:
+            if result["disease_id"] in diseases:
+                diseases[result["disease_id"]] = diseases[result["disease_id"]] + [""] * (result["distance"] + 1 - len(diseases[result["disease_id"]]))
+                print(result["disease_id"])
+                print(diseases[result["disease_id"]])
+                print(result["distance"])
+                diseases[result["disease_id"]][result["distance"]] = result["name"]
+            else:
+                diseases[result["disease_id"]] = [""] * (result["distance"]) + [result["name"]]
+        return [{"id": key, "name": "/".join(value[:-1][::-1])} for key, value in diseases.items()]
 
     @staticmethod
     def diseases_for_autocomplete(name_prefix):
@@ -232,6 +269,8 @@ class Disease:
         query = """
             SElECT DISTINCT diseases.do_id, diseases.name
             FROM diseases
+            JOIN disease_taxonomy ON disease_taxonomy.parent_id = diseases.id
+            JOIN genes_diseases on genes_diseases.disease_id = disease_taxonomy.child_id
         """
         cursor = Base.execute_query(query)
         return cursor.fetchall()
@@ -287,7 +326,7 @@ class GoCategory:
     def go_categories_for_gene(entrez_id, namespace):
         namespace_filter =  "" if namespace ==  'all' else "AND go_categories.namespace = '%s'" % namespace
         query = """
-            SELECT DISTINCT go_categories.go_id, go_categories.name
+            SELECT DISTINCT go_categories.go_id, go_categories.name, distance, genes_go_categories.go_category_id
             FROM go_categories
             JOIN go_taxonomy ON go_categories.id = go_taxonomy.parent_id
             JOIN genes_go_categories ON genes_go_categories.go_category_id = go_taxonomy.child_id
@@ -297,7 +336,19 @@ class GoCategory:
             %s
         """ % (entrez_id, namespace_filter)
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        results = cursor.fetchall()
+        gos = {}
+        for result in results:
+            print(result)
+            if result["go_category_id"] in gos:
+                gos[result["go_category_id"]] = gos[result["go_category_id"]] + [""] * (result["distance"] + 1 - len(gos[result["go_category_id"]]))
+                print(result["go_category_id"])
+                print(gos[result["go_category_id"]])
+                print(result["distance"])
+                gos[result["go_category_id"]][result["distance"]] = result["name"]
+            else:
+                gos[result["go_category_id"]] = [""] * (result["distance"]) + [result["name"]]
+        return [{"id": key, "name": "/".join(value[:-1][::-1])} for key, value in gos.items()]
 
     @staticmethod
     def go_categories_for_autocomplete(name_prefix):
@@ -311,8 +362,10 @@ class GoCategory:
 
     def go_category_names_for_branch(branch_name):
         query = """
-            SELECT go_categories.go_id, go_categories.name
-            FROM go_categories
+            SELECT DISTINCT go_categories.go_id, go_categories.name
+            FROM genes_go_categories
+            JOIN go_taxonomy on go_taxonomy.child_id = genes_go_categories.go_category_id
+            JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
             WHERE namespace = '%s'
         """ % branch_name
         cursor = Base.execute_query(query)
@@ -347,6 +400,29 @@ class PPI:
         """
         cursor = Base.execute_query(query)
         return cursor.fetchall()
+
+class SavedView:
+    @staticmethod
+    def get(username, view_name):
+        query = """
+        SELECT saved_views.username, saved_views.view_name, saved_views.session_info
+        FROM Datadivr_sessions.saved_views
+        WHERE saved_views.username = '%s'
+        AND saved_views.view_name = '%s'
+        """ % (username, view_name)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def create(data):
+        username = data["username"]
+        view_name = data["view_name"]
+        session_info = data["session_info"]
+        query = """
+        INSERT INTO Datadivr_sessions.saved_views (username, view_name, session_info)
+        VALUES ('%s', '%s', '%s)
+        """ % (username, view_name, session_info)
+
 
 
 if __name__ == '__main__':

@@ -51,7 +51,10 @@ def genes_for_go_category(go_category_id):
 def get_random_genes():
     return jsonify(Gene.show_random(10))
 
-
+@app.route("/api/gene/prefix", methods=['GET'])
+@cross_origin()
+def all_gene_names():
+    return jsonify(Gene.all())
 
 ###########
 # Disease #
@@ -81,6 +84,11 @@ def do_taxonomy(root_node_id):
 @cross_origin()
 def diseases_for_prefix(name_prefix):
     return jsonify(Disease.diseases_for_autocomplete(name_prefix))
+
+@app.route("/api/disease/prefix", methods=['GET'])
+@cross_origin()
+def all_disease_names():
+    return jsonify(Disease.all_disease_names())
 
 
 ###########
@@ -125,6 +133,11 @@ def go_taxonomy(root_node_id):
 def go_categories_for_prefix(name_prefix):
     return jsonify(GoCategory.go_categories_for_autocomplete(name_prefix))
 
+@app.route("/api/go_category/branch/<string:branch_name>", methods=['GET'])
+@cross_origin()
+def go_category_names_for_branch(branch_name):
+    return jsonify(GoCategory.go_category_names_for_branch(branch_name))
+
 #######
 # PPI #
 #######
@@ -133,6 +146,20 @@ def go_categories_for_prefix(name_prefix):
 @cross_origin()
 def get_ppi():
     return jsonify(PPI.all())
+
+#############
+# SavedView #
+#############
+@app.route("/api/saved_views/<string:username>/<string:view_name>", methods=['GET'])
+@cross_origin()
+def get_saved_view(username, view_name):
+    return jsonify(SavedView.get(username, view_name))
+
+@app.route("/api/saved_views/create", methods=['POST'])
+@cross_origin()
+def create_saved_view():
+    data = request.form
+    return jsonify(SavedView.create(data))
 
 
 
