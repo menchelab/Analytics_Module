@@ -21,6 +21,7 @@ class Base:
         cursor = connection.cursor()
         print(query)
         cursor.execute(query)
+        connection.commit()
         return cursor
 
     @staticmethod
@@ -420,8 +421,9 @@ class SavedView:
         session_info = data["session_info"]
         query = """
         INSERT INTO Datadivr_sessions.saved_views (username, view_name, session_info)
-        VALUES ('%s', '%s', '%s)
+        VALUES ('%s', '%s', '%s')
         """ % (username, view_name, session_info)
+        cursor = Base.execute_query(query)
 
 
 
