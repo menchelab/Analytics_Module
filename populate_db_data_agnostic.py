@@ -118,6 +118,47 @@ def create_edges(cursor):
     '''
     )
 
+def create_layouts(cursor):
+    cursor.execute('''
+    DROP TABLE IF EXISTS `Datadivr_jen`.`layouts`
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`layouts` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `node_id` int(11) DEFAULT NULL,
+      `x_loc` int(11) DEFAULT NULL,
+      `y_loc` int(11) DEFAULT NULL,
+      `z_loc` int(11) DEFAULT NULL,
+      `r_val` int(11) DEFAULT NULL,
+      `g_val` int(11) DEFAULT NULL,
+      `b_val` int(11) DEFAULT NULL,
+      `a_val` int(11) DEFAULT NULL,
+      `namespace` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`),
+      KEY `node_id` (`node_id`),
+      KEY `namespace` (`namespace`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    '''
+    )
+
+def create_labels(cursor):
+    cursor.execute('''
+    DROP TABLE IF EXISTS `Datadivr_jen`.`labels`
+    ''')
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`labels` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `text` varchar(100) DEFAULT NULL,
+      `x_loc` int(11) DEFAULT NULL,
+      `y_loc` int(11) DEFAULT NULL,
+      `z_loc` int(11) DEFAULT NULL,
+      `namespace` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`),
+      KEY `namespace` (`namespace`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    '''
+    )
+
 def create_tables(cursor):
     create_nodes(cursor)
     create_edges(cursor)
@@ -126,6 +167,8 @@ def create_tables(cursor):
     create_attribute_taxonomies(cursor)
     create_articles(cursor)
     create_nodes_articles(cursor)
+    create_layouts(cursor)
+    create_labels(cursor)
 
 def populate_genes(cursor):
     query = '''
@@ -351,21 +394,59 @@ def populate_ppi(cursor):
     '''
     cursor.execute(query)
 
+def populate_layouts(cursor):
 
-DB = "Datadivr_jen"
+    filename = "1_spring"
+    layouts_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/layouts/%s.csv' % filename
+    with open(layouts_file, 'r') as f:
+        positions = [l.split(",")[:-1] + [l.split(",")[-1].split(";")[1]] for l in f.readlines()]
 
-if __name__ == '__main__':
-    print("Hello!")
-    dbconf = db_config.asimov_admin
-    db = pymysql.connect(dbconf["host"], dbconf["user"], dbconf["password"])
-    cursor = db.cursor()
-    cursor.execute("DROP DATABASE IF EXISTS " + DB)
-    cursor.execute("CREATE DATABASE " + DB)
-    db.commit()
+    print(positions[:3])
 
-    create_tables(cursor);
+    print(",".join(["(" + ",".join(p) + ")" for p in positions[:2]]))
 
-    print("Hello!")
+    cursor.execute("DROP TABLE IF EXISTS `Datadivr_jen`.`tmp_layouts` ")
+    cursor.execute('''
+    CREATE TABLE `Datadivr_jen`.`tmp_layouts` (
+      `x_loc` int(11) DEFAULT NULL,
+      `y_loc` int(11) DEFAULT NULL,
+      `z_loc` int(11) DEFAULT NULL,
+      `r_val` int(11) DEFAULT NULL,
+      `g_val` int(11) DEFAULT NULL,
+      `b_val` int(11) DEFAULT NULL,
+      `a_val` int(11) DEFAULT NULL,
+      `entrez_id` int(11) DEFAULT NULL
+    )
+    '''
+    )
+    cursor.execute('''
+    INSERT INTO `Datadivr_jen`.`tmp_layouts` VALUES %s
+    ''' % ",".join(["(" + ",".join(p) + ")" for p in positions]))
+
+    cursor.execute('''
+    INSERT INTO `Datadivr_jen`.`layouts` (node_id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
+    SELECT n.id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, "%s"
+    FROM `Datadivr_jen`.`tmp_layouts` tl
+    JOIN `Datadivr_jen`.nodes n on n.external_id = tl.entrez_id
+    ''' % filename)
+
+    cursor.execute("DROP TABLE IF EXISTS `Datadivr_jen`.`tmp_layouts` ")
+
+def populate_labels(cursor):
+    filename = "2_bio"
+    labels_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/labels/%s.csv' % filename
+    with open(labels_file, 'r') as f:
+        positions = [l[:-1].split(",")[:-1] +
+                     ['"' + l[:-1].split(",")[-1] + '"' ]  +
+                     ['"'  + filename + '"' ] for l in f.readlines()]
+    cursor.execute('''
+    INSERT INTO `Datadivr_jen`.`labels`
+    (x_loc, y_loc, z_loc, text, namespace)
+    VALUES %s
+    ''' % ",".join(["(" + ",".join(p) + ")" for p in positions]))
+
+
+def populate_base_tables(cursor):
     populate_genes(cursor)
     print("nodes")
     populate_diseases(cursor)
@@ -387,6 +468,29 @@ if __name__ == '__main__':
     print("articles")
     populate_genes_articles(cursor)
     print("nodes_articles")
+    populate_layouts(cursor)
+    print("layouts")
+    populate_labels(cursor)
+    print("labels")
+
+
+
+
+DB = "Datadivr_jen"
+
+if __name__ == '__main__':
+    print("Hello!")
+    dbconf = db_config.asimov_admin
+    db = pymysql.connect(dbconf["host"], dbconf["user"], dbconf["password"])
+    cursor = db.cursor()
+    cursor.execute("DROP DATABASE IF EXISTS " + DB)
+    cursor.execute("CREATE DATABASE " + DB)
+    db.commit()
+
+    create_tables(cursor);
+    populate_base_tables(cursor);
+
+    print("Hello!")
     cursor.close()
     db.commit()
     db.close()
