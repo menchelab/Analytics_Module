@@ -20,6 +20,16 @@ def hello():
 def sepptest():
     return ",".join([str(x) for x in range(200000)])
 
+######d
+# Data
+#
+
+@app.route("/api/namespace/summary", methods=["GET"])
+@cross_origin()
+def get_summary():
+    return jsonify(Data.summary())
+
+
 ########
 # Node #
 ########
@@ -127,6 +137,8 @@ def get_edge(namespace, layout):
 @cross_origin()
 def get_layout(namespace):
     return jsonify(Layout.fetch(namespace))
+
+
 
 #########
 # Label #

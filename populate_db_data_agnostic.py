@@ -126,9 +126,9 @@ def create_layouts(cursor):
     CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`layouts` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `node_id` int(11) DEFAULT NULL,
-      `x_loc` float() DEFAULT NULL,
-      `y_loc` float() DEFAULT NULL,
-      `z_loc` float() DEFAULT NULL,
+      `x_loc` float(10,7) DEFAULT NULL,
+      `y_loc` float(10,7) DEFAULT NULL,
+      `z_loc` float(10,7) DEFAULT NULL,
       `r_val` int(11) DEFAULT NULL,
       `g_val` int(11) DEFAULT NULL,
       `b_val` int(11) DEFAULT NULL,
@@ -149,9 +149,18 @@ def create_labels(cursor):
     CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`labels` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `text` varchar(100) DEFAULT NULL,
-      `x_loc` float() DEFAULT NULL,
-      `y_loc` float() DEFAULT NULL,
-      `z_loc` float() DEFAULT NULL,
+      `x_loc` float(10,7) DEFAULT NULL,
+      `y_loc` float(10,7) DEFAULT NULL,
+      `z_loc` float(10,7) DEFAULT NULL,
+      `namespace` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`),
+      KEY `namespace` (`namespace`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1    CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`labels` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `text` varchar(100) DEFAULT NULL,
+      `x_loc` float(10,7) DEFAULT NULL,
+      `y_loc` float(10,7) DEFAULT NULL,
+      `z_loc` float(10,7) DEFAULT NULL,
       `namespace` varchar(255) NOT NULL,
       PRIMARY KEY (`id`),
       KEY `namespace` (`namespace`)
@@ -387,7 +396,7 @@ def populate_ppi(cursor):
 
 def populate_layouts(cursor):
 
-    filename = "2_bio"
+    filename = "5_cell"
     layouts_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/layouts/%s.csv' % filename
     with open(layouts_file, 'r') as f:
         positions = [l.split(",")[:-1] + [l.split(",")[-1].split(";")[1]] for l in f.readlines()]
@@ -399,9 +408,9 @@ def populate_layouts(cursor):
     cursor.execute("DROP TABLE IF EXISTS `Datadivr_jen`.`tmp_layouts` ")
     cursor.execute('''
     CREATE TABLE `Datadivr_jen`.`tmp_layouts` (
-      `x_loc` int(11) DEFAULT NULL,
-      `y_loc` int(11) DEFAULT NULL,
-      `z_loc` int(11) DEFAULT NULL,
+      `x_loc` float(10,6) DEFAULT NULL,
+      `y_loc` float(10,6) DEFAULT NULL,
+      `z_loc` float(10,6) DEFAULT NULL,
       `r_val` int(11) DEFAULT NULL,
       `g_val` int(11) DEFAULT NULL,
       `b_val` int(11) DEFAULT NULL,
@@ -435,6 +444,9 @@ def populate_labels(cursor):
     (x_loc, y_loc, z_loc, text, namespace)
     VALUES %s
     ''' % ",".join(["(" + ",".join(p) + ")" for p in positions]))
+
+
+#select count(*) from edges left join layouts on edges.node1_id = layouts.node_id and layouts.namespace = "5_cell" where layouts.node_id is null;
 
 
 def populate_base_tables(cursor):

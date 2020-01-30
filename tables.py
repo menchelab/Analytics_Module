@@ -30,6 +30,23 @@ class Base:
         print("helloz", string)
         return string
 
+class Data:
+    @staticmethod
+    def summary():
+        query = """
+            SELECT DISTINCT namespace from layouts
+        """
+        cursor = Base.execute_query(query)
+        layouts = cursor.fetchall()
+        query = """
+            SELECT DISTINCT namespace from labels
+        """
+        cursor = Base.execute_query(query)
+        labels = cursor.fetchall()
+        return {"ppi": {"layouts": [x["namespace"] for x in layouts],
+                        "labels": [x["namespace"] for x in labels]}}
+
+
 class Node:
 
     @staticmethod
@@ -437,7 +454,7 @@ class Label:
         cursor = Base.execute_query(query)
         label = cursor.fetchall()
         return [{'loc': [r["x_loc"], r["y_loc"], r["z_loc"]],
-                 'text': r["name"]} for r in label]
+                 'text': r["text"]} for r in label]
 
 # class SavedView:
 #     @staticmethod
