@@ -21,74 +21,76 @@ def sepptest():
     return ",".join([str(x) for x in range(200000)])
 
 ########
-# Gene #
+# Node #
 ########
 
-@app.route("/api/gene/prefix/<string:name_prefix>",  methods=['GET'])
+@app.route("/api/node/prefix/<string:name_prefix>",  methods=['GET'])
 @cross_origin()
-def genes_for_prefix(name_prefix):
-    return jsonify(Gene.genes_for_autocomplete(name_prefix))
+def nodes_for_prefix(name_prefix):
+    return jsonify(Node.nodes_for_autocomplete(name_prefix))
 
-@app.route("/api/gene/search", methods=['GET', 'POST'])
+# @app.route("/api/node/search", methods=['GET', 'POST'])
+# @cross_origin()
+# def search():
+#     data = request.form
+#     results = node.search(data)
+#     return jsonify(results)
+
+@app.route("/api/node/attribute/<string:attribute_id>",  methods=['GET'])
 @cross_origin()
-def search():
-    data = request.form
-    results = Gene.search(data)
-    return jsonify(results)
+def nodes_for_attribute(attribute_id):
+    return jsonify(Node.nodes_for_attribute(attribute_id))
 
-@app.route("/api/gene/disease/<string:disease_id>",  methods=['GET'])
+
+@app.route("/api/node/random", methods=['GET'])
 @cross_origin()
-def genes_for_disease(disease_id):
-    return jsonify(Gene.genes_for_disease(disease_id))
+def get_random_nodes():
+    return jsonify(Node.show_random(10))
 
-@app.route("/api/gene/go_category/<string:go_category_id>",  methods=['GET'])
+@app.route("/api/node/prefix", methods=['GET'])
 @cross_origin()
-def genes_for_go_category(go_category_id):
-    return jsonify(Gene.genes_for_go_category(disease_id))
+def all_node_names():
+    return jsonify(Node.all())
 
-@app.route("/api/gene/random", methods=['GET'])
+#############
+# Attribute #
+#############
+
+@app.route("/api/attribute/node/<int:node_id>/<string:namespace>",  methods=['GET'])
 @cross_origin()
-def get_random_genes():
-    return jsonify(Gene.show_random(10))
+def attributes_for_node(node_id, namespace):
+    if namespace == 'all':
+        namespace = None
+    return jsonify(Attribute.attributes_for_node(node_id, namespace))
 
-@app.route("/api/gene/prefix", methods=['GET'])
-@cross_origin()
-def all_gene_names():
-    return jsonify(Gene.all())
-
-###########
-# Disease #
-###########
-
-@app.route("/api/disease/gene/<int:entrez_id>",  methods=['GET'])
-@cross_origin()
-def diseases_for_gene(entrez_id):
-    return jsonify(Disease.diseases_for_gene(entrez_id))
-
-# Cache database call for disease taxonomy to prevent repeated queries.
-def get_disease_taxonomy(root_node_id):
-    zkey = 'disease_taxonomy_parents-%d' % root_node_id
+# Cache database call for attribute taxonomy to prevent repeated queries.
+def get_attribute_taxonomy(root_node_id):
+    zkey = 'attribute_taxonomy_parents-%d' % root_node_id
     dtc = cache.get(zkey)
     if dtc is None:
-        dtc = DiseaseTaxonomy.construct_taxonomy(root_node_id)
+        dtc = AttributeTaxonomy.construct_taxonomy(root_node_id)
         cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
     return dtc
 
-@app.route("/api/disease_taxonomy/<int:root_node_id>", methods=['GET'])
+@app.route("/api/attribute_taxonomy/<int:root_node_id>", methods=['GET'])
 @cross_origin()
-def do_taxonomy(root_node_id):
-    return jsonify(
-        get_disease_taxonomy(root_node_id))
+def taxonomy(root_node_id):
+    return jsonify(get_attribute_taxonomy(root_node_id))
 
-@app.route("/api/disease/prefix/<string:name_prefix>", methods=['GET'])
+@app.route("/api/attribute/prefix/<string:name_prefix>/<string:namespace>", methods=['GET'])
 @cross_origin()
-def diseases_for_prefix(name_prefix):
-    return jsonify(Disease.diseases_for_autocomplete(name_prefix))
+def attributes_for_prefix(name_prefix, namespace):
+    if namespace == 'all':
+        namespace = None
+    return jsonify(Attribute.attributes_for_autocomplete(name_prefix, namespace))
 
-@app.route("/api/disease/prefix", methods=['GET'])
+@app.route("/api/attribute/<string:namespace>", methods=['GET'])
 @cross_origin()
-def all_disease_names():
-    return jsonify(Disease.all_disease_names())
+def all_attribute_names(namespace):
+    print(namespace)
+    if namespace == 'all':
+        namespace = None
+    return jsonify(Attribute.all_attribute_names(namespace))
 
 
 ###########
@@ -100,66 +102,54 @@ def all_disease_names():
 def article_for_pubid(pubid):
     return jsonify(Article.article_for_pubid(pubid))
 
-@app.route("/api/article/gene/<int:entrez_id>",  methods=['GET'])
+@app.route("/api/article/node/<int:node_id>",  methods=['GET'])
 @cross_origin()
-def articles_for_gene(entrez_id):
-    return jsonify(Article.articles_for_gene(entrez_id))
+def articles_for_node(node_id):
+    return jsonify(Article.articles_for_node(node_id))
 
-##############
-# GoCategory #
-##############
+########
+# Edge #
+########
 
-@app.route("/api/go_category/gene/<string:namespace>/<int:entrez_id>",  methods=['GET'])
+@app.route("/api/edge/<string:namespace>/<string:layout>")
 @cross_origin()
-def go_category_for_gene(namespace, entrez_id):
-    return jsonify(GoCategory.go_categories_for_gene(entrez_id, namespace))
+def get_edge(namespace, layout):
+    # TODO(Jen): Hack - namespaces should be supported!
+    namespace = 'ppi'
+    return jsonify(Edge.all(namespace, layout))
 
-# Cache database call for go taxonomy to prevent repeated queries.
-def get_go_taxonomy(root_node_id):
-    zkey = 'go_taxonomy_parents-%d' % root_node_id
-    dtc = cache.get(zkey)
-    if dtc is None:
-        dtc = GoTaxonomy.construct_taxonomy(root_node_id)
-        cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
-    return dtc
 
-@app.route("/api/go_taxonomy/<int:root_node_id>")
+##########
+# Layout #
+##########
+
+@app.route("/api/layout/<string:namespace>")
 @cross_origin()
-def go_taxonomy(root_node_id):
-    return jsonify(get_go_taxonomy(root_node_id))
+def get_layout(namespace):
+    return jsonify(Layout.fetch(namespace))
 
-@app.route("/api/go_category/prefix/<string:name_prefix>", methods=['GET'])
+#########
+# Label #
+#########
+
+@app.route("/api/label/<string:namespace>")
 @cross_origin()
-def go_categories_for_prefix(name_prefix):
-    return jsonify(GoCategory.go_categories_for_autocomplete(name_prefix))
-
-@app.route("/api/go_category/branch/<string:branch_name>", methods=['GET'])
-@cross_origin()
-def go_category_names_for_branch(branch_name):
-    return jsonify(GoCategory.go_category_names_for_branch(branch_name))
-
-#######
-# PPI #
-#######
-
-@app.route("/api/ppi/all")
-@cross_origin()
-def get_ppi():
-    return jsonify(PPI.all())
+def get_label(namespace):
+    return jsonify(label.fetch(namespace))
 
 #############
 # SavedView #
 #############
-@app.route("/api/saved_views/<string:username>/<string:view_name>", methods=['GET'])
-@cross_origin()
-def get_saved_view(username, view_name):
-    return jsonify(SavedView.get(username, view_name))
-
-@app.route("/api/saved_views/create", methods=['POST'])
-@cross_origin()
-def create_saved_view():
-    data = request.form
-    return jsonify(SavedView.create(data))
+# @app.route("/api/saved_views/<string:username>/<string:view_name>", methods=['GET'])
+# @cross_origin()
+# def get_saved_view(username, view_name):
+#     return jsonify(SavedView.get(username, view_name))
+#
+# @app.route("/api/saved_views/create", methods=['POST'])
+# @cross_origin()
+# def create_saved_view():
+#     data = request.form
+#     return jsonify(SavedView.create(data))
 
 
 

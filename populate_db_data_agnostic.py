@@ -23,7 +23,7 @@ def create_nodes(cursor):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`nodes` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
-      `external_id` int(11) DEFAULT NULL,
+      `external_id` varchar(50) DEFAULT NULL,
       `name` varchar(155) DEFAULT NULL,
       `symbol` varchar(155) DEFAULT NULL,
       PRIMARY KEY (`id`),
@@ -126,9 +126,9 @@ def create_layouts(cursor):
     CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`layouts` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `node_id` int(11) DEFAULT NULL,
-      `x_loc` int(11) DEFAULT NULL,
-      `y_loc` int(11) DEFAULT NULL,
-      `z_loc` int(11) DEFAULT NULL,
+      `x_loc` float() DEFAULT NULL,
+      `y_loc` float() DEFAULT NULL,
+      `z_loc` float() DEFAULT NULL,
       `r_val` int(11) DEFAULT NULL,
       `g_val` int(11) DEFAULT NULL,
       `b_val` int(11) DEFAULT NULL,
@@ -149,9 +149,9 @@ def create_labels(cursor):
     CREATE TABLE IF NOT EXISTS `Datadivr_jen`.`labels` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `text` varchar(100) DEFAULT NULL,
-      `x_loc` int(11) DEFAULT NULL,
-      `y_loc` int(11) DEFAULT NULL,
-      `z_loc` int(11) DEFAULT NULL,
+      `x_loc` float() DEFAULT NULL,
+      `y_loc` float() DEFAULT NULL,
+      `z_loc` float() DEFAULT NULL,
       `namespace` varchar(255) NOT NULL,
       PRIMARY KEY (`id`),
       KEY `namespace` (`namespace`)
@@ -371,32 +371,23 @@ def populate_go_taxonomy(cursor):
 def populate_ppi(cursor):
     query = '''
     INSERT INTO Datadivr_jen.edges (node1_id, node2_id, namespace)
-    SELECT DISTINCT *, 'ppi' FROM (
-    SELECT n1.id as g_from, n2.id  as g_to
+    SELECT n1.id as g_from, n2.id  as g_to, "ppi"
     FROM networks.PPI_hippie2017 e
-    JOIN GenesGO.hgnc_complete g1 ON e.entrez_1 = g1.Entrez_Gene_ID_NCBI
-    JOIN GenesGO.hgnc_complete g2 ON e.entrez_2 = g2.Entrez_Gene_ID_NCBI
     JOIN Datadivr_jen.nodes n1 ON n1.external_id = e.entrez_1
-    JOIN Datadivr_jen.nodes n2 ON n1.external_id = e.entrez_2
-    WHERE e.author != '' AND e.entrez_1 != e.entrez_2
-    AND g1.Locus_Type in ('T cell receptor gene', 'gene with protein product', 'immunoglobulin gene')
-    AND g2.Locus_Type in ('T cell receptor gene', 'gene with protein product', 'immunoglobulin gene')
+    JOIN Datadivr_jen.nodes n2 ON n2.external_id = e.entrez_2 and n1.id != n2.id
+    WHERE e.author != ''
     UNION
-    SELECT n2.id as g_from, n1.id as g_to
+    SELECT n2.id as g_from, n1.id as g_to, "ppi"
     FROM networks.PPI_hippie2017 e
-    JOIN GenesGO.hgnc_complete g1 ON e.entrez_1 = g1.Entrez_Gene_ID_NCBI
-    JOIN GenesGO.hgnc_complete g2 ON e.entrez_2 = g2.Entrez_Gene_ID_NCBI
     JOIN Datadivr_jen.nodes n1 ON n1.external_id = e.entrez_1
-    JOIN Datadivr_jen.nodes n2 ON n1.external_id = e.entrez_2
-    WHERE e.author != '' AND e.entrez_1 != e.entrez_2
-    AND g1.Locus_Type in ('T cell receptor gene', 'gene with protein product', 'immunoglobulin gene')
-    AND g2.Locus_Type in ('T cell receptor gene', 'gene with protein product', 'immunoglobulin gene')) tbl
+    JOIN Datadivr_jen.nodes n2 ON n2.external_id = e.entrez_2  and n1.id != n2.id
+    WHERE e.author != ''
     '''
     cursor.execute(query)
 
 def populate_layouts(cursor):
 
-    filename = "1_spring"
+    filename = "2_bio"
     layouts_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/layouts/%s.csv' % filename
     with open(layouts_file, 'r') as f:
         positions = [l.split(",")[:-1] + [l.split(",")[-1].split(";")[1]] for l in f.readlines()]
@@ -433,7 +424,7 @@ def populate_layouts(cursor):
     cursor.execute("DROP TABLE IF EXISTS `Datadivr_jen`.`tmp_layouts` ")
 
 def populate_labels(cursor):
-    filename = "2_bio"
+    filename = "5_cell"
     labels_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/labels/%s.csv' % filename
     with open(labels_file, 'r') as f:
         positions = [l[:-1].split(",")[:-1] +
@@ -483,12 +474,14 @@ if __name__ == '__main__':
     dbconf = db_config.asimov_admin
     db = pymysql.connect(dbconf["host"], dbconf["user"], dbconf["password"])
     cursor = db.cursor()
-    cursor.execute("DROP DATABASE IF EXISTS " + DB)
-    cursor.execute("CREATE DATABASE " + DB)
+    #cursor.execute("DROP DATABASE IF EXISTS " + DB)
+    #cursor.execute("CREATE DATABASE " + DB)
     db.commit()
 
-    create_tables(cursor);
-    populate_base_tables(cursor);
+    #create_tables(cursor);
+    #populate_base_tables(cursor);
+    populate_layouts(cursor)
+    #populate_labels(cursor)
 
     print("Hello!")
     cursor.close()
