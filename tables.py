@@ -406,7 +406,7 @@ class Edge:
         """
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
-        return [[r["node1_id"] for r in results], [r["node2_id"] for r in results]]
+        return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
 
 class Layout:
     @staticmethod
