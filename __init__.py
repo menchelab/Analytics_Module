@@ -20,9 +20,9 @@ def hello():
 def sepptest():
     return ",".join([str(x) for x in range(200000)])
 
-######d
-# Data
-#
+########
+# Data #
+########
 
 @app.route("/api/namespace/summary", methods=["GET"])
 @cross_origin()
@@ -121,12 +121,12 @@ def articles_for_node(node_id):
 # Edge #
 ########
 
-@app.route("/api/edge/<string:namespace>/<string:layout>")
+@app.route("/api/edge/<string:namespace>")
 @cross_origin()
-def get_edge(namespace, layout):
+def get_edge(namespace):
     # TODO(Jen): Hack - namespaces should be supported!
     namespace = 'ppi'
-    return jsonify(Edge.all(namespace, layout))
+    return jsonify(Edge.all(namespace))
 
 
 ##########

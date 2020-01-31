@@ -43,8 +43,9 @@ class Data:
         """
         cursor = Base.execute_query(query)
         labels = cursor.fetchall()
-        return {"ppi": {"layouts": [x["namespace"] for x in layouts],
-                        "labels": [x["namespace"] for x in labels]}}
+        return ["namespace": "ppi",
+                "layouts": [x["namespace"] for x in layouts],
+                "labels": [x["namespace"] for x in labels]}]
 
 
 class Node:
@@ -397,12 +398,10 @@ class Article:
 
 class Edge:
     @staticmethod
-    def all(namespace, layout):
+    def all(namespace):
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM edges
-        join layouts l1 on edges.node1_id = l1.node_id
-        join layouts l2 on edges.node2_id = l2.node_id
         WHERE edges.node1_id < edges.node2_id
         """
         cursor = Base.execute_query(query)
