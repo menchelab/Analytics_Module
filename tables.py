@@ -43,7 +43,7 @@ class Data:
         """
         cursor = Base.execute_query(query)
         labels = cursor.fetchall()
-        return ["namespace": "ppi",
+        return [{"namespace": "ppi",
                 "layouts": [x["namespace"] for x in layouts],
                 "labels": [x["namespace"] for x in labels]}]
 
