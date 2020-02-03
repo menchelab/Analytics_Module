@@ -1,4 +1,10 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request,g, render_template
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
+import click
+from flask import current_app, g
+from flask.cli import with_appcontext
+
 from flask_cors import CORS, cross_origin
 from .tables import *
 from werkzeug.contrib.cache import SimpleCache
@@ -8,6 +14,7 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 cache = SimpleCache()
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 
@@ -15,7 +22,49 @@ cache = SimpleCache()
 
 @app.route("/")
 def hello():
-    return "Hello, I love Digital Ocean!"
+    g.user = {'username': "Jen", 'happiness': 'fleeting'}
+    return render_template('hello.html', name="jen")
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            g.filename = filename
+            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file',
+                                    filename=filename))
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload>
+    </form>
+    '''#
+
+@app.route('/uploaded_file', methods=['GET'])
+def uploaded_file():
+    filename = request.args.get('filename')
+    print("g")
+    return render_template('uploaded_file.html', filename=filename)
+
+
 @app.route("/sepptest",  methods=['GET'])
 def sepptest():
     return ",".join([str(x) for x in range(200000)])
