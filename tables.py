@@ -36,21 +36,29 @@ class Base:
 
 class Data:
     @staticmethod
-    def summary():
-        return [{"namespace": "ppi"}]
+    def describe_namespace(namespace):
         query = """
-            SELECT DISTINCT namespace from layouts
-        """
+            SELECT DISTINCT namespace from %s.layouts
+        """ % namespace
         cursor = Base.execute_query(query)
         layouts = cursor.fetchall()
         query = """
-            SELECT DISTINCT namespace from labels
-        """
+            SELECT DISTINCT namespace from %s.labels
+        """ % namespace
         cursor = Base.execute_query(query)
         labels = cursor.fetchall()
-        return [{"namespace": "ppi",
+        return {"namespace": namespace,
                 "layouts": [x["namespace"] for x in layouts],
-                "labels": [x["namespace"] for x in labels]}]
+                "labels": [x["namespace"] for x in labels]}
+    @staticmethod
+    def summary():
+        query = """
+            SELECT name FROM Datadivr_meta.namespaces
+        """
+        cursor = Base.execute_query(query)
+        namespaces = [x["name"] for x in cursor.fetchall()]
+
+        return [Data.describe_namespace(namespace) for namespace in namespaces]
 
 
 class Node:
@@ -406,16 +414,16 @@ class Edge:
     def all(namespace):
         query = """
         SELECT edges.node1_id, edges.node2_id
-        FROM edges
+        FROM %s.edges
         WHERE edges.node1_id < edges.node2_id
-        """
+        """ % namespace
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
 
 class Layout:
     @staticmethod
-    def all_namespaces():
+    def all_namespaces(db_namespace):
         query = """
         SELECT DISTINCT namespace, count(*)
         FROM layouts
@@ -425,13 +433,13 @@ class Layout:
         return cursor.fetchall()
 
     @staticmethod
-    def fetch(namespace):
+    def fetch(db_namespace, layout_namespace):
         query = """
         SELECT node_id, n.symbol, n.name, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val
-        FROM layouts
+        FROM %s.layouts
         JOIN nodes n on n.id = layouts.node_id
         WHERE namespace = "%s"
-        """ % namespace
+        """ % (db_namespace, layout_namespace)
         cursor = Base.execute_query(query)
         layout = cursor.fetchall()
         return [{'v': [r["x_loc"], r["y_loc"], r["z_loc"], r["r_val"], r["g_val"], r["b_val"], r["a_val"] ],
@@ -439,22 +447,22 @@ class Layout:
 
 class Label:
     @staticmethod
-    def all_namespaces():
+    def all_namespaces(db_namespace):
         query = """
         SELECT DISTINCT namespace, count(*)
-        FROM labels
+        FROM %s.labels
         GROUP BY 1
-        """
+        """ % db_namespace
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
-    def fetch(namespace):
+    def fetch(db_namespace, label_namespace):
         query = """
         SELECT text, x_loc, y_loc, z_loc
-        FROM labels
+        FROM %s.labels
         WHERE namespace = "%s"
-        """ % namespace
+        """ % (db_namespace, label_namespace)
         cursor = Base.execute_query(query)
         label = cursor.fetchall()
         return [{'loc': [r["x_loc"], r["y_loc"], r["z_loc"]],

@@ -194,10 +194,10 @@ def get_edge(namespace):
 # Layout #
 ##########
 
-@app.route("/api/layout/<string:namespace>")
+@app.route("/api/layout/<string:db_namespace>><string:layout_namespace>")
 @cross_origin()
-def get_layout(namespace):
-    return jsonify(Layout.fetch(namespace))
+def get_layout(db_namespace, layout_namespace):
+    return jsonify(Layout.fetch(db_namespace, layout_namespace))
 
 
 
@@ -205,10 +205,10 @@ def get_layout(namespace):
 # Label #
 #########
 
-@app.route("/api/label/<string:namespace>")
+@app.route("/api/label/<string:db_namespace>/<string:label_namespace>")
 @cross_origin()
-def get_label(namespace):
-    return jsonify(label.fetch(namespace))
+def get_label(db_namespace, label_namespace):
+    return jsonify(Label.fetch(db_namespace, label_namespace))
 
 #############
 # SavedView #
