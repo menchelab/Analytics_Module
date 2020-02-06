@@ -4,6 +4,7 @@ import sys
 import os
 from .db_config import DATABASE as dbconf
 from .table_utils.taxonomy import *
+from . import populate_db_data_agnostic
 import logging
 import pymysql
 import pymysql.cursors
@@ -11,17 +12,20 @@ import pymysql.cursors
 
 class Base:
     @staticmethod
-    def execute_query(query):
+    def execute_query(query, db = None):
+        if not db:
+            db = dbconf['database']
         connection = pymysql.connect(host=dbconf["host"],
                              user=dbconf["user"],
                              password=dbconf["password"],
-                             db=dbconf['database'],
+                             db=db,
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
         cursor = connection.cursor()
-        print(query)
+        #print(query)
         cursor.execute(query)
         connection.commit()
+        connection.close()
         return cursor
 
     @staticmethod
@@ -33,6 +37,7 @@ class Base:
 class Data:
     @staticmethod
     def summary():
+        return [{"namespace": "ppi"}]
         query = """
             SELECT DISTINCT namespace from layouts
         """
@@ -479,6 +484,377 @@ class Label:
 #         cursor = Base.execute_query(query)
 
 
+ERRORS_TO_SHOW = 5
+def asciitable(headers, rows):
+  if len(rows) > 0:
+    lens = []
+    for i in range(len(rows[0])):
+      lens.append(len(max([x[i] for x in rows] + [headers[i]],key=lambda x:len(str(x)))))
+    formats = []
+    hformats = []
+    for i in range(len(rows[0])):
+      if isinstance(rows[0][i], int):
+        formats.append("%%%ds" % lens[i])
+      else:
+        formats.append("%%-%ds" % lens[i])
+      hformats.append("%%-%ds" % lens[i])
+    pattern = " | ".join(formats)
+    hpattern = " | ".join(hformats)
+    separator = "-+-".join(['-' * n for n in lens])
+    print(hpattern % tuple(headers))
+    print (separator)
+    for line in rows:
+        print (pattern % tuple(str(t) for t in line))
+  elif len(rows) == 1:
+    row = rows[0]
+    hwidth = len(max(row._fields,key=lambda x: len(x)))
+    for i in range(len(row)):
+      print("%*s = %s" % (hwidth,row._fields[i],row[i]))
+
+
+def validate_coordinate(x):
+    try:
+        x = float(x)
+        return x >= 0 and x <= 1
+    except:
+        return False
+
+
+def validate_color_value(x):
+    try:
+        x = int(x)
+        return x >= 0 and x <= 255
+    except:
+        return False
+
+
+def validate_index(x, num_points):
+    try:
+        x = int(x)
+        return x < num_points
+    except:
+        return False
+
+def validate_layout(layout):
+    #print("Evaluating layout ", os.path.join(LAYOUTS_DIR, layout))
+    line_count = 0
+    bad_lines = {"len": [], "xyz":[], "rgb":[], "dup": []}
+    num_col_errors = 0
+    num_xyz_errors = 0
+    num_rgb_errors = 0
+    num_id_errors = 0
+    ids = {}
+    #print(layout[0])
+    for i, line in enumerate(layout):
+        line_count += 1
+        line = line.split(",")
+        # Check number of columns (columns are comma-separated; commas may not be escaped in any way)
+        if len(line) != 8:
+            num_col_errors += 1
+            if num_col_errors < ERRORS_TO_SHOW:
+                bad_lines["len"].append(["Illegal number of columns", 8, len(line), i, ",".join(line)])
+        try:
+            for x in range(3):
+                if x >= len(line):
+                    continue
+                if not validate_coordinate(line[x]):
+                    num_xyz_errors += 1
+                    if num_xyz_errors > ERRORS_TO_SHOW:
+                        bad_lines["xyz"].append(["illegal XYZ values", "float 0 <= f <= 1", line[x], i, ",".join(line)])
+        except:
+            pass
+        try:
+            for x in range(3, 7):
+                if x >= len(line):
+                    continue
+                if not validate_color_value(line[x]):
+                    num_rgb_errors += 1
+                    if num_rgb_errors > ERRORS_TO_SHOW:
+                        bad_lines["rgb"].append(["illegal RGBA values", "int 0 <= i <= 255", line[x],
+                                          i, ",".join(line)])
+        except:
+            pass
+        try:
+            descriptors = line[7].split(";")
+            if descriptors[0] in ids:
+                if num_id_errors < ERRORS_TO_SHOW:
+                    bad_lines["len"].append(["Duplicate ID", "All ids must be unique", line[x], i, ""])
+                num_id_errors += 1
+        except:
+            pass
+    total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
+    return(len(layout), total_errors, bad_lines)
+
+def validate_edges(namespace, links):
+    column_errors = []
+    num_col_errors = 0
+
+    for i, line in enumerate(links.split("\n")):
+        if not line:
+            continue
+        line = line.split(",")
+        # Validate number of columns
+        if len(line) != 2:
+            num_col_errors += 1
+            if num_col_errors < ERRORS_TO_SHOW:
+                column_errors.append(["Illegal number of columns", 2, len(line), i, ",".join(line)])
+    return(len(links), num_col_errors, column_errors)
+
+
+def add_layout_to_db(namespace, filename, layout):
+    Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`layouts_tmp` (
+      `x_loc` float(10,7) DEFAULT NULL,
+      `y_loc` float(10,7) DEFAULT NULL,
+      `z_loc` float(10,7) DEFAULT NULL,
+      `r_val` int(11) DEFAULT NULL,
+      `g_val` int(11) DEFAULT NULL,
+      `b_val` int(11) DEFAULT NULL,
+      `a_val` int(11) DEFAULT NULL,
+      `id` varchar(255) not null,
+      `namespace` varchar(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+    layout_rows = [ "(" + ",".join(line.split(",")[:7]) + 
+                   "".join([',"',line.split(",")[7].split(";")[1], '","', filename, '")']) \
+                   for line in layout]
+    query = """
+    insert into `tmp_%s`.layouts_tmp (x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, id, namespace)
+    values %s
+    """ % (namespace, ",".join(layout_rows))
+    cursor = Base.execute_query(query)
+    if run_db_layout_validations(namespace):
+        pass
+        # return errors
+        print("layouts already in DB!")
+    else:
+        write_layouts(namespace)
+
+def add_edges_to_db(namespace, filename, layout):
+    Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`edges_tmp`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`edges_tmp` (
+      `node1` varchar(255) NOT NULL,
+      `node2` varchar(255) NOT NULL,
+      `namespace` varchar(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+    lines = layout.split("\n")
+    print(lines[0])
+    print(lines[0].split(","))
+    print(lines[-1])
+    query = "insert into `tmp_%s`.edges_tmp (node1, node2, namespace) values %s" % \
+            (namespace, ",".join(["(%s, \"%s\")" % (line, filename) for line in layout.split("\n")]))
+    cursor = Base.execute_query(query)
+    if run_db_edge_validations(namespace):
+        pass
+        # return errors
+        print("edges already in DB!")
+    else:
+        write_edges(namespace)
+
+def add_labels_to_db(namespace, filename, labels):
+    Base.execute_query("DROP TABLE IF EXISTS `%s`.`labels_tmp`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`labels_tmp` (
+      `x_loc` float(10,7) DEFAULT NULL,
+      `y_loc` float(10,7) DEFAULT NULL,
+      `z_loc` float(10,7) DEFAULT NULL,
+      `text` varchar(255) not null,
+      `namespace` varchar(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+    lines = labels.split("\n")
+    print(lines[0].split(",")  + [filename] )
+    print(lines[0].split(","))
+    print(lines[-1])
+    query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
+            (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")  + [filename]) for line in lines]))
+    cursor = Base.execute_query(query)
+    if run_db_label_validations(namespace):
+        pass
+        # return errors
+        print("namespace already in DB!")
+    else:
+        write_labels(namespace)
+
+def run_db_layout_validations(namespace):
+    # Namespaces
+    query = """
+    SELECT DISTINCT tmp.namespace
+    FROM %s.layouts l
+    JOIN tmp_%s.layouts_tmp tmp on l.namespace = tmp.namespace
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+    namespace_conflicts = cursor.fetchall()
+    return namespace_conflicts
+
+def run_db_label_validations(namespace):
+    # Namespaces
+    query = """
+    SELECT DISTINCT tmp.namespace
+    FROM %s.labels l
+    JOIN tmp_%s.labels_tmp tmp on l.namespace = tmp.namespace
+    """ % (namespace, namespace)
+    w
+    cursor = Base.execute_query(query)
+    namespace_conflicts = cursor.fetchall()
+    return namespace_conflicts
+
+def run_db_edge_validations(namespace):
+    # Namespaces
+    query = """
+    SELECT DISTINCT node1
+    FROM tmp_%s.edges_tmp e
+    LEFT JOIN %s.nodes n ON n.external_id = e.node1
+    WHERE n.id IS NULL
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+    unknown_nodes = cursor.fetchall()
+    return unknown_nodes
+
+def write_layouts(namespace):
+    query = """
+    INSERT INTO %s.nodes (external_id)
+    SELECT tmp.id
+    FROM tmp_%s.layouts_tmp tmp
+    LEFT JOIN %s.nodes n on n.external_id = tmp.id
+    WHERE n.id IS NULL
+    """ % (namespace, namespace, namespace)
+    cursor = Base.execute_query(query)
+
+    query = """
+    INSERT INTO %s.layouts(node_id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
+    SELECT n.id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace
+    FROM tmp_%s.layouts_tmp tmp
+    JOIN %s.nodes n on n.external_id = tmp.id
+    """ % (namespace, namespace, namespace)
+    cursor = Base.execute_query(query)
+
+def write_edges(namespace):
+    # Namespaces
+    query = """
+    INSERT INTO %s.edges
+    SELECT e1.id, e2.id
+    FROM tmp_%s.edges_tmp tmp
+    JOIN %s.nodes n1 on n1.external_id = tmp.node1
+    JOIN %s.nodes n2 on n2.external_id = tmp.node2
+    LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
+    WHERE e.id IS NULL
+
+    """ % (namespace, namespace, namespace, namespace, namespace)
+    cursor = Base.execute_query(query)
+    query = """
+    INSERT INTO %s.edges
+    SELECT e2.id, e1.id
+    FROM tmp_%s.edges_tmp tmp
+    JOIN %s.nodes n1 on n1.external_id = tmp.node1
+    JOIN %s.nodes n2 on n2.external_id = tmp.node2
+    LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
+    WHERE e.id IS NULL
+
+    """ % (namespace, namespace, namespace, namespace, namespace)
+    cursor = Base.execute_query(query)
+
+
+def write_labels(namespace):
+
+    query = """
+    INSERT INTO %s.labels(text, x_loc, y_loc, z_loc, namespace)
+    SELECT text, x_loc, y_loc, z_loc, namespace
+    FROM tmp_%s.labels_tmp tmp
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+
+
+class Upload:
+    @staticmethod
+    def create_new_namespace(namespace):
+        query = "DROP DATABASE IF EXISTS %s" % namespace
+        cursor = Base.execute_query(query)
+        query = "DELETE FROM Datadivr_meta.namespaces WHERE name = \"%s\"" % namespace
+        cursor = Base.execute_query(query)
+
+        query = "CREATE DATABASE %s" % namespace
+        cursor = Base.execute_query(query)
+
+        connection = pymysql.connect(host=dbconf["host"],
+                             user=dbconf["user"],
+                             password=dbconf["password"],
+                             db=namespace,
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+        cursor = connection.cursor()
+        #print(query)
+        populate_db_data_agnostic.create_tables(cursor)
+        connection.commit()
+        query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
+        cursor = Base.execute_query(query)
+        #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
+        #cursor = Base.execute_query(query)
+
+
+    def create_new_temp_namespace(namespace):
+        query = "DROP DATABASE IF EXISTS tmp_%s" % namespace
+        cursor = Base.execute_query(query)
+
+        query = "CREATE DATABASE tmp_%s" % namespace
+        cursor = Base.execute_query(query)
+
+
+
+    @staticmethod
+    def upload_to_new_namespace(namespace, layout_files):
+        print(layout_files)
+        for file in layout_files:
+            # TODO: fix the below line to account for dots in filenames
+            name = file.filename.split(".")[0]
+            contents = file.read().decode('utf-8')
+            x = validate_layout(contents.split("\n"))
+            if x[1] == 0:
+                print(name)
+                add_layout_to_db(namespace, name, contents.split("\n"))
+
+    def upload_edges_to_new_namespace(namespace, links_files):
+        print("links_files", links_files)
+        for file in links_files:
+            # TODO: fix the below line to account for dots in filenames
+            name = file.filename.split(".")[0]
+            contents = file.read().decode('utf-8')
+            if not contents:
+                continue
+            if contents[-1] == "\n":
+                contents = contents[:-1]
+            x = validate_edges(None, contents)
+            if x[1] == 0:
+                print(name)
+                add_edges_to_db(namespace, name, contents)
+            else:
+                print(x)
+                print("!!! Error!!!!")
+
+    def upload_labels_to_new_namespace(namespace, labels_files):
+        print("labels_files", labels_files)
+        for file in labels_files:
+            # TODO: fix the below line to account for dots in filenames
+            name = file.filename.split(".")[0]
+            contents = file.read().decode('utf-8')
+            if not contents:
+                continue
+            if contents[-1] == "\n":
+                contents = contents[:-1]
+            #x = validate_edges(None, contents)
+            x = [0, 0, 0]
+            if True or x[1] == 0:
+                print(name)
+                add_labels_to_db(namespace, name, contents)
+            else:
+                print(x)
+                print("!!! Error!!!!")
 
 if __name__ == '__main__':
     #dbconf = db_config.asimov

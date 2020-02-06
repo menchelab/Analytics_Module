@@ -1,5 +1,8 @@
 from flask import Flask, jsonify, request,g, render_template
 from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, session
+from flask import Session
+
 from werkzeug.utils import secure_filename
 import click
 from flask import current_app, g
@@ -11,13 +14,11 @@ from werkzeug.contrib.cache import SimpleCache
 
 
 app = Flask(__name__)
+sess = Session()
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 cache = SimpleCache()
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
-
-
 
 
 @app.route("/")
@@ -33,6 +34,24 @@ def allowed_file(filename):
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
+        print(request.data)
+        #print(request.args)
+        print("namespace", request.args.get("namespace"))
+        form = request.form.to_dict()
+        print(request.files)
+        if form["namespace"] == "New":
+            namespace = form["new_name"]
+            Upload.create_new_namespace(form["new_name"])
+        else:
+            namespace = form["existing_namespace"]
+        if not namespace:
+            return "namespace fail"
+        #print(request.files.get("layouts"))
+        Upload.create_new_temp_namespace(namespace)
+        Upload.upload_to_new_namespace(namespace, request.files.getlist("layouts"))
+        Upload.upload_edges_to_new_namespace(namespace, request.files.getlist("links"))
+        Upload.upload_labels_to_new_namespace(namespace, request.files.getlist("labels"))
+        return "hello"
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -44,19 +63,12 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            g.filename = filename
             #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('uploaded_file',
                                     filename=filename))
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''#
+    data = Data.summary()
+    print(data)
+    return render_template('upload.html', data=data)
 
 @app.route('/uploaded_file', methods=['GET'])
 def uploaded_file():
@@ -215,4 +227,9 @@ def get_label(namespace):
 
 
 if __name__ == "__main__":
+    app.config['SECRET_KEY'] = 'super secret key'
+    app.config['SESSION_TYPE'] = 'filesystem'
+    sess.init_app(app)
+
+    app.debug = True
     app.run()
