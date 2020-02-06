@@ -95,10 +95,10 @@ def get_summary():
 # Node #
 ########
 
-@app.route("/api/node/prefix/<string:name_prefix>",  methods=['GET'])
+@app.route("/api/node/prefix/<string:db_namespace>/<string:name_prefix>",  methods=['GET'])
 @cross_origin()
-def nodes_for_prefix(name_prefix):
-    return jsonify(Node.nodes_for_autocomplete(name_prefix))
+def nodes_for_prefix(db_namespace,name_prefix):
+    return jsonify(Node.nodes_for_autocomplete(db_namespace, name_prefix))
 
 # @app.route("/api/node/search", methods=['GET', 'POST'])
 # @cross_origin()
@@ -107,76 +107,75 @@ def nodes_for_prefix(name_prefix):
 #     results = node.search(data)
 #     return jsonify(results)
 
-@app.route("/api/node/attribute/<string:attribute_id>",  methods=['GET'])
+@app.route("/api/node/attribute/<string:db_namespace>/<string:attribute_id>",  methods=['GET'])
 @cross_origin()
-def nodes_for_attribute(attribute_id):
-    return jsonify(Node.nodes_for_attribute(attribute_id))
+def nodes_for_attribute(db_namespace, attribute_id):
+    return jsonify(Node.nodes_for_attribute(db_namespace, attribute_id))
 
 
-@app.route("/api/node/random", methods=['GET'])
+@app.route("/api/node/random/<string:db_namespace>", methods=['GET'])
 @cross_origin()
-def get_random_nodes():
-    return jsonify(Node.show_random(10))
+def get_random_nodes(db_namespace):
+    return jsonify(Node.show_random(10, db_namespace))
 
-@app.route("/api/node/prefix", methods=['GET'])
+@app.route("/api/node/prefix/<string:db_namespace>", methods=['GET'])
 @cross_origin()
-def all_node_names():
-    return jsonify(Node.all())
+def all_node_names(db_namespace):
+    return jsonify(Node.all(db_namespace))
 
 #############
 # Attribute #
 #############
 
-@app.route("/api/attribute/node/<int:node_id>/<string:namespace>",  methods=['GET'])
+@app.route("/api/attribute/node/<string:db_namespace><int:node_id>/<string:attr_namespace>",  methods=['GET'])
 @cross_origin()
-def attributes_for_node(node_id, namespace):
-    if namespace == 'all':
-        namespace = None
-    return jsonify(Attribute.attributes_for_node(node_id, namespace))
+def attributes_for_node(db_namespace, node_id, attr_namespace):
+    if attr_namespace == 'all':
+        attr_namespace = None
+    return jsonify(Attribute.attributes_for_node(db_namespace, node_id, attr_namespace))
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
-def get_attribute_taxonomy(root_node_id):
-    zkey = 'attribute_taxonomy_parents-%d' % root_node_id
+def get_attribute_taxonomy(db_namespace, root_node_id):
+    zkey = 'attribute_taxonomy_parents-%s-%d' % (db_namespace, root_node_id)
     dtc = cache.get(zkey)
     if dtc is None:
-        dtc = AttributeTaxonomy.construct_taxonomy(root_node_id)
+        dtc = AttributeTaxonomy.construct_taxonomy(db_namespace, root_node_id)
         cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
     return dtc
 
-@app.route("/api/attribute_taxonomy/<int:root_node_id>", methods=['GET'])
+@app.route("/api/attribute_taxonomy/<string:db_namespace>/<int:root_node_id>", methods=['GET'])
 @cross_origin()
-def taxonomy(root_node_id):
-    return jsonify(get_attribute_taxonomy(root_node_id))
+def taxonomy(db_namespace, root_node_id):
+    return jsonify(get_attribute_taxonomy(db_namespace, root_node_id))
 
-@app.route("/api/attribute/prefix/<string:name_prefix>/<string:namespace>", methods=['GET'])
+@app.route("/api/attribute/prefix/<string:db_namespace>/<string:name_prefix>/<string:attr_namespace>", methods=['GET'])
 @cross_origin()
-def attributes_for_prefix(name_prefix, namespace):
-    if namespace == 'all':
-        namespace = None
-    return jsonify(Attribute.attributes_for_autocomplete(name_prefix, namespace))
+def attributes_for_prefix(db_namespace, name_prefix, attr_namespace):
+    if attr_namespace == 'all':
+        attr_namespace = None
+    return jsonify(Attribute.attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace))
 
-@app.route("/api/attribute/<string:namespace>", methods=['GET'])
+@app.route("/api/attribute/<string:db_namespace>/<string:attr_namespace>", methods=['GET'])
 @cross_origin()
-def all_attribute_names(namespace):
-    print(namespace)
-    if namespace == 'all':
-        namespace = None
-    return jsonify(Attribute.all_attribute_names(namespace))
+def all_attribute_names(db_namespace, attr_namespace):
+    if attr_namespace == 'all':
+        attr_namespace = None
+    return jsonify(Attribute.all_attribute_names(db_namespace, attr_namespace))
 
 
 ###########
 # Article #
 ###########
 
-@app.route("/api/article/pubid/<int:pubid>",  methods=['GET'])
+@app.route("/api/article/<string:namespace>/pubid/<int:pubid>",  methods=['GET'])
 @cross_origin()
-def article_for_pubid(pubid):
-    return jsonify(Article.article_for_pubid(pubid))
+def article_for_pubid(namespace, pubid):
+    return jsonify(Article.article_for_pubid(namespace, pubid))
 
-@app.route("/api/article/node/<int:node_id>",  methods=['GET'])
+@app.route("/api/article/<string:namespace>/node/<int:node_id>",  methods=['GET'])
 @cross_origin()
-def articles_for_node(node_id):
-    return jsonify(Article.articles_for_node(node_id))
+def articles_for_node(namespace, node_id):
+    return jsonify(Article.articles_for_node(namespace, node_id))
 
 ########
 # Edge #

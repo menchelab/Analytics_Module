@@ -64,39 +64,39 @@ class Data:
 class Node:
 
     @staticmethod
-    def all():
+    def all(db_namespace):
         query = """
-            SELECT DISTINCT name, symbol, id FROM nodes
-        """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % db_namespace
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
-    def show_random(num_to_show):
-        query = "SELECT name, symbol, id FROM nodes ORDER BY RAND() LIMIT %d" % num_to_show
+    def show_random(num_to_show, db_namespace):
+        query = "SELECT name, symbol, id FROM %s.nodes ORDER BY RAND() LIMIT %d" % (db_namespace, num_to_show)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
-    def nodes_for_attribute(attr_id):
+    def nodes_for_attribute(db_namespace, attr_id):
         query = """
             SELECT DISTINCT node.id
-            FROM nodes
-            JOIN nodes_attributes ON nodes.id = nodes_attributes.node_id
-            JOIN attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
+            FROM %s.nodes
+            JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
+            JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
             AND attribute_taxonomies.parent_id = %d
-        """ % attr_id
+        """ % (db_namespace, db_namespace, db_namespace, attr_id)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
-    def nodes_for_autocomplete(name_prefix):
+    def nodes_for_autocomplete(db_namespace, name_prefix):
         query = """
             SELECT nodes.id, nodes.symbol, nodes.name
-            FROM nodes
+            FROM %s.nodes
             WHERE LOWER(nodes.symbol) like LOWER('%s')
             OR LOWER(nodes.name) like LOWER('%s')
-        """ % (Base.sanitize_string(name_prefix) + '%', Base.sanitize_string(name_prefix) + '%')
+        """ % (db_namespace, Base.sanitize_string(name_prefix) + '%', Base.sanitize_string(name_prefix) + '%')
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -247,16 +247,16 @@ class Node:
 
 class Attribute:
     @staticmethod
-    def attributes_for_node(node_id, namespace=None):
-        namespace_clause = " AND a.namespace = \"%s\"" % namespace if namespace else ""
+    def attributes_for_node(db_namespace, node_id, attr_namespace=None):
+        namespace_clause = " AND a.namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
             SELECT DISTINCT a.id, a.name, a.description, a.namespace, distance
-            FROM attributes a
-            JOIN attribute_taxonomies at ON a.id = at.parent_id
-            JOIN nodes_attributes na ON na.attribute_id = at.child_id
+            FROM %s.attributes a
+            JOIN %s.attribute_taxonomies at ON a.id = at.parent_id
+            JOIN %s.nodes_attributes na ON na.attribute_id = at.child_id
             WHERE node_id = %d
             %s
-        """ % (node_id, namespace_clause)
+        """ % (namespace, namespace, namespace, node_id, namespace_clause)
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         attributes = {}
@@ -275,25 +275,25 @@ class Attribute:
                  "description": result["description"]} for result in results]
 
     @staticmethod
-    def attributes_for_autocomplete(name_prefix, namespace=None):
-        namespace_clause = " AND namespace = \"%s\"" % namespace if namespace else ""
+    def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
+        namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
             SELECT attributes.id, attributes.name, namespace
-            FROM attributes
+            FROM %s.attributes
             WHERE LOWER(attributes.name) like LOWER('%s')
             %s
-        """ % (Base.sanitize_string(name_prefix) + '%', namespace_clause)
+        """ % (db_namespace, Base.sanitize_string(name_prefix) + '%', namespace_clause)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
     @staticmethod
-    def all_attribute_names(namespace=None):
-        namespace_clause = " WHERE namespace = \"%s\"" % namespace if namespace else ""
+    def all_attribute_names(db_namespace, attr_namespace=None):
+        namespace_clause = " WHERE namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
             SElECT DISTINCT attributes.id, attributes.name, namespace
-            FROM attributes
+            FROM %s.attributes
             %s
-        """ % namespace_clause
+        """ % (db_namespace, namespace_clause)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -316,31 +316,31 @@ class AttributeTaxonomy:
 
 class Article:
     @staticmethod
-    def article_for_pubid(pub_id):
+    def article_for_pubid(namespace, pub_id):
         query = """
             SELECT articles.authors_list, articles.abstract, articles.title,
                 DATE_FORMAT(CURDATE(), '%s') AS publication_date,
                 "Fake Journal" AS publication, 10000 as citation_count
-            FROM articles
+            FROM %s.articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
-        """ % ("%Y-%m-%d", pub_id)
+        """ % ("%Y-%m-%d", namespace, pub_id)
         cursor = Base.execute_query(query)
         return cursor.fetchone()
 
     @staticmethod
-    def articles_for_node(entrez_id):
+    def articles_for_node(namespace, node_id):
         query = """
             SELECT articles.external_id, articles.title,
                 DATE_FORMAT(CURDATE(), '%s') AS publication_date,
                 "Fake Journal" AS publication, 10000 as citation_count
-            FROM articles
-            JOIN nodes_articles ON nodes_articles.article_id = articles.id
-            JOIN nodes ON nodes.id = nodes_articles.node_id
+            FROM %s.articles
+            JOIN %s.nodes_articles ON nodes_articles.article_id = articles.id
+            JOIN %s.nodes ON nodes.id = nodes_articles.node_id
             WHERE articles.type = 'pubmed'
             AND nodes.id = '%s'
             ORDER BY articles.publication_date desc
-        """ % ("%Y-%m-%d", entrez_id)
+        """ % ("%Y-%m-%d", namespace, namespace, namespace, node_id)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
