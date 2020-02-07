@@ -100,12 +100,28 @@ def get_summary():
 def nodes_for_prefix(db_namespace,name_prefix):
     return jsonify(Node.nodes_for_autocomplete(db_namespace, name_prefix))
 
-# @app.route("/api/node/search", methods=['GET', 'POST'])
-# @cross_origin()
-# def search():
-#     data = request.form
-#     results = node.search(data)
-#     return jsonify(results)
+@app.route("/api/node/",  methods=['GET'])
+@cross_origin()
+def nodes():
+    db_namespace = request.args.get('namespace') or "Datadivr_jen"
+    prefix = request.args.get('prefix') or ""
+    node_ids = request.args.getlist("id")
+    max_nodes = request.args.get('max_nodes')
+    print(node_ids)
+    return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
+
+@app.route("/api/node/search/<string:namespace>", methods=['GET', 'POST'])
+@cross_origin()
+def search(namespace):
+    if request.method == 'POST':
+        data = request.form
+        results = Node.search(namespace, data)
+        return jsonify(results)
+    else:
+        data = request.args
+        results = Node.search(namespace, data)
+        return jsonify(results)
+
 
 @app.route("/api/node/attribute/<string:db_namespace>/<string:attribute_id>",  methods=['GET'])
 @cross_origin()
@@ -118,16 +134,11 @@ def nodes_for_attribute(db_namespace, attribute_id):
 def get_random_nodes(db_namespace):
     return jsonify(Node.show_random(10, db_namespace))
 
-@app.route("/api/node/prefix/<string:db_namespace>", methods=['GET'])
-@cross_origin()
-def all_node_names(db_namespace):
-    return jsonify(Node.all(db_namespace))
-
 #############
 # Attribute #
 #############
 
-@app.route("/api/attribute/node/<string:db_namespace><int:node_id>/<string:attr_namespace>",  methods=['GET'])
+@app.route("/api/attribute/node/<string:db_namespace>/<int:node_id>/<string:attr_namespace>",  methods=['GET'])
 @cross_origin()
 def attributes_for_node(db_namespace, node_id, attr_namespace):
     if attr_namespace == 'all':
@@ -185,7 +196,6 @@ def articles_for_node(namespace, node_id):
 @cross_origin()
 def get_edge(namespace):
     # TODO(Jen): Hack - namespaces should be supported!
-    namespace = 'ppi'
     return jsonify(Edge.all(namespace))
 
 
@@ -193,7 +203,7 @@ def get_edge(namespace):
 # Layout #
 ##########
 
-@app.route("/api/layout/<string:db_namespace>><string:layout_namespace>")
+@app.route("/api/layout/<string:db_namespace>/<string:layout_namespace>")
 @cross_origin()
 def get_layout(db_namespace, layout_namespace):
     return jsonify(Layout.fetch(db_namespace, layout_namespace))
