@@ -100,150 +100,117 @@ class Node:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
-    # @staticmethod
-    # def search(clauses):
-    #     print(clauses)
-    #     have_name = False
-    #     have_diseases = False
-    #     have_go_categories = False
-    #     filter_clauses = []
-    #     select_clauses = []
+    @staticmethod
+    def search(db_namespace, clauses):
+        print(clauses)
+        have_name = False
+        have_attributes = False
+        filter_clauses = []
+        select_clauses = []
 
-    #     def filter_clause(subject, object):
-    #         print(subject)
-    #         if subject == "name_like":
-    #             have_name = True
-    #             return [" LOWER(genes.symbol) like LOWER('%s') " % (Base.sanitize_string(object) + "%"),
-    #                     ["name", object.lower()]]
-    #         column = ""
-    #         if subject == "disease":
-    #             column = "do_id"
-    #             have_diseases = True
-    #         else:
-    #             column = "go_id"
-    #             have_go_categories = True
+        def filter_clause(subject, object):
+            print(subject)
+            if subject == "name_like":
+                have_name = True
+                return [" LOWER(nodes.symbol) like LOWER('%s') " % (Base.sanitize_string(object) + "%"),
+                        ["name", object.lower()]]
+                column = ""
+            else:
+                column = "attribute_id"
+                have_attributes = True
 
-    #         return ["%s = '%s'" % (column, object),
-    #                 [column, object]]
+            return ["%s = '%s'" % (column, object),
+                    [column, object]]
 
-    #     def get_summary_stats(gene_set):
-    #         query = """
-    #         SELECT diseases.name, prevalence, count(distinct jgenes.id) as gene_number
-    #         FROM diseases
-    #         JOIN disease_taxonomy on diseases.id = parent_id
-    #         JOIN genes_diseases ON genes_diseases.disease_id = child_id
-    #         JOIN (select * from genes  where entrez_id in (%s)) jgenes ON jgenes.id = genes_diseases.gene_id
-    #         JOIN disease_counts on disease_counts.disease_id = diseases.id
-    #         WHERE prevalence > 25
-    #         GROUP BY 1, 2
-    #         ORDER BY 3 DESC
-    #         LIMIT 200
-    #         """ % ",".join([str(gene["entrez_id"]) for gene in gene_set])
-    #         cursor = Base.execute_query(query)
-    #         results = cursor.fetchall()
-    #         results = [{"name": x["name"], "gene_number": round(x["gene_number"]/x["prevalence"]* len(results), 2)} for x in results]
-    #         results.sort(reverse=True, key=lambda x: x["gene_number"])
-    #         return results[:10]
+        # def get_summary_stats(gene_set):
+        #     query = """
+        #     SELECT attributes.name, prevalence, count(distinct jgenes.id) as gene_number
+        #     FROM attributes
+        #     JOIN attribute_taxonomies on diseases.id = parent_id
+        #     JOIN nodes_attributes ON nodes_attibutes.attriute_id = child_id
+        #     JOIN (select * from nodes where id in (%s)) jgenes ON jgenes.id = nodes_attributes.node_id
+        #     JOIN disease_counts on disease_counts.disease_id = diseases.id
+        #     WHERE prevalence > 25
+        #     GROUP BY 1, 2
+        #     ORDER BY 3 DESC
+        #     LIMIT 200
+        #     """ % ",".join([str(gene["entrez_id"]) for gene in gene_set])
+        #     cursor = Base.execute_query(query)
+        #     results = cursor.fetchall()
+        #     results = [{"name": x["name"], "gene_number": round(x["gene_number"]/x["prevalence"]* len(results), 2)} for x in results]
+        #     results.sort(reverse=True, key=lambda x: x["gene_number"])
+        #     return results[:10]
 
 
-    #     for x in range(5):
-    #         andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
-    #         if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
-    #         or "object%d" % x not in clauses or clauses["object%d" % x] == "undefined":
-    #             break
-    #         if clauses["subject%d" % x] == "disease":
-    #             have_diseases = True
-    #         elif clauses["subject%d" % x] == "name_like":
-    #             have_name = True
-    #         else:
-    #             have_go_categories = True
-    #         new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
-    #         if andor == "AND":
-    #             filter_clauses.append(new_clause[0])
-    #             select_clauses.append([new_clause[1]])
-    #         else:
-    #             filter_clauses[-1]= filter_clauses[-1] + " OR " + new_clause[0]
-    #             select_clauses[-1].append(new_clause[1])
-    #     if not filter_clauses:
-    #         print("no filter clauses!")
-    #         return({"genes": [], "summary_stats": []})
-    #     if have_name and not have_diseases and not have_go_categories:
-    #         name_select_clause = """
-    #             SELECT name, symbol, entrez_id FROM genes WHERE
-    #         """
-    #         print("hello! I'm just a name")
-    #         query = name_select_clause + " AND ".join(filter_clauses)
-    #         cursor = Base.execute_query(query)
-    #         genes = cursor.fetchall()
-    #         return({"genes": genes, "summary_stats": get_summary_stats(genes)})
+        for x in range(5):
+            andor = clauses["predicate%d" % x] if "predicate%d" % x in clauses else "AND"
+            if "subject%d" % x not in clauses or clauses["subject%d" % x] == "undefined" \
+            or "object%d" % x not in clauses or clauses["object%d" % x] == "undefined":
+                break
+            if clauses["subject%d" % x] == "name_like":
+                have_name = True
+            else:
+                have_attributes = True
+            new_clause = filter_clause(clauses["subject%d" % x], clauses["object%d" % x] )
+            if andor == "AND":
+                filter_clauses.append(new_clause[0])
+                select_clauses.append([new_clause[1]])
+            else:
+                filter_clauses[-1]= filter_clauses[-1] + " OR " + new_clause[0]
+                select_clauses[-1].append(new_clause[1])
+        if not filter_clauses:
+            print("no filter clauses!")
+            return({"nodes": [], "summary_stats": []})
+        if have_name and not have_attributes:
+            name_select_clause = """
+                SELECT id, name, symbol FROM %s.nodes WHERE
+            """ % db_namespace
+            print("hello! I'm just a name")
+            query = name_select_clause + " AND ".join(filter_clauses)
+            cursor = Base.execute_query(query)
+            nodes = cursor.fetchall()
+            return({"nodes": nodes})
 
-    #     print(filter_clauses)
-    #     print(have_diseases, have_go_categories)
-    #     genes_to_names = {}
-    #     if have_diseases and have_go_categories:
-    #         name_disease_select_clause = """
-    #         SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
-    #             GROUP_CONCAT(DISTINCT diseases.do_id) AS do_id,
-    #             GROUP_CONCAT(DISTINCT go_categories.go_id) as go_id
-    #         FROM genes
-    #         JOIN genes_diseases ON genes_diseases.gene_id = genes.id
-    #         JOIN disease_taxonomy ON genes_diseases.disease_id = disease_taxonomy.child_id
-    #         JOIN diseases ON diseases.id = disease_taxonomy.parent_id
-    #         JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
-    #         JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
-    #         JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
-    #         WHERE %s
-    #         GROUP BY 1, 2, 3
-    #         """ % " OR ".join(filter_clauses)
-    #     elif have_diseases:
-    #         name_disease_select_clause = """
-    #         SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
-    #             GROUP_CONCAT(DISTINCT diseases.do_id) AS do_id,
-    #             "" as go_id
-    #         FROM genes
-    #         JOIN genes_diseases ON genes_diseases.gene_id = genes.id
-    #         JOIN disease_taxonomy ON genes_diseases.disease_id = disease_taxonomy.child_id
-    #         JOIN diseases ON diseases.id = disease_taxonomy.parent_id
-    #         WHERE %s
-    #         GROUP BY 1, 2, 3
-    #         """ % " OR ".join(filter_clauses)
-    #     elif have_go_categories:
-    #         name_disease_select_clause = """
-    #         SELECT DISTINCT genes.name, genes.symbol, genes.entrez_id,
-    #             "" as do_id,
-    #             GROUP_CONCAT(DISTINCT go_categories.go_id) as go_id
-    #         FROM genes
-    #         JOIN genes_go_categories ON genes.id = genes_go_categories.gene_id
-    #         JOIN go_taxonomy ON genes_go_categories.go_category_id = go_taxonomy.child_id
-    #         JOIN go_categories ON go_categories.id = go_taxonomy.parent_id
-    #         WHERE %s
-    #         GROUP BY 1, 2, 3
-    #         """ % " OR ".join(filter_clauses)
-    #     query = name_disease_select_clause
-    #     cursor = Base.execute_query(query)
-    #     disease_table = cursor.fetchall()
-    #     genes_to_diseases = {x["entrez_id"]: x["do_id"].split(",") for x in disease_table}
-    #     genes_to_go_categories = {x["entrez_id"]: x["go_id"].split(",") for x in disease_table}
-    #     genes_to_names_d = {x["entrez_id"]: {'name': x['name'], 'symbol': x['symbol']} for x in disease_table}
-    #     genes_to_names = {**genes_to_names, **genes_to_names_d}
+        print(filter_clauses)
+        print(have_attributes)
+        nodes_to_names = {}
+        nodes_to_attributes = {}
+        if have_attributes:
+            name_attribute_select_clause = """
+            SELECT DISTINCT node_id, nodes.name, nodes.symbol,
+                GROUP_CONCAT(DISTINCT attribute_taxonomies.parent_id) as attribute_id
+            FROM %s.nodes
+            JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
+            JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
+            WHERE %s
+            GROUP BY 1, 2, 3
+            """ % (db_namespace, db_namespace, db_namespace, " OR ".join(filter_clauses))
+            query = name_attribute_select_clause
+            cursor = Base.execute_query(query)
+            attr_table = cursor.fetchall()
+            print(attr_table)
+            print(query)
+            nodes_to_attributes = {x["node_id"]: x["attribute_id"].split(",") for x in attr_table}
+            nodes_to_names = {x["node_id"]: {'name': x['name'], 'symbol': x['symbol']} for x in attr_table}
+        #nodes_to_attributes = {**nodes_to_attributes, **nodes_to_attributes_d}
 
-    #     candidate_genes = set(genes_to_names.keys())
-    #     for clause in select_clauses:
-    #         keep_genes = set()
-    #         for subclause in clause:
-    #             print(clause)
-    #             print(subclause)
-    #             if subclause[0] == "name":
-    #                 new_candidates = [x for x in candidate_genes if subclause[1].lower() in genes_to_names[x]["name"]]
-    #             elif subclause[0] == "do_id":
-    #                 new_candidates = [x for x in candidate_genes if subclause[1] in genes_to_diseases[x]]
-    #             else:
-    #                 new_candidates = [x for x in candidate_genes if subclause[1] in genes_to_go_categories[x]]
-    #             for x in new_candidates:
-    #                 keep_genes.add(x)
-    #         candidate_genes = keep_genes
-    #     genes = [{"entrez_id": x, "name": genes_to_names[x]["name"], "symbol": genes_to_names[x]["symbol"]} for x in candidate_genes]
-    #     return({"genes": genes, "summary_stats": get_summary_stats(genes)})
+        candidate_nodes = set(nodes_to_attributes.keys())
+        #print("candidate_nodes", candidate_nodes)
+        print(len(candidate_nodes))
+        for clause in select_clauses:
+            keep_nodes = set()
+            for subclause in clause:
+                print(clause)
+                print(subclause)
+                if subclause[0] == "name":
+                    new_candidates = [x for x in candidate_nodes if subclause[1].lower() in nodes_to_names[x]["name"]]
+                else:
+                    new_candidates = [x for x in candidate_nodes if subclause[1] in nodes_to_attributes[x]]
+                for x in new_candidates:
+                    keep_nodes.add(x)
+            candidate_nodes = keep_nodes
+        nodes = [{"node_id": x, "name": nodes_to_names[x]["name"], "symbol": nodes_to_names[x]["symbol"]} for x in candidate_nodes]
+        return({"nodes": nodes})
 
 class Attribute:
     @staticmethod
@@ -256,7 +223,7 @@ class Attribute:
             JOIN %s.nodes_attributes na ON na.attribute_id = at.child_id
             WHERE node_id = %d
             %s
-        """ % (namespace, namespace, namespace, node_id, namespace_clause)
+        """ % (db_namespace, db_namespace, db_namespace, node_id, namespace_clause)
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         attributes = {}
@@ -300,16 +267,16 @@ class Attribute:
 class AttributeTaxonomy:
 
     @staticmethod
-    def construct_taxonomy(root_node):
+    def construct_taxonomy(namespace, root_node):
         start_time = datetime.datetime.now()
         query = """
             SELECT DISTINCT attributes.id,
                 attributes.name, attribute_taxonomies.child_id, attribute_taxonomies.distance
-            FROM attributes
-            JOIN attribute_taxonomies ON attribute_taxonomies.parent_id = attributes.id
+            FROM %s.attributes
+            JOIN %s.attribute_taxonomies ON attribute_taxonomies.parent_id = attributes.id
                 AND attribute_taxonomies.distance IN (0, 1)
-            JOIN attribute_taxonomies dt2 on attributes.id = dt2.child_id and dt2.parent_id = %s
-        """ % root_node
+            JOIN %s.attribute_taxonomies dt2 on attributes.id = dt2.child_id and dt2.parent_id = %s
+        """ % (namespace, namespace, namespace, root_node)
         cursor = Base.execute_query(query)
         db_results = cursor.fetchall()
         return build_taxonomy(db_results, root_node)
