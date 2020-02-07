@@ -95,22 +95,23 @@ def get_summary():
 # Node #
 ########
 
-@app.route("/api/node/prefix/<string:db_namespace>/<string:name_prefix>",  methods=['GET'])
-@cross_origin()
-def nodes_for_prefix(db_namespace,name_prefix):
-    return jsonify(Node.nodes_for_autocomplete(db_namespace, name_prefix))
 
-@app.route("/api/node/",  methods=['GET'])
+@app.route("/api/<string:db_namespace>/node",  methods=['GET'])
 @cross_origin()
-def nodes():
-    db_namespace = request.args.get('namespace') or "Datadivr_jen"
+def nodes(db_namespace):
     prefix = request.args.get('prefix') or ""
     node_ids = request.args.getlist("id")
-    max_nodes = request.args.get('max_nodes')
+    random = request.args.get('random') or None
+    attribute_ids = request.args.getlist("attribute_id")
     print(node_ids)
+    if random:
+        return jsonify(Node.show_random(random))
+    if attribute_ids:
+        return jsonify(Node.nodes_for_attribute(attribute_ids))
+    # TODO: handle node IDs case.
     return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
 
-@app.route("/api/node/search/<string:namespace>", methods=['GET', 'POST'])
+@app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
 def search(namespace):
     if request.method == 'POST':
@@ -121,18 +122,6 @@ def search(namespace):
         data = request.args
         results = Node.search(namespace, data)
         return jsonify(results)
-
-
-@app.route("/api/node/attribute/<string:db_namespace>/<string:attribute_id>",  methods=['GET'])
-@cross_origin()
-def nodes_for_attribute(db_namespace, attribute_id):
-    return jsonify(Node.nodes_for_attribute(db_namespace, attribute_id))
-
-
-@app.route("/api/node/random/<string:db_namespace>", methods=['GET'])
-@cross_origin()
-def get_random_nodes(db_namespace):
-    return jsonify(Node.show_random(10, db_namespace))
 
 #############
 # Attribute #
@@ -178,21 +167,21 @@ def all_attribute_names(db_namespace, attr_namespace):
 # Article #
 ###########
 
-@app.route("/api/article/<string:namespace>/pubid/<int:pubid>",  methods=['GET'])
+@app.route("/api/<string:namespace>/article/pubid/<int:pubid>",  methods=['GET'])
 @cross_origin()
-def article_for_pubid(namespace, pubid):
-    return jsonify(Article.article_for_pubid(namespace, pubid))
-
-@app.route("/api/article/<string:namespace>/node/<int:node_id>",  methods=['GET'])
-@cross_origin()
-def articles_for_node(namespace, node_id):
+def article(namespace):
+    pubid = request.args.get('pubid')
+    if pubid:
+        return jsonify(Article.article_for_pubid(namespace, pubid))
+    node_id = request.args.get("node_id") or 0
     return jsonify(Article.articles_for_node(namespace, node_id))
+
 
 ########
 # Edge #
 ########
 
-@app.route("/api/edge/<string:namespace>")
+@app.route("/api/<string:namespace>/edge")
 @cross_origin()
 def get_edge(namespace):
     # TODO(Jen): Hack - namespaces should be supported!
@@ -203,7 +192,7 @@ def get_edge(namespace):
 # Layout #
 ##########
 
-@app.route("/api/layout/<string:db_namespace>/<string:layout_namespace>")
+@app.route("/api/<string:db_namespace>/layout/<string:layout_namespace>")
 @cross_origin()
 def get_layout(db_namespace, layout_namespace):
     return jsonify(Layout.fetch(db_namespace, layout_namespace))
@@ -214,7 +203,7 @@ def get_layout(db_namespace, layout_namespace):
 # Label #
 #########
 
-@app.route("/api/label/<string:db_namespace>/<string:label_namespace>")
+@app.route("/api/<string:db_namespace>/label/<string:label_namespace>")
 @cross_origin()
 def get_label(db_namespace, label_namespace):
     return jsonify(Label.fetch(db_namespace, label_namespace))

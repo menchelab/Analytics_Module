@@ -84,8 +84,8 @@ class Node:
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
             JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
-            AND attribute_taxonomies.parent_id = %d
-        """ % (db_namespace, db_namespace, db_namespace, attr_id)
+            AND attribute_taxonomies.parent_id in (%s)
+        """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
