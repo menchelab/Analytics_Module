@@ -77,10 +77,6 @@ def uploaded_file():
     return render_template('uploaded_file.html', filename=filename)
 
 
-@app.route("/sepptest",  methods=['GET'])
-def sepptest():
-    return ",".join([str(x) for x in range(200000)])
-
 ########
 # Data #
 ########
@@ -94,7 +90,6 @@ def get_summary():
 ########
 # Node #
 ########
-
 
 @app.route("/api/<string:db_namespace>/node",  methods=['GET'])
 @cross_origin()
@@ -123,16 +118,20 @@ def search(namespace):
         results = Node.search(namespace, data)
         return jsonify(results)
 
+
 #############
 # Attribute #
 #############
 
-@app.route("/api/attribute/node/<string:db_namespace>/<int:node_id>/<string:attr_namespace>",  methods=['GET'])
+@app.route("/api/<string:db_namespace>/attribute/>",  methods=['GET'])
 @cross_origin()
 def attributes_for_node(db_namespace, node_id, attr_namespace):
-    if attr_namespace == 'all':
-        attr_namespace = None
-    return jsonify(Attribute.attributes_for_node(db_namespace, node_id, attr_namespace))
+    attr_namespace = request.args.get("namespace") or None
+    node_id = request.args.get("node_id")
+    if node_id:
+        return jsonify(Attribute.attributes_for_node(db_namespace, node_id, attr_namespace))
+    prefix = request.args.get("prefix") or ""
+    return jsonify(Attribute.attributes_for_autocomplete(db_namespace, prefix, attr_namespace))
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_attribute_taxonomy(db_namespace, root_node_id):
@@ -148,26 +147,12 @@ def get_attribute_taxonomy(db_namespace, root_node_id):
 def taxonomy(db_namespace, root_node_id):
     return jsonify(get_attribute_taxonomy(db_namespace, root_node_id))
 
-@app.route("/api/attribute/prefix/<string:db_namespace>/<string:name_prefix>/<string:attr_namespace>", methods=['GET'])
-@cross_origin()
-def attributes_for_prefix(db_namespace, name_prefix, attr_namespace):
-    if attr_namespace == 'all':
-        attr_namespace = None
-    return jsonify(Attribute.attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace))
-
-@app.route("/api/attribute/<string:db_namespace>/<string:attr_namespace>", methods=['GET'])
-@cross_origin()
-def all_attribute_names(db_namespace, attr_namespace):
-    if attr_namespace == 'all':
-        attr_namespace = None
-    return jsonify(Attribute.all_attribute_names(db_namespace, attr_namespace))
-
 
 ###########
 # Article #
 ###########
 
-@app.route("/api/<string:namespace>/article/pubid/<int:pubid>",  methods=['GET'])
+@app.route("/api/<string:namespace>/article",  methods=['GET'])
 @cross_origin()
 def article(namespace):
     pubid = request.args.get('pubid')
@@ -184,7 +169,6 @@ def article(namespace):
 @app.route("/api/<string:namespace>/edge")
 @cross_origin()
 def get_edge(namespace):
-    # TODO(Jen): Hack - namespaces should be supported!
     return jsonify(Edge.all(namespace))
 
 
@@ -196,7 +180,6 @@ def get_edge(namespace):
 @cross_origin()
 def get_layout(db_namespace, layout_namespace):
     return jsonify(Layout.fetch(db_namespace, layout_namespace))
-
 
 
 #########
