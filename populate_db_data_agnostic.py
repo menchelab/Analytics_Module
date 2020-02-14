@@ -438,6 +438,47 @@ def populate_labels(cursor):
 
 #select count(*) from edges left join layouts on edges.node1_id = layouts.node_id and layouts.namespace = "1_spring" where layouts.node_id is null;
 
+def populate_pathways(cursor):
+    query = '''
+    INSERT INTO attributes(external_id, name, description, namespace)
+    SELECT std_symbol, std_name, short_descr, "PATHWAY")
+    FROM Gene2Pathways.pathway_description
+    WHERE organism = 'Homo sapiens'
+    '''
+    cursor.execute(query)
+
+    query = '''
+    INSERT INTO nodes_attributes(node_id, attribute_id)
+    SELECT nodes.id, attributes.id
+    FROM Gene2Pathways.gene2pathways gp
+    JOIN nodes ON gp.gene_entID = nodes.external_id
+    JOIN attributes ON gp.label = attributes.name AND attributes.namespace = 'PATHWAY'
+    '''
+    cursor.execute(query)
+
+
+def populate_tissues(cursor):
+    query = '''
+    INSERT INTO attributes(external_id, name, description, namespace)
+    SELECT DISTINCT CONCAT(tissue, " - ", cell_type),
+                    CONCAT(tissue, " - ", cell_type),
+                    CONCAT(tissue, " - ", cell_type), "TISSUE"
+    FROM Gene2Tissue.gene2tissue
+    WHERE level_class != "Not detected" AND reliabilty != "Uncertain"
+    '''
+    cursor.execute(query)
+
+    query = '''
+    INSERT INTO nodes_attributes(node_id, attribute_id)
+    SELECT nodes.id, attributes.id
+    FROM Gene2Tissue.gene2tissue gt
+    JOIN nodes ON gt.genesymbol = nodes.symbol
+    JOIN attributes ON CONCAT(tissue, " - ", cell_type) = attributes.external_id
+                    AND attributes.namespace = 'TISSUE'
+    WHERE level_class != "Not detected" AND reliabilty != "Uncertain"
+    '''
+    cursor.execute(query)
+
 
 def populate_base_tables(cursor):
     populate_genes(cursor)
