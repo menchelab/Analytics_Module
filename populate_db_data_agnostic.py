@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..")))
-from . import db_config
+import db_config
 import pymysql
 import networkx as nx
 
@@ -171,7 +171,7 @@ def create_tables(cursor):
 
 def populate_genes(cursor):
     query = '''
-    INSERT INTO jentest.nodes(external_id, name, symbol)
+    INSERT INTO nodes(external_id, name, symbol)
     SELECT CONVERT(Entrez_Gene_ID_NCBI, SIGNED), Approved_Name, Approved_Symbol
     FROM GenesGO.hgnc_complete h
     WHERE h.Entrez_Gene_ID_NCBI != ""
@@ -185,7 +185,7 @@ def populate_genes(cursor):
 
 def populate_diseases(cursor):
     query = '''
-    INSERT INTO jentest.attributes (external_id, name, namespace)
+    INSERT INTO attributes (external_id, name, namespace)
     SELECT do.do_id, do.do_name, "DISEASE"
     FROM Gene2Disease.disease_ontology do
     WHERE do.is_obsolete != 'true';
@@ -202,7 +202,7 @@ def populate_disease_taxonomy(cursor):
     disease_tree_data = cursor.fetchall()
 
     query = '''
-    SELECT id, external_id FROM jentest.attributes where namespace = "DISEASE";
+    SELECT id, external_id FROM attributes where namespace = "DISEASE";
     '''
     cursor.execute(query)
     db.commit()
@@ -238,19 +238,19 @@ def populate_disease_taxonomy(cursor):
 
     values = ",".join(["(%s)" % ",".join(x.split("->") +  [str(edges[x])] + ['"DISEASE"']) for x in edges])
     query = '''
-    INSERT INTO jentest.attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
+    INSERT INTO attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
     ''' % values
     cursor.execute(query)
 
 def populate_genes_diseases(cursor):
     query = '''
-    INSERT INTO jentest.nodes_attributes(node_id, attribute_id)
+    INSERT INTO nodes_attributes(node_id, attribute_id)
     SELECT g.id, d.id
-    FROM jentest.nodes g
+    FROM nodes g
     JOIN Gene2Disease.gene2disease_all gd ON g.external_id = gd.entrezID
     JOIN HumanPhenotypes.umlsmapping mp
     ON mp.disease_ID = gd.diseaseID
-    JOIN jentest.attributes d
+    JOIN attributes d
     ON right(d.external_id, length(d.external_id) - 5) = mp.identifier
     AND d.namespace = "DISEASE"
     '''
@@ -258,7 +258,7 @@ def populate_genes_diseases(cursor):
 
 def populate_articles(cursor):
     query = '''
-    INSERT INTO jentest.articles(
+    INSERT INTO articles(
         external_id, title, authors_list, abstract, type, url)
     SELECT DISTINCT a.pubid, b.title, REPLACE(b.author, ",", ", "), b.abstract, "pubmed", a.pubmedurl
     FROM Datadivr.gene2pubid a
@@ -271,17 +271,17 @@ def populate_articles(cursor):
 
 def populate_genes_articles(cursor):
     query = '''
-    INSERT INTO jentest.nodes_articles(node_id, article_id)
+    INSERT INTO nodes_articles(node_id, article_id)
     SELECT g.id, a.id
-    FROM jentest.nodes g
+    FROM nodes g
     JOIN Datadivr.gene2pubid gp ON g.external_id = gp.entrez AND g.external_id IS NOT NULL
-    JOIN jentest.articles a ON a.external_id = gp.pubid and a.type="pubmed"
+    JOIN articles a ON a.external_id = gp.pubid and a.type="pubmed"
     '''
     cursor.execute(query)
 
 def populate_go_categories(cursor):
     query = '''
-    INSERT INTO jentest.attributes (external_id, name, namespace, description)
+    INSERT INTO attributes (external_id, name, namespace, description)
     SELECT DISTINCT go_id, go_name, namespace, def
     FROM Datadivr.GO_tree
     '''
@@ -289,11 +289,11 @@ def populate_go_categories(cursor):
 
 def populate_genes_go_categories(cursor):
     query = '''
-    INSERT INTO jentest.nodes_attributes(node_id, attribute_id)
+    INSERT INTO nodes_attributes(node_id, attribute_id)
     SELECT DISTINCT g.id, gc.id
     FROM GenesGO.Gene2GO_human h
-    JOIN jentest.nodes g ON g.external_id = h.entrezid
-    JOIN jentest.attributes gc ON gc.external_id = h.go_id
+    JOIN nodes g ON g.external_id = h.entrezid
+    JOIN attributes gc ON gc.external_id = h.go_id
     AND gc.namespace != "DISEASE"
     WHERE h.entrezid != '-'
     AND h.evidence != 'ND'
@@ -327,7 +327,7 @@ def populate_go_taxonomy(cursor):
     '''
 
     query = '''
-    SELECT id, external_id FROM jentest.attributes where namespace != "DISEASE";
+    SELECT id, external_id FROM attributes where namespace != "DISEASE";
     '''
     cursor.execute(query)
     node_ids = cursor.fetchall()
@@ -362,31 +362,31 @@ def populate_go_taxonomy(cursor):
 
     values = ",".join(["(%s)" % ",".join(x.split("->") +  [str(edges[x]), '"GO"']) for x in edges])
     query = '''
-    INSERT INTO jentest.attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
+    INSERT INTO attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
     ''' % values
     cursor.execute(query)
 
 
 def populate_ppi(cursor):
     query = '''
-    INSERT INTO jentest.edges (node1_id, node2_id, namespace)
+    INSERT INTO edges (node1_id, node2_id, namespace)
     SELECT n1.id as g_from, n2.id  as g_to, "ppi"
     FROM networks.PPI_hippie2017 e
-    JOIN jentest.nodes n1 ON n1.external_id = e.entrez_1
-    JOIN jentest.nodes n2 ON n2.external_id = e.entrez_2 and n1.id != n2.id
+    JOIN nodes n1 ON n1.external_id = e.entrez_1
+    JOIN nodes n2 ON n2.external_id = e.entrez_2 and n1.id != n2.id
     WHERE e.author != ''
     UNION
     SELECT n2.id as g_from, n1.id as g_to, "ppi"
     FROM networks.PPI_hippie2017 e
-    JOIN jentest.nodes n1 ON n1.external_id = e.entrez_1
-    JOIN jentest.nodes n2 ON n2.external_id = e.entrez_2  and n1.id != n2.id
+    JOIN nodes n1 ON n1.external_id = e.entrez_1
+    JOIN nodes n2 ON n2.external_id = e.entrez_2  and n1.id != n2.id
     WHERE e.author != ''
     '''
     cursor.execute(query)
 
 def populate_layouts(cursor):
 
-    filename = "5_cell"
+    filename = "1_spring"
     layouts_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/layouts/%s.csv' % filename
     with open(layouts_file, 'r') as f:
         positions = [l.split(",")[:-1] + [l.split(",")[-1].split(";")[1]] for l in f.readlines()]
@@ -423,7 +423,7 @@ def populate_layouts(cursor):
     cursor.execute("DROP TABLE IF EXISTS `tmp_layouts` ")
 
 def populate_labels(cursor):
-    filename = "5_cell"
+    filename = "1_spring"
     labels_file = '/Users/eiofinova/Projects/DataDiVR/viveNet/Content/data/labels/%s.csv' % filename
     with open(labels_file, 'r') as f:
         positions = [l[:-1].split(",")[:-1] +
@@ -436,7 +436,7 @@ def populate_labels(cursor):
     ''' % ",".join(["(" + ",".join(p) + ")" for p in positions]))
 
 
-#select count(*) from edges left join layouts on edges.node1_id = layouts.node_id and layouts.namespace = "5_cell" where layouts.node_id is null;
+#select count(*) from edges left join layouts on edges.node1_id = layouts.node_id and layouts.namespace = "1_spring" where layouts.node_id is null;
 
 
 def populate_base_tables(cursor):
@@ -470,14 +470,21 @@ def populate_base_tables(cursor):
 
 
 if __name__ == '__main__':
+    DB = "ppi"
     print("Hello!")
     dbconf = db_config.asimov_admin
+    print(dbconf)
+    # db = pymysql.connect(dbconf["host"], dbconf["user"],
+    #                      dbconf["password"], db=dbconf["database"])
+    # cursor = db.cursor()
+    # cursor.execute("DROP DATABASE IF EXISTS " + DB)
+    # cursor.execute("CREATE DATABASE " + DB)
+    # db.commit()
+    # db.close()
+
     db = pymysql.connect(dbconf["host"], dbconf["user"],
-                         dbconf["password"], db=dbconf["database"])
+                         dbconf["password"], db=DB)
     cursor = db.cursor()
-    #cursor.execute("DROP DATABASE IF EXISTS " + DB)
-    #cursor.execute("CREATE DATABASE " + DB)
-    db.commit()
 
     #create_tables(cursor);
     #populate_base_tables(cursor);
