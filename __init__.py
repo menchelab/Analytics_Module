@@ -122,9 +122,9 @@ def search(namespace):
 # Attribute #
 #############
 
-@app.route("/api/<string:db_namespace>/attribute/>",  methods=['GET'])
+@app.route("/api/<string:db_namespace>/attribute/",  methods=['GET'])
 @cross_origin()
-def attributes_for_node(db_namespace, node_id, attr_namespace):
+def attributes_for_node(db_namespace):
     attr_namespace = request.args.get("namespace") or None
     node_id = request.args.get("node_id")
     if node_id:
