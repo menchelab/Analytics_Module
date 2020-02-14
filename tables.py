@@ -264,6 +264,18 @@ class Attribute:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
+    @staticmethod
+    def get_attribute_namespaces(db_namespace):
+        query = """
+            SElECT DISTINCT namespace
+            FROM %s.attributes
+        """ % (db_namespace)
+        cursor = Base.execute_query(query)
+        namespaces = cursor.fetchall()
+        return [x["namespace"] for x in namespaces]
+
+
+
 class AttributeTaxonomy:
 
     @staticmethod
