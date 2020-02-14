@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request,g, render_template
 from flask import Flask, flash, request, redirect, url_for
 from flask import Flask, session
-from flask import Session
 
 from werkzeug.utils import secure_filename
 import click
@@ -14,7 +13,7 @@ from werkzeug.contrib.cache import SimpleCache
 
 
 app = Flask(__name__)
-sess = Session()
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 cache = SimpleCache()
@@ -225,9 +224,6 @@ def get_label(db_namespace, label_namespace):
 
 
 if __name__ == "__main__":
-    app.config['SECRET_KEY'] = 'super secret key'
-    app.config['SESSION_TYPE'] = 'filesystem'
-    sess.init_app(app)
 
-    app.debug = True
+    #app.debug = True
     app.run()
