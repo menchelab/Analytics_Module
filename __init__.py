@@ -151,6 +151,20 @@ def taxonomy(db_namespace, root_node_id):
 def attribute_namespaces(db_namespace):
     return jsonify(Attribute.get_attribute_namespaces(db_namespace))
 
+@app.route("/api/<string:db_namespace>/selection/create", methods=['GET', 'POST'])
+@cross_origin()
+def create_selection(db_namespace):
+    print("helo!")
+    if request.method == 'POST':
+        data = request.form
+    else:
+        data = request.args
+    selection_name = data.get("selection_name")
+    node_ids = data.get("node_ids")
+    if not selection_name or not node_ids:
+        return jsonify({"status": "FAIL", "reason": "invalid request"})
+    return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
+
 
 ###########
 # Article #

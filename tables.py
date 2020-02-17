@@ -274,6 +274,53 @@ class Attribute:
         namespaces = cursor.fetchall()
         return [x["namespace"] for x in namespaces]
 
+    @staticmethod
+    def create_selection(db_namespace, selection_name, node_ids):
+        #Validate that the namespace is new
+        query = """
+            SELECT * FROM %s.attributes
+            WHERE namespace = "SELECTION"
+            AND LOWER(name) like "%s"
+            LIMIT 1
+        """ %(db_namespace, selection_name.lower())
+        cursor = Base.execute_query(query)
+        namespaces = cursor.fetchall()
+        if namespaces:
+            return({"status": "FAIL", "reason": "selection with that name already exists"})
+        # Validate node IDs.
+        node_ids = set(node_ids)
+        query = """
+            SELECT COUNT(*) as node_count FROM %s.nodes
+            WHERE id in (%s)
+        """ %(db_namespace, ",".join([str(x) for x in node_ids]))
+        cursor = Base.execute_query(query)
+        count = cursor.fetchall()
+        if count[0]["node_count"] < len(node_ids):
+            return({"status": "FAIL", "reason": "invalid node IDs in query"})
+        query = """
+            INSERT INTO %s.attributes(name, namespace)
+            VALUES ("%s", "SELECTION")
+        """ %(db_namespace, selection_name)
+        cursor = Base.execute_query(query)
+        query = """
+            SELECT id
+            FROM %s.attributes
+            ORDER BY id desc
+            LIMIT 1
+        """ %(db_namespace)
+        cursor = Base.execute_query(query)
+        attr_id = cursor.fetchone()["id"]
+        query = """
+            INSERT INTO %s.nodes_attributes(node_id, attribute_id)
+            VALUES %s
+        """ %(db_namespace, ",".join(['(%s, %d)' % (x, attr_id) for x in node_ids]))
+        cursor = Base.execute_query(query)
+        return {"status":"OK"}
+
+
+
+
+
 
 
 class AttributeTaxonomy:
