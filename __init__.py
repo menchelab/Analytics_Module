@@ -154,9 +154,10 @@ def attribute_namespaces(db_namespace):
 @app.route("/api/<string:db_namespace>/selection/create", methods=['GET', 'POST'])
 @cross_origin()
 def create_selection(db_namespace):
-    print("helo!")
     if request.method == 'POST':
         data = request.form
+        if not data:
+            data = request.get_json()
     else:
         data = request.args
     selection_name = data.get("selection_name")
