@@ -1,0 +1,78 @@
+.disable-select {
+    user-select: none; /* supported by Chrome and Opera */
+   -webkit-user-select: none; /* Safari */
+   -khtml-user-select: none; /* Konqueror HTML */
+   -moz-user-select: none; /* Firefox */
+   -ms-user-select: none; /* Internet Explorer/Edge */
+}
+/*disable dragging on images */
+img{-webkit-user-drag: none;
+}
+
+/* added comment */
+.ui-slider-horizontal {
+  margin: 30px 8px 30px 8px;
+  height: 12px;
+}
+
+.ui-slider .ui-slider-handle {
+	position: absolute;
+	z-index: 2;
+	width: 40px;
+	height: 40px;
+	cursor: default;
+  touch-action: none;
+}
+
+
+/* style for d3 board in tab random walk */
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+body {
+  font-family: 'Roboto Condensed',Helvetica,Arial;
+  background-color: lightsteelblue;
+}
+
+h1 {
+  font-family: 'ZCOOL QingKe HuangYou',Helvetica,Arial;
+  color:#40B9D4;
+}
+
+h2 {
+  font-family: 'ZCOOL QingKe HuangYou',Helvetica,Arial;
+  color:#DFDC00;
+}
+
+.header {
+  background-image: url("/static/images/bunnynet.jpeg");
+  background-color: #40B9D4;
+  margin: auto;
+  width: 90%;
+}
+
+.canvas {
+  background-color: white;
+  margin: auto;
+  width: 90%;
+}
+
+
+/* for debugging i make the background of body and ui widget contents transparent */
+/* body { */
+  /* background-color:rgba(0, 0, 0, 0); */
+/* } */
+/* .ui-widget-content { */
+	/* border: 1px solid #666666; */
+	/* background: none; */
+  /* color: white; */
+  /* background-color:rgba(0, 0, 0, 0); */
+/* } */
