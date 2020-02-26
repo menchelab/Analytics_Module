@@ -1,7 +1,8 @@
-<html>
+{% extends "layout.html" %}
+{% block content %}
 <head>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
 
  <style type="text/css">
   div.tooltip {
@@ -29,7 +30,7 @@
     </style>
 
 </head>
-<body style="background-color: transparent; -webkit-user-select: none;">
+<body>
 
 <svg width="960" height="600" style="background-color:#F8B100"></svg>
 <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -254,4 +255,4 @@ Note that all external IDs in the links table must match nodes in the layouts ta
 
 
 </body>
-</html>
+{% endblock %}

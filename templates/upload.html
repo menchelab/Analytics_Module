@@ -1,4 +1,6 @@
 <!doctype html>
+{% extends "layout.html" %}
+{% block content %}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <title>Upload new Network</title>
 <h1>Upload new Network</h1>
@@ -25,3 +27,4 @@ Note that all external IDs in the links table must match nodes in the layouts ta
   Select Labels: <input type=file name=labels multiple><br>
   <input type=submit value=Upload>
 </form>
+{% endblock %}
