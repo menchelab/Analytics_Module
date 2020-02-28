@@ -208,9 +208,9 @@ def article(namespace):
 @cross_origin()
 def get_edge(namespace):
     data = request.args
-    node_ids = data.get(node_id)
+    node_ids = data.get("node_id")
     if node_id:
-        return jsonify(Edge.for_nodelist(node_ids))
+        return jsonify(Edge.for_nodelist(node_id))
     return jsonify(Edge.all(namespace))
 
 
