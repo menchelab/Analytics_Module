@@ -668,7 +668,6 @@ def add_layout_to_db(namespace, filename, layout):
                    "".join([',"',line.split(",")[-1], '","', filename, '")']) \
                    for i , line in enumerate(layout)]
     print(layout_rows);
-
     query = """
     insert into `tmp_%s`.layouts_tmp (x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, id, namespace)
     values %s
