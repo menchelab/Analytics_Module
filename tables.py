@@ -80,7 +80,7 @@ class Node:
     @staticmethod
     def nodes_for_attribute(db_namespace, attr_id):
         query = """
-            SELECT DISTINCT node.id
+            SELECT DISTINCT nodes.id
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
             JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
@@ -652,7 +652,7 @@ def add_layout_to_db(namespace, filename, layout):
     ''' % namespace
     )
     layout_rows = [ "(" + ",".join(line.split(",")[:7]) + 
-                   "".join([',"',line.split(",")[7].split(";")[1], '","', filename, '")']) \
+                   "".join([',"',line.split(",")[7].split(";")[0], '","', filename, '")']) \
                    for line in layout]
     query = """
     insert into `tmp_%s`.layouts_tmp (x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, id, namespace)
@@ -851,7 +851,7 @@ class Upload:
             x = validate_layout(contents.split("\n"))
             if x[1] == 0:
                 print(name)
-                add_layout_to_db(namespace, name, contents.split("\n"))
+                add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
 
     def upload_edges_to_new_namespace(namespace, links_files):
         print("links_files", links_files)

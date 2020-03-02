@@ -101,7 +101,7 @@ def nodes(db_namespace):
     if random:
         return jsonify(Node.show_random(random))
     if attribute_ids:
-        return jsonify(Node.nodes_for_attribute(attribute_ids))
+        return jsonify(Node.nodes_for_attribute(db_namespace, attribute_ids))
     # TODO: handle node IDs case.
     return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
 
