@@ -175,12 +175,16 @@ def attribute_namespaces(db_namespace):
 def create_selection(db_namespace):
     if request.method == 'POST':
         data = request.form
+        selection_name = data.get("selection_name")
+        node_ids = data.get("node_ids")
         if not data:
-            data = request.get_json()
+            data = request.get_json(force=True)
+            selection_name = data["selection_name"]
+            node_ids = data["node_ids"]
     else:
         data = request.args
-    selection_name = data.get("selection_name")
-    node_ids = data.get("node_ids")
+        selection_name = data.get("selection_name")
+        node_ids = data.get("node_ids")
     if not selection_name or not node_ids:
         return jsonify({"status": "FAIL", "reason": "invalid request"})
     return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
