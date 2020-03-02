@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style type="text/css">
+</style>
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed|ZCOOL+QingKe+HuangYou&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+    <title>New York City Schools</title>
+  </head>
+  <body>
+    <div class=header>
+      <h2>THIS IS THE UNIVERSAL LAYOUT:</h2> <a href="/">Home</a> <a href="mailto:contact@example.com">Contact me</a>
+    </div>
+    <div class=canvas>
+    {% block content %}{% endblock %}
+    </div>
+    <p>&copy; 2020 The awesome DataDiVR Team</p>
+  </body>
+  
+</html>

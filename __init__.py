@@ -22,8 +22,14 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 @app.route("/")
 def hello():
-    g.user = {'username': "Jen", 'happiness': 'fleeting'}
-    return render_template('hello.html', name="jen")
+    g.namespaces = Data.summary()
+    if g.namespaces:
+        g.selected_namespace = g.namespaces[0]
+    g.subnetwork = {"nodes": [1, 2, 3, 4, 5], "edges": [[1, 2], [2, 4], [3, 5], [2, 5]]}
+    g.subnetwork2 = {}
+    g.subnetwork2["nodes"] = [{"id": str(x), "group": str(x)} for x in  g.subnetwork["nodes"]]
+    g.subnetwork2["links"] = [{"source": x[0], "target": x[1]} for x in  g.subnetwork["edges"]]
+    return render_template('dashboard_demo.html', name="jen")
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -83,7 +89,20 @@ def uploaded_file():
 @app.route("/api/namespace/summary", methods=["GET"])
 @cross_origin()
 def get_summary():
+
     return jsonify(Data.summary())
+
+
+@app.route("/api/<string:db_namespace>/subgraph",  methods=['GET'])
+@cross_origin()
+def get_subgraph(db_namespace):
+    attribute = request.args.getlist('attribute_id')
+    if not attribute:
+        return ("fail")
+    nodes = Node.nodes_for_attribute(db_namespace, attribute)
+    edges = Edge.for_nodelist(db_namespace, [node["id"] for node in nodes])
+    return jsonify({"nodes": nodes, "edges": edges})
+
 
 
 ########
@@ -154,13 +173,18 @@ def attribute_namespaces(db_namespace):
 @app.route("/api/<string:db_namespace>/selection/create", methods=['GET', 'POST'])
 @cross_origin()
 def create_selection(db_namespace):
-    print("helo!")
     if request.method == 'POST':
         data = request.form
+        selection_name = data.get("selection_name")
+        node_ids = data.get("node_ids")
+        if not data:
+            data = request.get_json(force=True)
+            selection_name = data["selection_name"]
+            node_ids = data["node_ids"]
     else:
         data = request.args
-    selection_name = data.get("selection_name")
-    node_ids = data.get("node_ids")
+        selection_name = data.get("selection_name")
+        node_ids = data.get("node_ids")
     if not selection_name or not node_ids:
         return jsonify({"status": "FAIL", "reason": "invalid request"})
     return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
@@ -184,9 +208,13 @@ def article(namespace):
 # Edge #
 ########
 
-@app.route("/api/<string:namespace>/edge")
+@app.route("/api/<string:namespace>/edge", methods=['GET'])
 @cross_origin()
 def get_edge(namespace):
+    data = request.args
+    node_ids = data.get("node_id")
+    if node_ids:
+        return jsonify(Edge.for_nodelist(node_ids))
     return jsonify(Edge.all(namespace))
 
 

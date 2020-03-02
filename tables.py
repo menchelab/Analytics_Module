@@ -79,13 +79,14 @@ class Node:
 
     @staticmethod
     def nodes_for_attribute(db_namespace, attr_id):
+        #JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
+        #    AND attribute_taxonomies.parent_id in (%s)
         query = """
-            SELECT DISTINCT nodes.id
+            SELECT DISTINCT nodes.id, nodes.name, nodes.symbol
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
-            JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
-            AND attribute_taxonomies.parent_id in (%s)
-        """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
+            AND attribute_id in (%s)
+        """ % (db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -318,11 +319,6 @@ class Attribute:
         return {"status":"OK"}
 
 
-
-
-
-
-
 class AttributeTaxonomy:
 
     @staticmethod
@@ -446,6 +442,18 @@ class Edge:
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
+
+    @staticmethod
+    def for_nodelist(namespace, nodes):
+        print(nodes)
+        query = """
+        SELECT node1_id, node2_id
+        FROM %s.edges
+        WHERe node1_id in (%s) and node2_id in (%s)
+        """ % (namespace, ",".join([str(node) for node in nodes]),  ",".join([str(node) for node in nodes]))
+        cursor = Base.execute_query(query)
+        results = cursor.fetchall()
+        return [{"source": r["node1_id"], "target": r["node2_id"]} for r in results]
 
 class Layout:
     @staticmethod
@@ -580,6 +588,8 @@ def validate_layout(layout):
     ids = {}
     #print(layout[0])
     for i, line in enumerate(layout):
+        if not line:
+            continue
         line_count += 1
         line = line.split(",")
         # Check number of columns (columns are comma-separated; commas may not be escaped in any way)
@@ -617,6 +627,7 @@ def validate_layout(layout):
         except:
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
+    print(len(layout), total_errors, bad_lines)
     return(len(layout), total_errors, bad_lines)
 
 def validate_edges(namespace, links):
@@ -652,12 +663,14 @@ def add_layout_to_db(namespace, filename, layout):
     ''' % namespace
     )
     layout_rows = [ "(" + ",".join(line.split(",")[:7]) + 
-                   "".join([',"',line.split(",")[7].split(";")[0], '","', filename, '")']) \
-                   for line in layout]
+                   "".join([',"',line.split(",")[-1], '","', filename, '")']) \
+                   for i , line in enumerate(layout)]
+    print(layout_rows);
     query = """
     insert into `tmp_%s`.layouts_tmp (x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, id, namespace)
     values %s
     """ % (namespace, ",".join(layout_rows))
+    print(query)
     cursor = Base.execute_query(query)
     if run_db_layout_validations(namespace):
         pass
@@ -734,7 +747,6 @@ def run_db_label_validations(namespace):
     FROM %s.labels l
     JOIN tmp_%s.labels_tmp tmp on l.namespace = tmp.namespace
     """ % (namespace, namespace)
-    w
     cursor = Base.execute_query(query)
     namespace_conflicts = cursor.fetchall()
     return namespace_conflicts
@@ -769,11 +781,12 @@ def write_layouts(namespace):
     """ % (namespace, namespace, namespace)
     cursor = Base.execute_query(query)
 
+
 def write_edges(namespace):
     # Namespaces
     query = """
-    INSERT INTO %s.edges
-    SELECT e1.id, e2.id
+    INSERT INTO %s.edges(node1_id, node2_id, namespace)
+    SELECT n1.id, n2.id, tmp.namespace
     FROM tmp_%s.edges_tmp tmp
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
@@ -783,8 +796,8 @@ def write_edges(namespace):
     """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
     query = """
-    INSERT INTO %s.edges
-    SELECT e2.id, e1.id
+    INSERT INTO %s.edges(node1_id, node2_id, namespace)
+    SELECT n2.id, n1.id, tmp.namespace
     FROM tmp_%s.edges_tmp tmp
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
@@ -843,7 +856,7 @@ class Upload:
 
     @staticmethod
     def upload_to_new_namespace(namespace, layout_files):
-        print(layout_files)
+        print("layout files", layout_files)
         for file in layout_files:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
