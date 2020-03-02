@@ -291,13 +291,15 @@ class Attribute:
         # Validate node IDs.
         node_ids = set(node_ids)
         query = """
-            SELECT COUNT(*) as node_count FROM %s.nodes
+            SELECT id FROM %s.nodes
             WHERE id in (%s)
         """ %(db_namespace, ",".join([str(x) for x in node_ids]))
         cursor = Base.execute_query(query)
-        count = cursor.fetchall()
-        if count[0]["node_count"] < len(node_ids):
-            return({"status": "FAIL", "reason": "invalid node IDs in query"})
+        matched_ids = {x["id"] for x in cursor.fetchall()}
+        print(matched_ids)
+        if len(matched_ids) < len(node_ids):
+            unmatched = set(node_ids) - matched_ids
+            return({"status": "FAIL", "reason": "invalid node IDs in query: %s" % ",".join([str(x) for x in unmatched])})
         query = """
             INSERT INTO %s.attributes(name, namespace)
             VALUES ("%s", "SELECTION")
