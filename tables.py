@@ -218,7 +218,7 @@ class Attribute:
     def attributes_for_node(db_namespace, node_id, attr_namespace=None):
         namespace_clause = " AND a.namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT DISTINCT a.id, a.name, a.description, a.namespace, distance
+            SELECT DISTINCT a.id, a.name, a.description, a.namespace, distance, at.value
             FROM %s.attributes a
             JOIN %s.attribute_taxonomies at ON a.id = at.parent_id
             JOIN %s.nodes_attributes na ON na.attribute_id = at.child_id
