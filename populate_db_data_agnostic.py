@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..")))
 from . import db_config
+#import db_config
 import pymysql
 import networkx as nx
 
@@ -327,7 +328,7 @@ def populate_go_taxonomy(cursor):
     '''
 
     query = '''
-    SELECT id, external_id FROM attributes where namespace != "DISEASE";
+    SELECT id, external_id FROM attributes where namespace in ("biological_process", "cellular_component", "molecular_function");
     '''
     cursor.execute(query)
     node_ids = cursor.fetchall()
@@ -382,6 +383,73 @@ def populate_ppi(cursor):
     JOIN nodes n2 ON n2.external_id = e.entrez_2  and n1.id != n2.id
     WHERE e.author != ''
     '''
+    cursor.execute(query)
+
+def populate_hp_categories(cursor):
+    query = '''
+    INSERT INTO ppi.attributes (external_id, name, namespace, description)
+    SELECT DISTINCT hp_id, hp_name, "HUMAN_PHENOTYPE", def
+    FROM HumanPhenotypes.phenotype_tree
+    WHERE is_obsolete != 'true';
+    '''
+    cursor.execute(query)
+
+def populate_genes_hp_categories(cursor):
+    query = '''
+    INSERT INTO ppi.nodes_attributes(node_id, attribute_id)
+    SELECT DISTINCT g.id, gc.id
+    FROM HumanPhenotypes.disease_gene_phenotype_all h
+    JOIN ppi.nodes g ON g.external_id = h.gene_id_entrez
+    JOIN ppi.attributes gc ON gc.external_id = h.HPO_ID
+    AND gc.namespace = "HUMAN_PHENOTYPE"
+    '''
+    cursor.execute(query)
+
+def populate_hp_taxonomy(cursor):
+    query = '''
+    SELECT hp_id, is_a
+    FROM HumanPhenotypes.phenotype_tree
+    WHERE is_obsolete != 'true';
+    '''
+    cursor.execute(query)
+    gene_tree_data = cursor.fetchall()
+
+    query = '''
+    SELECT id, external_id FROM attributes where namespace = "HUMAN_PHENOTYPE";
+    '''
+    cursor.execute(query)
+    node_ids = cursor.fetchall()
+    node_ids = {row[1]: row[0] for row in node_ids}
+
+    tree = nx.DiGraph()
+
+    for row in gene_tree_data:
+        go_id, is_a = row
+        if not is_a:
+            continue
+        parent_go_id = is_a.split(" ! ")[0]
+        tree.add_edge(parent_go_id, go_id)
+
+    edges = {}
+    def add_ancestors(n_node, o_node, dist=1):
+        ancestors = tree.in_edges(n_node)
+        for ancestor in ancestors:
+            key = "%d->%d" % (node_ids[ancestor[0]], node_ids[o_node])
+            if key not in edges:
+                edges[key] = dist
+            else:
+                edges[key] = min(dist, edges[key])
+            add_ancestors(ancestor[0], o_node, dist+1)
+
+    for node in tree.nodes:
+        key = "%d->%d" % (node_ids[node], node_ids[node])
+        edges[key] = 0
+        add_ancestors(node, node, 1)
+
+    values = ",".join(["(%s)" % ",".join(x.split("->") +  [str(edges[x]), '"GO"']) for x in edges])
+    query = '''
+    INSERT INTO attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
+    ''' % values
     cursor.execute(query)
 
 def populate_layouts(cursor):
@@ -529,8 +597,9 @@ if __name__ == '__main__':
 
     #create_tables(cursor);
     #populate_base_tables(cursor);
-    populate_layouts(cursor)
+    #populate_layouts(cursor)
     #populate_labels(cursor)
+    populate_hp_taxonomy(cursor)
 
     print("Hello!")
     cursor.close()
