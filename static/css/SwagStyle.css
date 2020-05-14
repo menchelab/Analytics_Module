@@ -21,6 +21,7 @@ img{-webkit-user-drag: none;
 	width: 40px;
 	height: 40px;
 	cursor: default;
+	-ms-touch-action: none;
   touch-action: none;
 }
 
@@ -37,34 +38,21 @@ img{-webkit-user-drag: none;
   stroke-width: 1.5px;
 }
 
-body {
-  font-family: 'Roboto Condensed',Helvetica,Arial;
-  background-color: lightsteelblue;
-}
 
-h1 {
-  font-family: 'ZCOOL QingKe HuangYou',Helvetica,Arial;
-  color:#40B9D4;
-}
 
-h2 {
-  font-family: 'ZCOOL QingKe HuangYou',Helvetica,Arial;
-  color:#DFDC00;
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus,
+.ui-button:hover,
+.ui-button:focus {
+	border: 1px solid #0f0f0f;
+	background: #0f0f0f;
+	font-weight: bold;
+	color: #ffffff;
 }
-
-.header {
-  background-image: url("/static/images/bunnynet.jpeg");
-  background-color: #40B9D4;
-  margin: auto;
-  width: 90%;
-}
-
-.canvas {
-  background-color: white;
-  margin: auto;
-  width: 90%;
-}
-
 
 /* for debugging i make the background of body and ui widget contents transparent */
 /* body { */
@@ -76,3 +64,4 @@ h2 {
   /* color: white; */
   /* background-color:rgba(0, 0, 0, 0); */
 /* } */
+

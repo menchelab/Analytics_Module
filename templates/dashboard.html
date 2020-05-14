@@ -1,0 +1,61 @@
+<!doctype html>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<script src="https://d3js.org/d3-dispatch.v1.min.js"></script>
+<script src="https://d3js.org/d3-quadtree.v1.min.js"></script>
+<script src="https://d3js.org/d3-timer.v1.min.js"></script>
+<script src="https://d3js.org/d3-force.v2.min.js"></script>
+
+<svg width="960" height="600"></svg>
+<script>
+
+var nodes = [
+  {"id": "Alice"},
+  {"id": "Bob"},
+  {"id": "Carol"}
+];
+
+var links = [
+  {"source": "Alice", "target": "Bob"},
+  {"source": "Bob", "target": "Carol"}
+];
+
+var simulation = d3.forceSimulation(nodes);
+console.log(simulation)
+simulation.tick(30)
+
+</script>
+
+
+
+
+<title>My Awesome Dashboard</title>
+<h1>My awesome dashboard is so awesome!</h1>
+<p>
+Please upload layouts, links, and labels here.
+<p>
+</p>
+Note that all external IDs in the links table must match nodes in the layouts table.
+</p>
+
+{{ g.namespaces }}
+
+<table>
+  <tbody>
+    {% for namespace in g.namespaces %}
+      <tr>
+        <td>
+           {{ namespace["namespace"] }}
+        </td>
+        <td>
+           {{ ",".join(namespace["labels"]) }}
+        </td>
+        <td>
+           {{ ",".join(namespace["layouts"]) }}
+        </td>
+      </tr>
+     {% endfor %}
+  </tbody>
+</table>
+
+
+

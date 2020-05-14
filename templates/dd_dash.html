@@ -1,0 +1,147 @@
+<!-- PUT YOUR UI ELEMENTS IN HERE AND DEFINE MAPPINGS IN MyUi.js -->
+
+<!-- HTML STARTS HERE -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+  <!-- <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" -->
+  <!-- rel = "stylesheet"> -->
+  <!-- <link href="jquery-ui.css" rel="stylesheet"> -->
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script type="text/javascript" src="{{ url_for('static', filename='js/dataDiVR_API.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/MyUi.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
+
+  <!-- add d3 for fun and profit (and for the randomwalk tab) -->
+
+
+
+</head>
+
+<body>
+
+
+
+  <div id="tabs" class="disable-select">
+    <ul>
+      <li><a href="#tabs-1"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_open.png') }}" /></a></li>
+      <li><a href="#tabs-2"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_sel.png') }}" /></a></li>
+      <li><a href="#tabs-3"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_tune.png') }}" /></a></li>
+      <li><a href="#tabs-4"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_search.png') }}" /></a></li>
+      <li><a href="#tabs-5"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_pin.png') }}" /></a></li>
+      <li><a href="#tabs-6"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_gears.png') }}" /></a></li>
+      <li><a href="#tabs-7"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_pub.png') }}" /></a></li>
+    </ul>
+
+    <div id="tabs-1">
+      <p>PROJECTS</p>
+      <select name="namespaces" id="namespaces">
+        {% for namespace in namespaces %}
+          <option value="{{namespace['namespace']}}">{{namespace['namespace']}}</option>
+        {% endfor %}
+      </select>
+      <button name="test" id="test">TEST
+      </button>
+
+    </div>
+
+    <div id="tabs-2">
+      <p>LOAD SELECTION</p>
+      <select name="selectMode" id="selectMode"></select>
+      <select name="selections" id="selections"></select>
+      <button id="LoadSelection">GO!</button>
+      <p>
+      <button id="saveSel">SAVE SELECTION</button>
+      </p>
+    </div>
+
+    <div id="tabs-3">
+      <!-- SLIDERS -->
+      <h1>SCALE</h1>
+      <div id="slider_scale"></div>
+      <h1>NODE SIZE</h1>
+      <div id="slider-node_size"></div>
+      <h1>LINK SIZE</h1>
+      <div id="slider-link_size"></div>
+      <h1>LINK TRANSPARENCY</h1>
+      <div id="slider-link_transparency"></div>
+      <h1>LIGHT</h1>
+      <div id="slider-light"></div>
+      <!-- BUTTONS -->
+      <div class="widget">
+        <button id="morph_button">MORPH</button>
+        <label for="left_handed">LEFT HANDED</label>
+        <input type="checkbox" name="left_handed" id="left_handed">
+      </div>
+
+    </div>
+    <div id="tabs-4">
+      <p>SEARCH </p>
+       <p> <select name="searchMode1" id="searchMode1"></select>
+       <button name="searchGO" id="searchGO">GO!</button>
+       &nbsp;
+       <button name="SaveSearch" id="SaveSearch">SAVE
+      </button>
+       </p>
+      <p>
+      <select name="searchAttribute1" id="searchAttribute1"></select>
+      <button name	="searchInput1" id="searchInput1">INPUT1
+      </button>
+      <input type="text" id="search_txt" name="search_txt" />
+      </p>
+
+      <p>
+        <p id="sResults">SEARCH RESULTS</p>
+      <div id="autocomp">
+       </p>
+      </div>
+    </div>
+
+    <div id="tabs-5">
+       <p id="ResultsLabel">RESULTS</p>
+      <div id="ResultList">
+    </div>
+    </div>
+    <div id="tabs-6">
+
+      <h1>
+        RESTART PROBABILITY:
+        <span type="text" id="restart_probability" readonly style="color: white; background-color: black;">0
+        </span>
+      </h1>
+      <div id="slider-restart_probability"></div>
+
+      <div class="widget">
+        <button id="start_randomwalk_button">START RANDOMWALK</button>
+        <button id="clear_randomwalk_button">CLEAR</button>
+      </div>
+
+      <!-- <svg width="512" height="600"></svg> -->
+      <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script> -->
+    </div>
+
+    <div id="tabs-7">
+      <p>PUBLICATIONS</p>
+    </div>
+  </div>
+
+
+</body>
+
+

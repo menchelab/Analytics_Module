@@ -78,8 +78,14 @@ def upload_file():
 @app.route('/uploaded_file', methods=['GET'])
 def uploaded_file():
     filename = request.args.get('filename')
-    print("g")
     return render_template('uploaded_file.html', filename=filename)
+
+@app.route('/<string:db_namespace>/search', methods=['GET'])
+def show_node(db_namespace):
+    attributes = Attribute.attributes_for_autocomplete(db_namespace, "", "SELECTION")
+    namespaces = Data.summary()
+    print(namespaces)
+    return render_template('dd_dash.html', namespaces = namespaces)
 
 
 ########
