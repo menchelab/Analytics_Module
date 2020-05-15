@@ -5,6 +5,7 @@
 // add MAPPINGS TO UI ELEMENTS HERE //
 
 $(document).ready(function () {
+  $('#menu').dropdown();
 
 
   //LOAD NAMESPACE MENU TAB 1
@@ -92,7 +93,6 @@ $(function () {
         $("#LoadSelection").click(function (event) {
             event.preventDefault();
             logger($("#selectMode").val() + " " + $("#selections").val() );
-            //ActivateVRkeyboard("test");
         });
     });
 
@@ -105,9 +105,12 @@ $(function () {
         event.preventDefault();
 
         ActivateVRkeyboard("saveSel");
-        //ue4("GetSelection","oggggoggogg");
     });
   });
+
+
+    
+
 
 
 
@@ -227,44 +230,5 @@ $(function () {
   ///////INIT HERE
 
  GetDbFileNames1();
-  console.log("running myui")
-
-
-
-
-    //drawit(input);
-
-
-
-
-
-  // INITIALIZE STUFF HERE
-  //read files and populate ui's
-
-
-
-  /*     document.getElementById("SendButton").onclick = function() {
-          postFlask("/_receive_json/", nodes)
-      };
-      document.getElementById("ReadButton").onclick = function() {
-          postFlask("/_request_json/", requestTxt)
-      }; */
-
-
-  /*     $( "#slider-6" ).slider({
-                 range:false,
-                 min: 0,
-                 max: 500,
-                 values: [250],
-
-                 slide: function( event, ui ) {
-                    // $( "#slidevalue" )
-                       //.val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-                        logger(ui.values[ 0 ] );
-                        ue4("print", ui.values[ 0 ]);
-                 }
-       }); */
-
-
 
 });
