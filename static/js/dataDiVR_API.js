@@ -400,7 +400,7 @@ function SimpleSearch(id) {
 
             }
             // Open the results tab, which is 4 when 0-indexed.
-            $('#tabs').tabs( "option", "active", 4 );
+            $('#tabs').tabs( "option", "active", 3 );
 
 
         },
