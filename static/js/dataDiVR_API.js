@@ -354,7 +354,7 @@ function GetDbSelections() {
             response.forEach(function(item)
             {
 
-                 $('#selections').append($('<option>', {value: item.name, text: item.name}));
+                 $('#selections').append($('<option>', {value: item.id, text: item.name}));
             });
             $('#selections').val( response[0].namespace);
             $("#selections").selectmenu("refresh");

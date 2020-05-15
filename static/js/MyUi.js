@@ -63,9 +63,27 @@ $(function () {
   });
 
   $('#selections').on('selectmenuselect', function () {
-    var name = $('#selections').find(':selected').text();
-    ue4("loadSelection","loadSelection");
-    logger(name);
+    var id = $('#selections').find(':selected').val();
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        //data: payload,
+        dataType: "json",
+      success: function(response) {
+        for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
+
+            createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
+
+        }
+        // Open the results tab, which is 4 when 0-indexed.
+        $('#tabs').tabs( "option", "active", 3 );
+
+      }
+
+
+    });
   });
 
 
