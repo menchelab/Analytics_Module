@@ -326,8 +326,45 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
        // $("#searchInput1").text(Bname);
       //  $("#searchInput1").attr("searchID",Bid);
         console.log(Bname + " " + Bid + " " + Parent);
+      path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute?node_id=" + Bid ;
+      $.ajax({
+          type: "GET",
+          url: path,
+          contentType: "application/json",
+          //data: payload,
+          dataType: "json",
+        success: function(response) {
+          for (var i = 0; i < 100 && i < response.length ; i++) {
+
+            createAttributeButton(response[i].name,response[i].id,"tab_info");
+
+          }
+          $('#tabs').tabs( "option", "active", 5 );
+
+        }
+      });
+  }
+    )};
+
+function createAttributeButton(name, id, Parent) {
+ //for resultList
+
+    var r=$('<input/>').attr({
+        type: "button",
+        id: id,
+        value: name
+
     });
-}
+    var p = '#' + Parent;
+    $(p).append(r);
+    $(r).button();
+    $(r).click(function() {
+       // $("#searchInput1").text(Bname);
+      //  $("#searchInput1").attr("searchID",Bid);
+        console.log(name + " " + id + " " + Parent);
+
+  }
+    )};
 
 
 function clearButtons(parent){
