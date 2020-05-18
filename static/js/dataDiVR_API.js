@@ -451,6 +451,58 @@ function SimpleSearch(id) {
 
 }
 
+function AddChild(parent, child) {
+  if(child.childnodes.length == 0) {
+    llist = $('<li>');
+    parent.append($(llist));
+    link = $('<a>', {href: '#link', text: child.name})
+    llist.append(link);
+  } else {  //(child.childnodes.length >= 1){
+      llist = $('<li>');
+      parent.append($(llist));
+      link = $('<a>', {href: '#', text: child.name})
+      llist.append(link);
+    newul = $('<ul>');
+      llist.append(newul);
+    child.childnodes.forEach(function(item) {
+      AddChild(newul, item)
+    });
+  }
+
+}
+
+function GetAttributeTaxonomy() {
+
+    path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy/20681" ;
+    console.log(path)
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        dataType: "json",
+        success: function(response) {
+          console.log("trying")
+
+        logger(response);
+          header = $('<li><a href="#">'+ response.name + '</a></li>');
+          list = $('<ul>');
+          header.append(list);
+          $("#menu-holder").append(header);
+          response.childnodes.forEach(function(item) {
+            console.log(item);
+            AddChild(list, item);
+          });
+        },
+
+        error: function(err) {
+        logger(err);
+
+        }
+    });
+//event.preventDefault();
+
+}
+
 function SaveSelectionDB(data) {
 
    payload = JSON.stringify(data);

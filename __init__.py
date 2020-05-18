@@ -166,10 +166,10 @@ def get_attribute_taxonomy(db_namespace, root_node_id):
         cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
     return dtc
 
-@app.route("/api/attribute_taxonomy/<string:db_namespace>/<int:root_node_id>", methods=['GET'])
+@app.route("/api/<string:db_namespace>/attribute_taxonomy/<int:root_node_id>", methods=['GET'])
 @cross_origin()
 def taxonomy(db_namespace, root_node_id):
-    return jsonify(Attribute.get_attribute_taxonomy(db_namespace, root_node_id))
+    return jsonify(get_attribute_taxonomy(db_namespace, root_node_id))
 
 @app.route("/api/<string:db_namespace>/attribute/namespaces", methods=["GET"])
 @cross_origin()

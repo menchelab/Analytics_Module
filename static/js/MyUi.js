@@ -230,5 +230,6 @@ $(function () {
   ///////INIT HERE
 
  GetDbFileNames1();
+  GetAttributeTaxonomy();
 
 });
