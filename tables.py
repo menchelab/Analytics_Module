@@ -5,9 +5,12 @@ import os
 from .db_config import DATABASE as dbconf
 from .table_utils.taxonomy import *
 from . import populate_db_data_agnostic
+# from db_config import DATABASE as dbconf
+# from table_utils.taxonomy import *
 import logging
 import pymysql
 import pymysql.cursors
+import random
 
 
 class Base:
@@ -72,6 +75,25 @@ class Node:
         return cursor.fetchall()
 
     @staticmethod
+    def get(db_namespace, node_ids):
+        query = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes where id in (%s)
+        """ % (db_namespace, ",".join(node_ids))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_neighbors(db_namespace, node_ids):
+        query = """
+            SELECT DISTINCT name, symbol, nodes.id FROM %s.nodes
+            JOIN %s.edges on nodes.id = edges.node1_id
+            WHERE edges.node2_id in (%s)
+        """ % (db_namespace, db_namespace, ",".join(node_ids))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+
+    @staticmethod
     def show_random(num_to_show, db_namespace):
         query = "SELECT name, symbol, id FROM %s.nodes ORDER BY RAND() LIMIT %d" % (db_namespace, num_to_show)
         cursor = Base.execute_query(query)
@@ -100,6 +122,37 @@ class Node:
         """ % (db_namespace, Base.sanitize_string(name_prefix) + '%', Base.sanitize_string(name_prefix) + '%')
         cursor = Base.execute_query(query)
         return cursor.fetchall()
+
+
+    @staticmethod
+    def random_walk(namespace, starting_nodes, restart_probability):
+        print(starting_nodes)
+        query = """
+        SELECT edges.node1_id, edges.node2_id
+        FROM %s.edges
+        """ % namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        edges = [[x["node1_id"], x["node2_id"]] for x in edges]
+        neighbors = {}
+        for edge in edges:
+            if edge[0] not in neighbors.keys():
+                neighbors[edge[0]] = [edge[1]]
+            else:
+                neighbors[edge[0]].append(edge[1])
+        visited_nodes = [0] * 20000
+        starting_node = random.choice(starting_nodes)
+
+        for i in range (100000):
+            if random.random() < restart_probability:
+                starting_node = random.choice(starting_nodes)
+            else:
+                starting_node = random.choice(neighbors[starting_node])
+            visited_nodes[starting_node] += 1
+
+        kept_values = [(i, x) for i, x in enumerate(visited_nodes) if x > 0]
+        kept_values.sort(key=lambda x: x[1], reverse=True)
+        return kept_values
 
     @staticmethod
     def search(db_namespace, clauses):
@@ -456,6 +509,18 @@ class Edge:
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         return [{"source": r["node1_id"], "target": r["node2_id"]} for r in results]
+
+    @staticmethod
+    def by_node(namespace):
+        query = """
+        SELECT node1_id AS node_id, GROUP_CONCAT(node2_id) as neighbors
+        FROM (select node1_id, node2_id from  %s.edges UNION ALL select node2_id as node1_id, node1_id as node2_id from %s.edges) tbl
+        GROUP BY 1
+        """ % (namespace, namespace)
+        print(query)
+        cursor = Base.execute_query(query)
+        results = cursor.fetchall()
+        print(results[:10])
 
 class Layout:
     @staticmethod

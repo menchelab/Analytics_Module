@@ -51,7 +51,6 @@ def upload_file():
             namespace = form["existing_namespace"]
         if not namespace:
             return "namespace fail"
-        #print(request.files.get("layouts"))
         Upload.create_new_temp_namespace(namespace)
         Upload.upload_to_new_namespace(namespace, request.files.getlist("layouts"))
         Upload.upload_edges_to_new_namespace(namespace, request.files.getlist("links"))
@@ -95,7 +94,6 @@ def show_node(db_namespace):
 @app.route("/api/namespace/summary", methods=["GET"])
 @cross_origin()
 def get_summary():
-
     return jsonify(Data.summary())
 
 
@@ -120,15 +118,28 @@ def get_subgraph(db_namespace):
 def nodes(db_namespace):
     prefix = request.args.get('prefix') or ""
     node_ids = request.args.getlist("id")
+    neighbors = request.args.get("neighbor")
     random = request.args.get('random') or None
     attribute_ids = request.args.getlist("attribute_id")
     print(node_ids)
     if random:
-        return jsonify(Node.show_random(random))
+        return jsonify(Node.show_random(random, db_namespace))
+    if node_ids:
+        return jsonify(Node.get(db_namespace, node_ids))
+    if neighbors:
+        return jsonify(Node.get_neighbors(db_namespace, neighbors))
     if attribute_ids:
         return jsonify(Node.nodes_for_attribute(db_namespace, attribute_ids))
-    # TODO: handle node IDs case.
     return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
+
+@app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET'])
+@cross_origin()
+def random_walk(db_namespace):
+    node_ids = request.args.getlist("node_id")
+    node_ids = [int(x) for x in node_ids]
+    restart_probability = request.args.get("restart_probability")
+    restart_probability = float(restart_probability)
+    return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability))
 
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
