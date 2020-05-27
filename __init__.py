@@ -118,7 +118,7 @@ def get_subgraph(db_namespace):
 def nodes(db_namespace):
     prefix = request.args.get('prefix') or ""
     node_ids = request.args.getlist("id")
-    neighbors = request.args.get("neighbor")
+    neighbors = request.args.getlist("neighbor")
     random = request.args.get('random') or None
     attribute_ids = request.args.getlist("attribute_id")
     print(node_ids)
