@@ -125,8 +125,8 @@ class Node:
 
 
     @staticmethod
-    def random_walk(namespace, starting_nodes, restart_probability):
-        print(starting_nodes)
+    def random_walk(namespace, starting_nodes, restart_probability, min_frequency):
+        num_trials = 100000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -143,14 +143,14 @@ class Node:
         visited_nodes = [0] * 20000
         starting_node = random.choice(starting_nodes)
 
-        for i in range (100000):
+        for i in range (num_trials):
             if random.random() < restart_probability:
                 starting_node = random.choice(starting_nodes)
             else:
                 starting_node = random.choice(neighbors[starting_node])
             visited_nodes[starting_node] += 1
 
-        kept_values = [(i, x) for i, x in enumerate(visited_nodes) if x > 0]
+        kept_values = [(i, 1.0*x/num_trials) for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
         kept_values.sort(key=lambda x: x[1], reverse=True)
         return kept_values
 

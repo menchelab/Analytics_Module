@@ -135,11 +135,12 @@ def nodes(db_namespace):
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET'])
 @cross_origin()
 def random_walk(db_namespace):
-    node_ids = request.args.getlist("node_id")
-    node_ids = [int(x) for x in node_ids]
+    node_ids = [int(x) for x in request.args.getlist("node_id")]
     restart_probability = request.args.get("restart_probability")
-    restart_probability = float(restart_probability)
-    return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability))
+    restart_probability = float(restart_probability or 0.9)
+    min_frequency = request.args.get("min_frequency")
+    min_frequency = float(min_frequency or 0)
+    return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
 
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
