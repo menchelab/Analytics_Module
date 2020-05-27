@@ -142,6 +142,14 @@ def random_walk(db_namespace):
     min_frequency = float(min_frequency or 0)
     return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
 
+@app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
+@cross_origin()
+def shortest_path(db_namespace):
+    from_id = request.args.get("from")
+    to_id = request.args.get("to")
+    return jsonify(Node.shortest_path(db_namespace, from_id, to_id))
+
+
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
 def search(namespace):

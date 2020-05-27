@@ -248,11 +248,12 @@ def populate_genes_diseases(cursor):
     INSERT INTO nodes_attributes(node_id, attribute_id)
     SELECT g.id, d.id
     FROM nodes g
-    JOIN Gene2Disease.gene2disease_all gd ON g.external_id = gd.entrezID
+    JOIN Gene2Disease.gene2disease gd ON g.external_id = gd.entrezID
     JOIN HumanPhenotypes.umlsmapping mp
     ON mp.disease_ID = gd.diseaseID
     JOIN attributes d
     ON right(d.external_id, length(d.external_id) - 5) = mp.identifier
+    WHERE mp.vocabulary = 'DO'
     AND d.namespace = "DISEASE"
     '''
     cursor.execute(query)

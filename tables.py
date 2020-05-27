@@ -155,6 +155,19 @@ class Node:
         return kept_values
 
     @staticmethod
+    def shortest_path(db_namespace, from_id, to_id):
+        #DB query for edges
+        query = """
+        SELECT edges.node1_id, edges.node2_id
+        FROM %s.edges
+        """ % db_namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        #Create networkx graph
+        #do the sortest path
+        return []
+
+    @staticmethod
     def search(db_namespace, clauses):
         print(clauses)
         have_name = False
