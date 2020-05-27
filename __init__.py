@@ -39,7 +39,6 @@ def allowed_file(filename):
 def upload_file():
     if request.method == 'POST':
         # check if the post request has the file part
-        print(request.data)
         #print(request.args)
         print("namespace", request.args.get("namespace"))
         form = request.form.to_dict()
@@ -135,10 +134,14 @@ def nodes(db_namespace):
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET'])
 @cross_origin()
 def random_walk(db_namespace):
-    node_ids = [int(x) for x in request.args.getlist("node_id")]
-    restart_probability = request.args.get("restart_probability")
+    if request.method == 'POST':
+        data = request.form
+    else:
+        data = request.args
+    node_ids = [int(x) for x in data.getlist("node_ids")]
+    restart_probability = data.get("restart_probability")
     restart_probability = float(restart_probability or 0.9)
-    min_frequency = request.args.get("min_frequency")
+    min_frequency = data.get("min_frequency")
     min_frequency = float(min_frequency or 0)
     return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
 
