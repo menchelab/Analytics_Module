@@ -131,7 +131,7 @@ def nodes(db_namespace):
         return jsonify(Node.nodes_for_attribute(db_namespace, attribute_ids))
     return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
 
-@app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET'])
+@app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])
 @cross_origin()
 def random_walk(db_namespace):
     if request.method == 'POST':
