@@ -1,0 +1,51 @@
+<!doctype html>
+{% extends "layout.html" %}
+{% block content %}
+<head>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+<script>
+console.log("Hello"),
+$(document).ready(function(){
+  $("#search_submit").click(function(){
+      console.log($("#namespace").val()); // Submit the form
+
+
+  const mydata = $.ajax({
+    url: '/api/ppi/node/search?subject0=name_like&object0=a&predicate1=AND&object1=100&subject1=attribute',
+    //data: {"attribute_id":"64963"},
+    success: function(x) {
+      console.log(x);
+      //var mydataz = {};
+      //mydataz["links"] = x["edges"].map(function(z) {return { "source":z.source.toString(), "target": z.target.toString() }});
+      //mydataz["nodes"] =  x["nodes"].map(function(z) { return {"id": z.id.toString(), "group": 1, "symbol": z.symbol, "name": z.name}});
+      //console.log(mydataz);
+      }
+    });
+  });
+});
+
+</script>
+</head>
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<title>Upload new Network</title>
+<h1>Upload new Network</h1>
+<p>
+Please upload layouts, links, and labels here.
+<p>
+</p>
+Note that all external IDs in the links table must match nodes in the layouts table.
+{{attribute_namespaces}}
+</p>
+
+<form method=post enctype=multipart/form-data>
+  <label for="lname">Attribute:</label><br>
+  <input type="text" id="attribute" name="attribute">
+  <select id="namespace" name="namespace">
+    {% for namespace in attribute_namespaces %}
+      <option value="{{namespace}}">{{namespace}}</option>
+    {% endfor %}
+  </select>
+  <button type="button" id="search_submit">Submit Form</button>
+</form>
+{% endblock %}
