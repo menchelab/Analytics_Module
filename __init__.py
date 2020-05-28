@@ -137,11 +137,10 @@ def random_walk(db_namespace):
     if request.method == 'POST':
         #data = request.form
         data =request.get_json()
-        print(type(data),data)
     else:
         data = request.args
 #    node_ids = data.node_ids
-    node_ids = data['node_ids']
+    node_ids = [int(x) for x in data['node_ids']]
     print(node_ids)
     #node_ids = [int(x) for x in data.getlist("node_ids")]
     restart_probability = data["restart_probability"]
