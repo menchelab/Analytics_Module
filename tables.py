@@ -313,7 +313,7 @@ class Attribute:
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT attributes.id, attributes.name, namespace
+            SELECT attributes.id, attributes.external_id, attributes.name, namespace
             FROM %s.attributes
             WHERE LOWER(attributes.name) like LOWER('%s')
             %s
@@ -325,7 +325,7 @@ class Attribute:
     def attributes_for_external_ids(db_namespace, external_ids, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT attributes.id, attributes.name, namespace
+            SELECT attributes.id, attributes.external_id, attributes.name, namespace
             FROM %s.attributes
             WHERE attributes.external_id in ('%s')
             %s
@@ -338,7 +338,7 @@ class Attribute:
     def all_attribute_names(db_namespace, attr_namespace=None):
         namespace_clause = " WHERE namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SElECT DISTINCT attributes.id, attributes.name, namespace
+            SElECT DISTINCT attributes.id, attributes.external_id, attributes.name, namespace
             FROM %s.attributes
             %s
         """ % (db_namespace, namespace_clause)
