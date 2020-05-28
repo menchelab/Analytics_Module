@@ -180,10 +180,16 @@ def search(namespace):
 def attributes_for_node(db_namespace):
     attr_namespace = request.args.get("namespace") or None
     node_id = request.args.get("node_id")
+    external_ids = request.args.getlist("external_ids")
     if node_id:
         return jsonify(Attribute.attributes_for_node(db_namespace, node_id, attr_namespace))
     prefix = request.args.get("prefix") or ""
-    return jsonify(Attribute.attributes_for_autocomplete(db_namespace, prefix, attr_namespace))
+    if prefix:
+        return jsonify(Attribute.attributes_for_autocomplete(db_namespace, prefix, attr_namespace))
+    if external_ids:
+        return jsonify(Attribute.attributes_for_external_ids(db_namespace, external_ids))
+    else:
+        return "no arguments supplied!"
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_attribute_taxonomy(db_namespace, root_node_id):

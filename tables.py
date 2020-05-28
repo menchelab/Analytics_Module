@@ -284,7 +284,7 @@ class Attribute:
     def attributes_for_node(db_namespace, node_id, attr_namespace=None):
         namespace_clause = " AND a.namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT DISTINCT a.id, a.name, a.description, a.namespace, distance, na.value
+            SELECT DISTINCT a.id, a.external_id, a.name, a.description, a.namespace, distance, na.value
             FROM %s.attributes a
             JOIN %s.attribute_taxonomies at ON a.id = at.parent_id
             JOIN %s.nodes_attributes na ON na.attribute_id = at.child_id
@@ -302,6 +302,7 @@ class Attribute:
                 attributes[result["id"]] = [""] * (result["distance"]) + [result["name"]]
         return [{"id": result["id"],
                  "full_name": "/".join(attributes[result["id"]][:-1][::-1]),
+                 "external_id": result["external_id"],
                  "name": result["name"],
                  "value": result["value"],
                  "description": result["description"]} for result in results]
@@ -315,6 +316,19 @@ class Attribute:
             WHERE LOWER(attributes.name) like LOWER('%s')
             %s
         """ % (db_namespace, Base.sanitize_string(name_prefix) + '%', namespace_clause)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def attributes_for_external_ids(db_namespace, external_ids, attr_namespace=None):
+        namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
+        query = """
+            SELECT attributes.id, attributes.name, namespace
+            FROM %s.attributes
+            WHERE attributes.external_id in ('%s')
+            %s
+        """ % (db_namespace, Base.sanitize_string("','".join(external_ids)), namespace_clause)
+        print(query)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
