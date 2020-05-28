@@ -157,6 +157,7 @@ class Node:
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges
+        print(from_id," ",to_id)
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
