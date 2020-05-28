@@ -107,8 +107,9 @@ class Node:
             SELECT DISTINCT nodes.id, nodes.name, nodes.symbol
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
-            AND attribute_id in (%s)
-        """ % (db_namespace, db_namespace, ",".join(attr_id))
+            JOIN %s.attribute_taxonomies at on at.child_id = attribute_id
+            AND parent_id in (%s)
+        """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
