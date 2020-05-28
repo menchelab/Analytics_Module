@@ -150,8 +150,8 @@ class Node:
                 starting_node = random.choice(neighbors[starting_node])
             visited_nodes[starting_node] += 1
 
-        kept_values = [(i, 1.0*x/num_trials) for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
-        kept_values.sort(key=lambda x: x[1], reverse=True)
+        kept_values = [{'id': i, 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+        kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         return kept_values
 
     @staticmethod

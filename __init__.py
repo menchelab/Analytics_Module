@@ -135,13 +135,18 @@ def nodes(db_namespace):
 @cross_origin()
 def random_walk(db_namespace):
     if request.method == 'POST':
-        data = request.form
+        #data = request.form
+        data =request.get_json()
+        print(type(data),data)
     else:
         data = request.args
-    node_ids = [int(x) for x in data.getlist("node_ids")]
-    restart_probability = data.get("restart_probability")
+#    node_ids = data.node_ids
+    node_ids = data['node_ids']
+    print(node_ids)
+    #node_ids = [int(x) for x in data.getlist("node_ids")]
+    restart_probability = data["restart_probability"]
     restart_probability = float(restart_probability or 0.9)
-    min_frequency = data.get("min_frequency")
+    min_frequency = data["min_frequency"]
     min_frequency = float(min_frequency or 0)
     return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
 
