@@ -107,8 +107,9 @@ class Node:
             SELECT DISTINCT nodes.id, nodes.name, nodes.symbol
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
-            AND attribute_id in (%s)
-        """ % (db_namespace, db_namespace, ",".join(attr_id))
+            JOIN %s.attribute_taxonomies at on at.child_id = attribute_id
+            AND parent_id in (%s)
+        """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -161,14 +162,16 @@ class Node:
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
-        LIMIT 10
         """ % db_namespace
         cursor = Base.execute_query(query)
         edges = cursor.fetchall()
-        print(edges)
-        #Create networkx graph
-        #do the sortest path
-        return []
+        G = nx.Graph()
+        for x in edges:
+            s = x['node1_id']
+            t = x['node2_id']
+            G.add_edge(s,t)
+        sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
+        return sp
 
     @staticmethod
     def search(db_namespace, clauses):
@@ -287,7 +290,7 @@ class Attribute:
     def attributes_for_node(db_namespace, node_id, attr_namespace=None):
         namespace_clause = " AND a.namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT DISTINCT a.id, a.name, a.description, a.namespace, distance, na.value
+            SELECT DISTINCT a.id, a.external_id, a.name, a.description, a.namespace, distance, na.value
             FROM %s.attributes a
             JOIN %s.attribute_taxonomies at ON a.id = at.parent_id
             JOIN %s.nodes_attributes na ON na.attribute_id = at.child_id
@@ -305,6 +308,7 @@ class Attribute:
                 attributes[result["id"]] = [""] * (result["distance"]) + [result["name"]]
         return [{"id": result["id"],
                  "full_name": "/".join(attributes[result["id"]][:-1][::-1]),
+                 "external_id": result["external_id"],
                  "name": result["name"],
                  "value": result["value"],
                  "description": result["description"]} for result in results]
@@ -313,7 +317,7 @@ class Attribute:
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SELECT attributes.id, attributes.name, namespace
+            SELECT attributes.id, attributes.external_id, attributes.name, namespace
             FROM %s.attributes
             WHERE LOWER(attributes.name) like LOWER('%s')
             %s
@@ -322,10 +326,23 @@ class Attribute:
         return cursor.fetchall()
 
     @staticmethod
+    def attributes_for_external_ids(db_namespace, external_ids, attr_namespace=None):
+        namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
+        query = """
+            SELECT attributes.id, attributes.external_id, attributes.name, namespace
+            FROM %s.attributes
+            WHERE attributes.external_id in ('%s')
+            %s
+        """ % (db_namespace, Base.sanitize_string("','".join(external_ids)), namespace_clause)
+        print(query)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
     def all_attribute_names(db_namespace, attr_namespace=None):
         namespace_clause = " WHERE namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
-            SElECT DISTINCT attributes.id, attributes.name, namespace
+            SElECT DISTINCT attributes.id, attributes.external_id, attributes.name, namespace
             FROM %s.attributes
             %s
         """ % (db_namespace, namespace_clause)
