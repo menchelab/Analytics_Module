@@ -153,7 +153,9 @@ def random_walk(db_namespace):
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
 def shortest_path(db_namespace):
+    print(request, type(request))
     from_id = request.args.get("from")
+    print(from_id)
     to_id = request.args.get("to")
     return jsonify(Node.shortest_path(db_namespace, from_id, to_id))
 

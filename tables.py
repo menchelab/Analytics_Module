@@ -160,9 +160,11 @@ class Node:
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
+        LIMIT 10
         """ % db_namespace
         cursor = Base.execute_query(query)
         edges = cursor.fetchall()
+        print(edges)
         #Create networkx graph
         #do the sortest path
         return []
