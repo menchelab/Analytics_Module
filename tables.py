@@ -158,17 +158,20 @@ class Node:
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges
+        print(from_id," ",to_id)
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
-        LIMIT 10
         """ % db_namespace
         cursor = Base.execute_query(query)
         edges = cursor.fetchall()
-        print(edges)
-        #Create networkx graph
-        #do the sortest path
-        return []
+        G = nx.Graph()
+        for x in edges:
+            s = x['node1_id']
+            t = x['node2_id']
+            G.add_edge(s,t)
+        sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
+        return sp
 
     @staticmethod
     def search(db_namespace, clauses):
