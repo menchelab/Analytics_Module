@@ -4,10 +4,10 @@
 containing network data and the VR-baased front end. It is implemented
 in Flask, a minimalist Python-based framework for web development.*
 
-# Installing and running locally (mac/linux)
+# Installing and running locally (mac/linux/windows)
 
 1. Make sure you are running Python 3 (we tested with 3.6 and up),
-   preferably in a virtual environment.
+   preferably in a virtual environment. If using Windows check out the guide at: https://flask.palletsprojects.com/en/1.1.x/installation/ for instructions about how to get a virtualenv set up right.
 1. Clone this repository `git clone git@github.com:menchelab/dataserver.git`
 1. Navigate to the repo `cd dataserver`
 1. Install dependencies `pip install -r requirements.txt`
