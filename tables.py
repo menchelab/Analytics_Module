@@ -92,6 +92,22 @@ class Node:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
+    @staticmethod
+    def get_by_external_ids(db_namespace, external_ids):
+        query = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes where external_id in (%s)
+        """ % (db_namespace, ",".join(external_ids))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_by_symbols(db_namespace, symbols):
+        query = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes where symbol in ('%s')
+        """ % (db_namespace, "','".join(symbols))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
 
     @staticmethod
     def show_random(num_to_show, db_namespace):

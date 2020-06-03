@@ -106,6 +106,7 @@ def get_subgraph(db_namespace):
     if not nodes:
         return "Fail"
     edges = Edge.for_nodelist(db_namespace, nodes)
+    nodes = Node.get(db_namespace, nodes)
     return jsonify({"nodes": nodes, "edges": edges})
 
 
@@ -118,6 +119,8 @@ def get_subgraph(db_namespace):
 @cross_origin()
 def nodes(db_namespace):
     prefix = request.args.get('prefix') or ""
+    symbols = request.args.getlist("symbols")
+    external_ids = request.args.getlist("external_ids")
     node_ids = request.args.getlist("id")
     neighbors = request.args.getlist("neighbor")
     random = request.args.get('random') or None
@@ -127,6 +130,10 @@ def nodes(db_namespace):
         return jsonify(Node.show_random(random, db_namespace))
     if node_ids:
         return jsonify(Node.get(db_namespace, node_ids))
+    if external_ids:
+        return jsonify(Node.get_by_external_ids(db_namespace, external_ids))
+    if symbols:
+        return jsonify(Node.get_by_symbols(db_namespace, symbols))
     if neighbors:
         return jsonify(Node.get_neighbors(db_namespace, neighbors))
     if attribute_ids:
