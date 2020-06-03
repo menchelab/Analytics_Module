@@ -358,7 +358,7 @@ class Attribute:
             FROM %s.attributes
             WHERE attributes.external_id in ('%s')
             %s
-        """ % (db_namespace, Base.sanitize_string("','".join(external_ids)), namespace_clause)
+        """ % (db_namespace, "','".join(external_ids), namespace_clause)
         print(query)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
