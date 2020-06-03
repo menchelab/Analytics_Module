@@ -10,6 +10,8 @@ function logger(message){
     ue4("log",message);
 }
 
+var CCResponse = ""
+
 
 
 //// FUNCTIONS CALLED BY UE4
@@ -273,7 +275,7 @@ function GetDbSearchTerms(name, namespace) {
 
             response.forEach(function(item)
             {
-                createButton(item.name,item.id,"autocomp");
+                createButton(item.name,item.id,$("#autocomp"));
                  //$('#layouts').append($('<option>', {value: item,text: item}));
             });
 
@@ -299,8 +301,7 @@ function createButton(Bname,Bid,Parent) {
         value: Bname
 
     });
-    var p = '#' + Parent;
-    $(p).append(r);
+    Parent.append(r);
     $(r).button();
     $(r).click(function() {
         $("#searchInput1").text(Bname);
@@ -456,12 +457,19 @@ function AddChild(parent, child) {
     llist = $('<li>');
     parent.append($(llist));
     link = $('<a>', {href: '#link', text: child.name})
+    // link.css("display", "inline");
+    // link.css("float", "left");
     llist.append(link);
+    // createButton(child.name, child.id, llist);
+    // $('#'+child.id).css("display", "inline")
   } else {  //(child.childnodes.length >= 1){
       llist = $('<li>');
       parent.append($(llist));
       link = $('<a>', {href: '#', text: child.name})
+      // link.css("display", "inline");
+      // link.css("float", "left");
       llist.append(link);
+    // createButton(child.name, child.id, llist);
     newul = $('<ul>');
       llist.append(newul);
     child.childnodes.forEach(function(item) {
@@ -474,6 +482,7 @@ function AddChild(parent, child) {
 function GetAttributeTaxonomy() {
 
     path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy/20681" ;
+    var ajaxTime= new Date().getTime();
     console.log(path)
     $.ajax({
         type: "GET",
@@ -481,6 +490,8 @@ function GetAttributeTaxonomy() {
         contentType: "application/json",
         dataType: "json",
         success: function(response) {
+          var totalTime = new Date().getTime()-ajaxTime;
+          console.log("total time" , totalTime)
           console.log("trying")
 
         logger(response);
@@ -489,9 +500,13 @@ function GetAttributeTaxonomy() {
           header.append(list);
           $("#menu-holder").append(header);
           response.childnodes.forEach(function(item) {
-            console.log(item);
+            // console.log(item);
             AddChild(list, item);
           });
+          $('#menu').dropdown();
+          totalTime = new Date().getTime()-ajaxTime;
+          console.log("total time" , totalTime)
+          CCResponse = response;
         },
 
         error: function(err) {

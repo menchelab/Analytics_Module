@@ -1,7 +1,5 @@
 (function($) {
 
-  console.log("I haz JS");
-
   // Reverse
   // =============================================
   $.fn.reverse = [].reverse;
