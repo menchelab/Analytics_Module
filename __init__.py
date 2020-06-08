@@ -215,6 +215,16 @@ def get_attribute_taxonomy(db_namespace, root_node_id):
 def taxonomy(db_namespace, root_node_id):
     return jsonify(get_attribute_taxonomy(db_namespace, root_node_id))
 
+@app.route("/api/<string:db_namespace>/attribute_taxonomy/", methods=['GET'])
+@cross_origin()
+def taxonomy_from_name(db_namespace):
+    taxonomy_name = request.args.get("namespace")
+    root_node_id = AttributeTaxonomy.get_root(db_namespace, taxonomy_name)
+    if root_node_id:
+        return jsonify(get_attribute_taxonomy(db_namespace, root_node_id))
+    else:
+        return jsonify([])
+
 @app.route("/api/<string:db_namespace>/attribute/namespaces", methods=["GET"])
 @cross_origin()
 def attribute_namespaces(db_namespace):

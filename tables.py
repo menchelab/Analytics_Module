@@ -339,6 +339,17 @@ class Attribute:
                  "description": result["description"]} for result in results]
 
     @staticmethod
+    def children(db_namespace, attr_id):
+        query = """
+            SELECT nodes.id, nodes.name, nodes.symbol
+            FROM %s.nodes n JOIN  %s.attribute_taxonomies at on %s.id = at.child_id
+            WHERE parent_id = %s
+        """ % (db_namespace, attr_id)
+
+
+
+
+    @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
@@ -431,6 +442,18 @@ class Attribute:
 
 
 class AttributeTaxonomy:
+    @staticmethod
+    def get_root(db_namespace, taxonomy_name):
+        query = """
+        SELECT id from %s.attributes
+        WHERE namespace = "%s"
+        AND root_node;
+        """ % (db_namespace, taxonomy_name)
+        cursor = Base.execute_query(query)
+        db_results = cursor.fetchall()
+        if len(db_results) == 0:
+            return None
+        return db_results[0]["id"]
 
     @staticmethod
     def construct_taxonomy(namespace, root_node):
