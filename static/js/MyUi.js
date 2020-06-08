@@ -5,7 +5,6 @@
 // add MAPPINGS TO UI ELEMENTS HERE //
 
 $(document).ready(function () {
-  $('#menu').dropdown();
 
 
   //LOAD NAMESPACE MENU TAB 1
@@ -15,7 +14,7 @@ $(document).ready(function () {
 
   $('#namespaces').on('selectmenuselect', function () {
     var name = $('#namespaces').find(':selected').text();
-    //logger(name);
+    //console.log(name);
     console.log(name);
     UpdateNamespace(name);
 
@@ -53,7 +52,7 @@ $(function () {
 
     $('#selectMode').on('selectmenuselect', function () {
 
-        logger($('#selectMode').val());
+        console.log($('#selectMode').val());
     });
 
 
@@ -92,7 +91,7 @@ $(function () {
     $("#LoadSelection").button();
         $("#LoadSelection").click(function (event) {
             event.preventDefault();
-            logger($("#selectMode").val() + " " + $("#selections").val() );
+            console.log($("#selectMode").val() + " " + $("#selections").val() );
         });
     });
 
@@ -148,7 +147,7 @@ $(function () {
 
     $('#searchAttribute1').on('selectmenuselect', function () {
         var name = $('#searchAttribute1').find(':selected').text();
-        logger("Attribute says: "+ name);
+        GetAttributeTaxonomy(name);
     });
 
 
@@ -212,7 +211,7 @@ $(function () {
     $("#start_randomwalk_button").click(function (event) {
       event.preventDefault();
       var span_Text = document.getElementById("restart_probability").innerText;
-      logger(span_Text)
+      console.log(span_Text)
       ue4("StartRandomWalk", span_Text);
       reloadForceLayout (inputdata1);
     });
@@ -230,6 +229,5 @@ $(function () {
   ///////INIT HERE
 
  GetDbFileNames1();
-  GetAttributeTaxonomy();
 
 });

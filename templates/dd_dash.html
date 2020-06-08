@@ -21,7 +21,6 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataDiVR_API.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/MyUi.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
 
   <!-- add d3 for fun and profit (and for the randomwalk tab) -->
 
@@ -79,7 +78,7 @@
        <button name="SaveSearch" id="SaveSearch">SAVE
       </button>
        </p>
-      <p>
+       <p id=search_bar>
       <select name="searchAttribute1" id="searchAttribute1"></select>
       <button name	="searchInput1" id="searchInput1">INPUT1
       </button>
@@ -123,19 +122,6 @@
 
 
 
-   <div class="menu root" id="menu">
-    <div class="center">
-      <div class="grid-menu">
-        <div class="column-menu-left"></div>
-        <div class="column-menu-right"><a class="menu-button" id="menu-button" href="#"></a>
-          <nav class="menu-drawer" id="menu-drawer">
-            <ul id="menu-holder">
-            </ul>
-          </nav>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="page" id="page"></div>
 
 

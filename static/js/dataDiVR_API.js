@@ -19,26 +19,26 @@ var CCResponse = ""
 ue.interface.setPayload = function(payload)
 {
     input = JSON.parse(payload);
-    logger("setPayload says:");
-    logger(input);
+    console.log("setPayload says:");
+    console.log(input);
 
 };
 
 ue.interface.getSelection = function(data)
 {
-    //logger(data);
+    //console.log(data);
    // i
     //dummydata = '{"node_ids":[12149,108],"selection_name":"somAARGrgARGagname"}';
     //input = JSON.parse(data);
-    //logger(input);
+    //console.log(input);
     SaveSelectionDB(data);
 };
 
 ue.interface.getRandomWalkResult = function(data)
 {
     input = JSON.parse(data);
-    logger("getSelection triggered");
-    logger(input);
+    console.log("getSelection triggered");
+    console.log(input);
     reloadForceLayout (input);
 };
 
@@ -49,37 +49,38 @@ ue.interface.VRkeyboard = function(payload)
 // Call function dynamically
     var fnName = input.route + "Trigger";;
     window[fnName](input);
-    logger("VRKeyboard triggered:"+ fnName);
+    console.log("VRKeyboard triggered:"+ fnName);
 };
 
 // TEXT INPUT FIELDS
 function searchInput1Trigger(data){
-    //logger(data);
+    //console.log(data);
     // SET BUTTON TEXT
+    console.log("Yep, definitely running!");
     var element = "#" + data.route;
     $(element).html(data.content);
-    //logger(data.content);
+    //console.log(data.content);
     GetDbSearchTerms(data.content,$('#searchAttribute1').val());
 
 /*     if (data.end == 1){
-        logger(data.route + " Event Fired");
+        console.log(data.route + " Event Fired");
     } */
 }
 
 function SaveSearchTrigger(data){
-    logger(data);
+    console.log(data);
     // SET BUTTON TEXT
     //var element = "#" + data.route;
     //$(element).html(data.content);
 
     if (data.end == 1){
         ue4("getSelection", data.content);
-        logger(data.route + " Event Fired");
+        console.log(data.route + " Event Fired");
     }
 }
 
 function saveSelTrigger(data){
-/*     logger(data);
+/*     console.log(data);
     var element = "#" + data.route;
     $(element).html(data.content); */
 
@@ -88,7 +89,7 @@ function saveSelTrigger(data){
         // Get Selection from UE4 somehow
         ue4("getSelection", data.content);
         //var dummySelData =  {"selection_name": data.content,"node_ids":[1,2,3,4,5,99,666,1337]};
-        logger(data.route + " Event Fired");
+        console.log(data.route + " Event Fired");
     }
 }
 
@@ -99,8 +100,8 @@ function saveSelTrigger(data){
 ue.interface.setFilenames = function(payload)
 {
     input = JSON.parse(payload);
-    //logger("setFilenames says:");
-    //logger(input.nodes[1]);
+    //console.log("setFilenames says:");
+    //console.log(input.nodes[1]);
 
         // POPULATE UI DROPDOWN
              input.nodes.forEach(function(item)
@@ -119,14 +120,14 @@ var thisNamespace;
 
 function ActivateVRkeyboard(route){
     ue4("VRkeyboard", route);
-    logger("vrkeyboard");
+    console.log("vrkeyboard");
 }
 
 ////put functions that POST to Flask HERE vvv
 function UpdateNamespace(name) {
 
     thisNamespace = dbdata.find(o => o.namespace === name);
-    logger(thisNamespace);
+    console.log(thisNamespace);
 
     GetDbSelections(); //LOAD SELECTION FILES FOR PROJECT
 }
@@ -144,10 +145,10 @@ function GetDbFileNames1() {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         dataType: "json",
         success: function(response) {
-            //logger(response);
+            //console.log(response);
         // POPULATE UI DROPDOWN
             dbdata = response.slice(); //DEEP COPY !!!!
-            //logger(dbdata)
+            //console.log(dbdata)
 
             response[0].layouts.forEach(function(item)
             {
@@ -170,7 +171,7 @@ function GetDbFileNames1() {
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -190,18 +191,18 @@ function GetDbNodeList1(name) {
         dataType: "json",
         success: function(response) {
             ue4("LoadDbNodeList", response);
-            //logger(response.["a"]);
+            //console.log(response.["a"]);
             GetDbLabelList1(name);
 
 /*             response.forEach(function(item)
             {
 
-                 logger(item["a"][0])
+                 console.log(item["a"][0])
             }); */
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -223,10 +224,10 @@ function GetDbLinkList1() {
             dataType: "json",
                 success: function(response) {
                     ue4("LoadDbLinkList", response);
-                    logger("linklist loaded" + path);
+                    console.log("linklist loaded" + path);
             },
         error: function(err) {
-        logger(err);
+        console.log(err);
         }
     });
 }
@@ -246,10 +247,10 @@ function GetDbLabelList1(name) {
             dataType: "json",
                 success: function(response) {
                     ue4("LoadDbLabelList", response);
-                    //logger(response);
+                    //console.log(response);
             },
         error: function(err) {
-        logger(err);
+        console.log(err);
         }
     });
 }
@@ -261,7 +262,7 @@ function GetDbSearchTerms(name, namespace) {
 
 
     path = dbprefix + "/api/ppi/attribute/?prefix="+ name + "&namespace="+ namespace;
-    //logger(path);
+    //console.log(path);
     if (name.length > 1){
     $.ajax({
         type: "GET",
@@ -276,14 +277,13 @@ function GetDbSearchTerms(name, namespace) {
             response.forEach(function(item)
             {
                 createButton(item.name,item.id,$("#autocomp"));
-                 //$('#layouts').append($('<option>', {value: item,text: item}));
             });
 
-        logger(response);
+        console.log(response);
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -306,10 +306,25 @@ function createButton(Bname,Bid,Parent) {
     $(r).click(function() {
         $("#searchInput1").text(Bname);
         $("#searchInput1").attr("searchID",Bid);
-        console.log(Bname + " " + Bid + " " + Parent);
     });
 }
 
+function createDropdownButton(Bname,Bid,Parent, depth, children) {
+
+    var r=$('<input/>').attr({
+        type: "button",
+        id: Bid,
+        value: "\u25BC " + Bname
+
+    });
+    Parent.append(r);
+    $(r).button();
+    $(r).click(function() {
+        $("#searchInput1").text(Bname);
+        $("#searchInput1").attr("searchID",Bid);
+        AddChildren(children, depth);
+    });
+}
 
 function createNodeButton(Bname,Bsym,Bid,Parent) {
  //for resultList
@@ -396,11 +411,11 @@ function GetDbSelections() {
             });
             $('#selections').val( response[0].namespace);
             $("#selections").selectmenu("refresh");
-        logger(response);
+        console.log(response);
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -420,7 +435,7 @@ function SimpleSearch(id) {
         success: function(response) {
 
             response.mode = $('#searchMode1').val();
-            logger(response);
+            console.log(response);
             document.getElementById("sResults").innerHTML = "FOUND " + response.nodes.length + " NODES FOR " + $('#searchInput1').text();
             ue4("LoadSelectionDB", response);
 
@@ -444,7 +459,7 @@ function SimpleSearch(id) {
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -452,36 +467,43 @@ function SimpleSearch(id) {
 
 }
 
-function AddChild(parent, child) {
+function AddChild(parent, child, depth) {
   if(child.childnodes.length == 0) {
-    llist = $('<li>');
-    parent.append($(llist));
-    link = $('<a>', {href: '#link', text: child.name})
-    // link.css("display", "inline");
-    // link.css("float", "left");
-    llist.append(link);
-    // createButton(child.name, child.id, llist);
-    // $('#'+child.id).css("display", "inline")
+    createButton(child.name, child.id, parent);
+    $('#' +child.id).attr("depth", depth)
   } else {  //(child.childnodes.length >= 1){
-      llist = $('<li>');
-      parent.append($(llist));
-      link = $('<a>', {href: '#', text: child.name})
-      // link.css("display", "inline");
-      // link.css("float", "left");
-      llist.append(link);
-    // createButton(child.name, child.id, llist);
-    newul = $('<ul>');
-      llist.append(newul);
-    child.childnodes.forEach(function(item) {
-      AddChild(newul, item)
-    });
+    createDropdownButton(child.name, child.id, parent, depth, child.childnodes);
   }
+    if (depth%2 == 0) {$('#'+child.id).css("background-color", "#3e67ff")}
 
 }
 
-function GetAttributeTaxonomy() {
+function AddChildren(children, depth) {
+  if (typeof depth == typeof undefined) {
+    console.log("undefined depth of children")
+  }
+  depth = depth || 1
+  $("#search_bar").children().each(function(i) {
+    var child = $(this)
+    var attr = $(this).attr('depth')
+    if (typeof attr !== typeof undefined && attr !== false && attr > depth) {
+       child.remove();
+    };
+  });
+  new_bar = $('<p>');
+  new_bar.addClass('taxo_display');
+  new_bar.attr("depth", depth + 1)
+  console.log("adding depth", depth);
+  $("#search_bar").append(new_bar);
+  children.forEach(function(child) {
+    AddChild(new_bar, child, depth + 1)});
+  console.log("new bar depth", new_bar.attr("depth"));
+}
 
-    path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy/20681" ;
+function GetAttributeTaxonomy(name) {
+  $(".taxo_display").remove();
+
+    path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy?namespace=" + name ;
     var ajaxTime= new Date().getTime();
     console.log(path)
     $.ajax({
@@ -492,25 +514,21 @@ function GetAttributeTaxonomy() {
         success: function(response) {
           var totalTime = new Date().getTime()-ajaxTime;
           console.log("total time" , totalTime)
-          console.log("trying")
 
-        logger(response);
-          header = $('<li><a href="#">'+ response.name + '</a></li>');
-          list = $('<ul>');
-          header.append(list);
-          $("#menu-holder").append(header);
-          response.childnodes.forEach(function(item) {
-            // console.log(item);
-            AddChild(list, item);
-          });
-          $('#menu').dropdown();
-          totalTime = new Date().getTime()-ajaxTime;
-          console.log("total time" , totalTime)
-          CCResponse = response;
+          new_bar = $('<p>');
+          new_bar.addClass('taxo_display');
+          $("#search_bar").append(new_bar)
+          if (typeof response.childnodes !== typeof undefined) {
+            response.childnodes.forEach(function(item) {
+              AddChild(new_bar, item);
+            });
+            totalTime = new Date().getTime()-ajaxTime;
+              console.log("total time" , totalTime)
+          }
         },
 
         error: function(err) {
-        logger(err);
+        console.log(err);
 
         }
     });
@@ -521,7 +539,7 @@ function GetAttributeTaxonomy() {
 function SaveSelectionDB(data) {
 
    payload = JSON.stringify(data);
-    //logger(payload);
+    //console.log(payload);
     path = dbprefix + "/api/ppi/selection/create";
     $.ajax({
         type: "POST",
@@ -532,10 +550,10 @@ function SaveSelectionDB(data) {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         success: function(response) {
 
-            logger(response);
+            console.log(response);
             },
         error: function(err) {
-        logger(err);
+        console.log(err);
         }
     });
 //event.preventDefault();
