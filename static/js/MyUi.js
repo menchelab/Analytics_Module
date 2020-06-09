@@ -148,7 +148,6 @@ $(function () {
         $(this).selectmenu("refresh");
     $(this).on('selectmenuselect', function () {
         var name = $(this).find(':selected').text();
-        console.log(id_num);
         GetAttributeTaxonomy(name, id_num);
       })
 
