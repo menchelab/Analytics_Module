@@ -133,35 +133,38 @@ $(function () {
 
 // TAB4 SEARCH
     $(function () {
-        $("#searchAttribute1").selectmenu();
-        $('#searchAttribute1').append($('<option>', {value: "DISEASE",text: "DISEASE",}));
-        $('#searchAttribute1').append($('<option>', {value: "PATHWAY",text: "PATHWAY",}));
-        $('#searchAttribute1').append($('<option>', {value: "molecular_function",text: "molecular_function",}));
-        $('#searchAttribute1').append($('<option>', {value: "cellular_component",text: "cellular_component",}));
-        $('#searchAttribute1').append($('<option>', {value: "biological_process",text: "biological_process",}));
-        $('#searchAttribute1').append($('<option>', {value: "TISSUE",text: "TISSUE",}));
-        $('#searchAttribute1').append($('<option>', {value: "HUMAN_PHENOTYPE",text: "HUMAN_PHENOTYPE",}));
-        $('#searchAttribute1').val("TISSUE");   //SET ACTIVE SLOT
-        $("#searchAttribute1").selectmenu("refresh");
-    });
+      $(".search-attribute").each( function() {
+        var id_num = $(this).attr('id').substr(-1);
+        console.log(id_num);
+        $(this).selectmenu();
+        $(this).append($('<option>', {value: "DISEASE",text: "DISEASE",}));
+        $(this).append($('<option>', {value: "PATHWAY",text: "PATHWAY",}));
+        $(this).append($('<option>', {value: "molecular_function",text: "molecular_function",}));
+        $(this).append($('<option>', {value: "cellular_component",text: "cellular_component",}));
+        $(this).append($('<option>', {value: "biological_process",text: "biological_process",}));
+        $(this).append($('<option>', {value: "TISSUE",text: "TISSUE",}));
+        $(this).append($('<option>', {value: "HUMAN_PHENOTYPE",text: "HUMAN_PHENOTYPE",}));
+        $(this).val("TISSUE");   //SET ACTIVE SLOT
+        $(this).selectmenu("refresh");
+    $(this).on('selectmenuselect', function () {
+        var name = $(this).find(':selected').text();
+        console.log(id_num);
+        GetAttributeTaxonomy(name, id_num);
+      })
 
-    $('#searchAttribute1').on('selectmenuselect', function () {
-        var name = $('#searchAttribute1').find(':selected').text();
-        GetAttributeTaxonomy(name);
+    });
     });
 
 
 
 
   $(function () {
-    $("#searchInput1").button();
-    $("#searchInput1").attr("searchID", -1);
-    $("#searchInput1").click(function (event) {
-      event.preventDefault();
-      ActivateVRkeyboard("searchInput1");
-
-      //GetDbSearchTerms("af", $('#searchAttribute1').val());
-
+    $(".search-button").each( function() {
+      $(this).button();
+      $(this).attr("searchID", -1);
+      $(this).click(function (event) {
+        event.preventDefault();
+    });
     });
   });
 

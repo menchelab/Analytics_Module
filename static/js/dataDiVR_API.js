@@ -260,6 +260,7 @@ function GetDbLabelList1(name) {
 ////Search and auto complete dynamic button factory
 function GetDbSearchTerms(name, namespace) {
   console.log("running");
+  var search_attr_id = 1;
 
 
     path = dbprefix + "/api/ppi/attribute/?prefix="+ name + "&namespace="+ namespace;
@@ -277,7 +278,7 @@ function GetDbSearchTerms(name, namespace) {
 
             response.forEach(function(item)
             {
-                createButton(item.name,item.id,$("#autocomp"));
+                createButton(item.name,item.id,$("#autocomp"), search_attr_id);
             });
 
         console.log(response);
@@ -294,7 +295,7 @@ function GetDbSearchTerms(name, namespace) {
 }
 
 
-function createButton(Bname,Bid,Parent) {
+function createButton(Bname,Bid,Parent, search_attr_id) {
 
     var r=$('<input/>').attr({
         type: "button",
@@ -305,12 +306,12 @@ function createButton(Bname,Bid,Parent) {
     Parent.append(r);
     $(r).button();
     $(r).click(function() {
-        $("#searchInput1").text(Bname);
-        $("#searchInput1").attr("searchID",Bid);
+        $("#searchInput" + search_attr_id).text(Bname);
+        $("#searchInput" + search_attr_id).attr("searchID",Bid);
     });
 }
 
-function createDropdownButton(Bname,Bid,Parent, depth, children) {
+function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id) {
 
     var r=$('<input/>').attr({
         type: "button",
@@ -321,9 +322,10 @@ function createDropdownButton(Bname,Bid,Parent, depth, children) {
     Parent.append(r);
     $(r).button();
     $(r).click(function() {
-        $("#searchInput1").text(Bname);
-        $("#searchInput1").attr("searchID",Bid);
-        AddChildren(children, depth);
+        $("#searchInput" + search_attr_id).text(Bname);
+        $("#searchInput" + search_attr_id).attr("searchID",Bid);
+      console.log(search_attr_id);
+        AddChildren(children, depth, search_attr_id);
     });
 }
 
@@ -468,18 +470,18 @@ function SimpleSearch(id) {
 
 }
 
-function AddChild(parent, child, depth) {
+function AddChild(parent, child, depth, search_attr_id) {
   if(child.childnodes.length == 0) {
-    createButton(child.name, child.id, parent);
+    createButton(child.name, child.id, parent, search_attr_id);
     $('#' +child.id).attr("depth", depth)
   } else {  //(child.childnodes.length >= 1){
-    createDropdownButton(child.name, child.id, parent, depth, child.childnodes);
+    createDropdownButton(child.name, child.id, parent, depth, child.childnodes, search_attr_id);
   }
     if (depth%2 == 0) {$('#'+child.id).css("background-color", "#3e67ff")}
 
 }
 
-function AddChildren(children, depth) {
+function AddChildren(children, depth, search_attr_id) {
   if (typeof depth == typeof undefined) {
     console.log("undefined depth of children")
   }
@@ -494,14 +496,12 @@ function AddChildren(children, depth) {
   new_bar = $('<p>');
   new_bar.addClass('taxo_display');
   new_bar.attr("depth", depth + 1)
-  console.log("adding depth", depth);
   $("#taxonomy_bar").append(new_bar);
   children.forEach(function(child) {
-    AddChild(new_bar, child, depth + 1)});
-  console.log("new bar depth", new_bar.attr("depth"));
+    AddChild(new_bar, child, depth + 1, search_attr_id)});
 }
 
-function GetAttributeTaxonomy(name) {
+function GetAttributeTaxonomy(name, search_attr_id) {
   $(".taxo_display").remove();
 
     path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy?namespace=" + name ;
@@ -521,7 +521,7 @@ function GetAttributeTaxonomy(name) {
           $("#taxonomy_bar").append(new_bar)
           if (typeof response.childnodes !== typeof undefined) {
             response.childnodes.forEach(function(item) {
-              AddChild(new_bar, item);
+              AddChild(new_bar, item, 1, search_attr_id);
             });
             totalTime = new Date().getTime()-ajaxTime;
               console.log("total time" , totalTime)
