@@ -259,6 +259,7 @@ function GetDbLabelList1(name) {
 
 ////Search and auto complete dynamic button factory
 function GetDbSearchTerms(name, namespace) {
+  console.log("running");
 
 
     path = dbprefix + "/api/ppi/attribute/?prefix="+ name + "&namespace="+ namespace;
@@ -272,7 +273,7 @@ function GetDbSearchTerms(name, namespace) {
         dataType: "json",
         success: function(response) {
 
-        clearButtons("autocomp");
+          //clearButtons("autocomp");
 
             response.forEach(function(item)
             {
@@ -483,7 +484,7 @@ function AddChildren(children, depth) {
     console.log("undefined depth of children")
   }
   depth = depth || 1
-  $("#search_bar").children().each(function(i) {
+  $("#taxonomy_bar").children().each(function(i) {
     var child = $(this)
     var attr = $(this).attr('depth')
     if (typeof attr !== typeof undefined && attr !== false && attr > depth) {
@@ -494,7 +495,7 @@ function AddChildren(children, depth) {
   new_bar.addClass('taxo_display');
   new_bar.attr("depth", depth + 1)
   console.log("adding depth", depth);
-  $("#search_bar").append(new_bar);
+  $("#taxonomy_bar").append(new_bar);
   children.forEach(function(child) {
     AddChild(new_bar, child, depth + 1)});
   console.log("new bar depth", new_bar.attr("depth"));
@@ -517,7 +518,7 @@ function GetAttributeTaxonomy(name) {
 
           new_bar = $('<p>');
           new_bar.addClass('taxo_display');
-          $("#search_bar").append(new_bar)
+          $("#taxonomy_bar").append(new_bar)
           if (typeof response.childnodes !== typeof undefined) {
             response.childnodes.forEach(function(item) {
               AddChild(new_bar, item);
