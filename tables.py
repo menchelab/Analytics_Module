@@ -93,6 +93,22 @@ class Node:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
+    @staticmethod
+    def get_by_external_ids(db_namespace, external_ids):
+        query = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes where external_id in (%s)
+        """ % (db_namespace, ",".join(external_ids))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_by_symbols(db_namespace, symbols):
+        query = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes where symbol in ('%s')
+        """ % (db_namespace, "','".join(symbols))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
 
     @staticmethod
     def show_random(num_to_show, db_namespace):
@@ -128,7 +144,7 @@ class Node:
 
     @staticmethod
     def random_walk(namespace, starting_nodes, restart_probability, min_frequency):
-        num_trials = 100000
+        num_trials = 10000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -144,15 +160,24 @@ class Node:
                 neighbors[edge[0]].append(edge[1])
         visited_nodes = [0] * 20000
         starting_node = random.choice(starting_nodes)
-
+        
+        
         for i in range (num_trials):
             if random.random() < restart_probability:
                 starting_node = random.choice(starting_nodes)
             else:
                 starting_node = random.choice(neighbors[starting_node])
             visited_nodes[starting_node] += 1
-
-        kept_values = [{'id': i, 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+            
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+        
+        
+        kept_values = [{'id': i,'symbol': d_i_name[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         return kept_values
 
@@ -315,6 +340,17 @@ class Attribute:
                  "description": result["description"]} for result in results]
 
     @staticmethod
+    def children(db_namespace, attr_id):
+        query = """
+            SELECT nodes.id, nodes.name, nodes.symbol
+            FROM %s.nodes n JOIN  %s.attribute_taxonomies at on %s.id = at.child_id
+            WHERE parent_id = %s
+        """ % (db_namespace, attr_id)
+
+
+
+
+    @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
@@ -334,7 +370,7 @@ class Attribute:
             FROM %s.attributes
             WHERE attributes.external_id in ('%s')
             %s
-        """ % (db_namespace, Base.sanitize_string("','".join(external_ids)), namespace_clause)
+        """ % (db_namespace, "','".join(external_ids), namespace_clause)
         print(query)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
@@ -407,6 +443,18 @@ class Attribute:
 
 
 class AttributeTaxonomy:
+    @staticmethod
+    def get_root(db_namespace, taxonomy_name):
+        query = """
+        SELECT id from %s.attributes
+        WHERE namespace = "%s"
+        AND root_node;
+        """ % (db_namespace, taxonomy_name)
+        cursor = Base.execute_query(query)
+        db_results = cursor.fetchall()
+        if len(db_results) == 0:
+            return None
+        return db_results[0]["id"]
 
     @staticmethod
     def construct_taxonomy(namespace, root_node):

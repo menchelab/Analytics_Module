@@ -21,7 +21,6 @@
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataDiVR_API.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/MyUi.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js') }}"></script>
 
   <!-- add d3 for fun and profit (and for the randomwalk tab) -->
 
@@ -79,18 +78,40 @@
        <button name="SaveSearch" id="SaveSearch">SAVE
       </button>
        </p>
-      <p>
-      <select name="searchAttribute1" id="searchAttribute1"></select>
-      <button name	="searchInput1" id="searchInput1">INPUT1
+       <p id=search_bar>
+    <p>
+      <select name="searchAttribute1" class="search-attribute" id="searchAttribute1"></select>
+      <button name	="searchInput1" class="search-button" id="searchInput1">INPUT1
       </button>
-      <input type="text" id="search_txt" name="search_txt" />
+    </p>
+    <p>
+      <select name="searchAttribute2" class="search-attribute" id="searchAttribute2"></select>
+      <button name	="searchInput2" class="search-button" id="searchInput2">INPUT2
+      </button>
+    </p>
+    <p>
+      <select name="searchAttribute3" class="search-attribute" id="searchAttribute3"></select>
+      <button name	="searchInput3" class="search-button" id="searchInput3">INPUT3
+      </button>
+    </p>
+    <p>
+      <select name="searchAttribute4" class="search-attribute" id="searchAttribute4"></select>
+      <button name	="searchInput4" class="search-button" id="searchInput4">INPUT4
+      </button>
+    </p>
       </p>
 
       <p>
-        <p id="sResults">SEARCH RESULTS</p>
+        <p id="sResults">SEARCH BY NAME</p>
+        Enter search term:
+      <input type="text" id="search_txt" name="search_txt" />
       <div id="autocomp">
+      </div
        </p>
-      </div>
+       <p id=taxonomy_bar_outer>
+        <p id="tex">TAXONOMY EXPLORER</p>
+        <p id=taxonomy_bar> </p>
+        </p>
     </div>
 
     <div id="tab_nodes">
@@ -123,19 +144,6 @@
 
 
 
-   <div class="menu root" id="menu">
-    <div class="center">
-      <div class="grid-menu">
-        <div class="column-menu-left"></div>
-        <div class="column-menu-right"><a class="menu-button" id="menu-button" href="#"></a>
-          <nav class="menu-drawer" id="menu-drawer">
-            <ul id="menu-holder">
-            </ul>
-          </nav>
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="page" id="page"></div>
 
 

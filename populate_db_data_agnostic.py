@@ -447,7 +447,7 @@ def populate_hp_taxonomy(cursor):
         edges[key] = 0
         add_ancestors(node, node, 1)
 
-    values = ",".join(["(%s)" % ",".join(x.split("->") +  [str(edges[x]), '"GO"']) for x in edges])
+    values = ",".join(["(%s)" % ",".join(x.split("->") +  [str(edges[x]), '"HUMAN_PHENOTYPE"']) for x in edges])
     query = '''
     INSERT INTO attribute_taxonomies (parent_id, child_id, distance, namespace) VALUES %s
     ''' % values
