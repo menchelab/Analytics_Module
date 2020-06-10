@@ -64,6 +64,12 @@ $(function () {
 
   $('#selections').on('selectmenuselect', function () {
     var id = $('#selections').find(':selected').val();
+
+    // Compute search string.
+    if ($("#searchInput1").text() != "INPUT1") {
+      input_string = input_string.concat(input_string, "predicate0=", $(search))
+    }
+
     path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
         type: "GET",
@@ -132,10 +138,9 @@ $(function () {
 
 
 // TAB4 SEARCH
-    $(function () {
+// $(function () {
       $(".search-attribute").each( function() {
         var id_num = $(this).attr('id').substr(-1);
-        console.log(id_num);
         $(this).selectmenu();
         $(this).append($('<option>', {value: "DISEASE",text: "DISEASE",}));
         $(this).append($('<option>', {value: "PATHWAY",text: "PATHWAY",}));
@@ -152,7 +157,17 @@ $(function () {
       })
 
     });
-    });
+//     });
+
+
+$(".search-predicate").each(function() {
+    $(this).selectmenu();
+    $(this).append($('<option>', {value: "AND",text: "AND",}));
+    $(this).append($('<option>', {value: "OR",text: "OR",}));
+    $(this).val("AND");   //SET ACTIVE SLOT
+    $(this).selectmenu("refresh");
+  });
+$("#searchPredicate1-button").hide();
 
 
 
@@ -166,6 +181,27 @@ $(function () {
     });
     });
   });
+
+  for (var i = 2; i <= 4; i++) {
+  $("#showInput" + i).click(function(event) {
+      event.preventDefault();
+      $(this).hide();
+      console.log("search_field_" + $(this).attr("id").substr(-1));
+    $("#search_field_" + $(this).attr("id").substr(-1)).show();
+
+  });
+  };
+
+  for (var i = 2; i <= 4; i++) {
+  $("#hideInput" + i).click(function(event) {
+      event.preventDefault();
+      $("#showInput" + $(this).attr("id").substr(-1)).show();
+    console.log($("#searchAttribute" + $(this).attr("id").substr(-1)));
+      $("#searchInput" + $(this).attr("id").substr(-1)).text('INPUT'+$(this).attr("id").substr(-1))
+    $("#search_field_" + $(this).attr("id").substr(-1)).hide();
+
+  });
+  };
 
   //desktop version input field1
    $("#search_txt").keyup(function(){

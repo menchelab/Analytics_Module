@@ -427,8 +427,23 @@ function GetDbSelections() {
 }
 
 function SimpleSearch(id) {
-
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
+    
+    var input_string = ""
+    for (var i = 1; i <=4; i++) {
+      if ($("#searchInput" + i).text() != "INPUT" + i) {
+        console.log("INPUT" + i);
+        console.log($("#searchInput" + i).text());
+        console.log($("#searchInput" + i).text() == "INPUT" + i);
+        input_string = input_string.concat(
+          "predicate", (i-1), "=",
+          $("#searchPredicate" + i).val(),
+          "&subject", i-1, "=attribute&object", i-1, "=",
+          $("#searchInput" + i).attr("searchID"), "&"
+        )
+      }
+    }
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?" + input_string
+  console.log(path);
         $.ajax({
         type: "GET",
         url: path,
