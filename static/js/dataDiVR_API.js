@@ -256,11 +256,22 @@ function GetDbLabelList1(name) {
 }
 
 
+function setActiveSearchRow(row_num) {
+  console.log("setting");
+  if($("#search_bar").attr("active_row") != row_num) {
+    $("#search_bar").attr("active_row", row_num)
+    clearButtons("autocomp");
+    clearButtons("taxonomy_bar");
+    $('#search_txt').val("")
+  }
+}
+
+
 
 ////Search and auto complete dynamic button factory
-function GetDbSearchTerms(name, namespace) {
+function GetDbSearchTerms(name, namespace, search_attr_id) {
   console.log("running");
-  var search_attr_id = 1;
+  // var search_attr_id = 1;
 
 
     path = dbprefix + "/api/ppi/attribute/?prefix="+ name + "&namespace="+ namespace;

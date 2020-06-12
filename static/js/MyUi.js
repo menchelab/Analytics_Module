@@ -186,10 +186,10 @@ $("#searchPredicate1-button").hide();
   $("#showInput" + i).click(function(event) {
       event.preventDefault();
       $(this).hide();
-      console.log("search_field_" + $(this).attr("id").substr(-1));
     $("#search_field_" + $(this).attr("id").substr(-1)).show();
+    setActiveSearchRow($(this).attr("id").substr(-1))
 
-  });
+    });
   };
 
   for (var i = 2; i <= 4; i++) {
@@ -204,8 +204,14 @@ $("#searchPredicate1-button").hide();
   };
 
   //desktop version input field1
+    setActiveSearchRow(1);
+
    $("#search_txt").keyup(function(){
-       GetDbSearchTerms($(this).val(),$('#searchAttribute1').val());
+      console.log("clicked", $("#search_bar").attr("active_row"));
+     GetDbSearchTerms($(this).val(),
+       $('#searchAttribute' + $("#search_bar").attr("active_row")).val(),
+      $("#search_bar").attr("active_row")
+     );
    });
 
 
@@ -221,14 +227,18 @@ $("#searchPredicate1-button").hide();
 
     });
 
-
+  for (var i = 1; i <= 4; i++) {
+    $('#search_field_' + i).click(function() {
+      setActiveSearchRow($(this).attr("id").substr(-1))
+    });
+  }
 
 
  $(function () {
     $("#searchGO").button();
     $("#searchGO").click(function (event) {
         event.preventDefault();
-        var id = $("#searchInput1").attr("searchID");
+        var id = $("#searchInput" + $("#search_bar").attr("active_row")).attr("searchID");
 
         SimpleSearch(id);
     });
