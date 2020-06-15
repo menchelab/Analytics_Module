@@ -237,7 +237,7 @@ $("#searchPredicate1-button").hide();
       event.preventDefault();
       var span_Text = document.getElementById("restart_probability").innerText;
       console.log(span_Text)
-      ue4("StartRandomWalk", span_Text);
+      // ue4("StartRandomWalk", span_Text);
       reloadForceLayout (inputdata1);
     });
   });
@@ -253,6 +253,6 @@ $("#searchPredicate1-button").hide();
 
   ///////INIT HERE
 
- GetDbFileNames1();
+ GetDbFileNames();
 
 });

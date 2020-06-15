@@ -10,9 +10,6 @@ function logger(message){
     ue4("log",message);
 }
 
-//// FUNCTIONS CALLED BY UE4
-
-
 var dbdata;
 var thisNamespace;
 
@@ -27,8 +24,17 @@ function UpdateNamespace(name) {
     GetDbSelections(); //LOAD SELECTION FILES FOR PROJECT
 }
 
-function GetDbFileNames1() {
+function GetDbFileNames() {
 
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
     path = dbprefix + '/api/namespace/summary' ;
     $.ajax({
         type: "GET",
@@ -67,82 +73,6 @@ function GetDbFileNames1() {
     });
 //event.preventDefault();
 
-}
-
-
-function GetDbNodeList1(name) {
-
-    path = dbprefix + "/api/" + thisNamespace.namespace + "/layout/"  + name;
-    $.ajax({
-        type: "GET",
-        url: path,
-        contentType: "application/json",
-        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-        dataType: "json",
-        success: function(response) {
-            ue4("LoadDbNodeList", response);
-            //console.log(response.["a"]);
-            GetDbLabelList1(name);
-
-/*             response.forEach(function(item)
-            {
-
-                 console.log(item["a"][0])
-            }); */
-        },
-
-        error: function(err) {
-        console.log(err);
-
-        }
-    });
-//event.preventDefault();
-
-}
-
-
-
-function GetDbLinkList1() {
-
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/edge";
-        $.ajax({
-            type: "GET",
-            url: path,
-            contentType: "application/json",
-
-            headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-            dataType: "json",
-                success: function(response) {
-                    ue4("LoadDbLinkList", response);
-                    console.log("linklist loaded" + path);
-            },
-        error: function(err) {
-        console.log(err);
-        }
-    });
-}
-
-
-
-
-function GetDbLabelList1(name) {
-
-
-    path = dbprefix + "/api/" + thisNamespace.namespace + "/label/" + name;
-        $.ajax({
-            type: "GET",
-            url: path,
-            contentType: "application/json",
-            headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-            dataType: "json",
-                success: function(response) {
-                    ue4("LoadDbLabelList", response);
-                    //console.log(response);
-            },
-        error: function(err) {
-        console.log(err);
-        }
-    });
 }
 
 
@@ -190,11 +120,8 @@ function GetDbSearchTerms(name, namespace, search_attr_id) {
 
         }
     });
-//event.preventDefault();
     }
-
 }
-
 
 function createButton(Bname,Bid,Parent, search_attr_id) {
 
