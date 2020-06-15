@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
 var dbprefix = ""
-//var dbprefix = ' http://127.0.0.1:1337';
+var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -418,6 +418,7 @@ function GetDbSelections() {
 
 
 
+            console.log(response);
             response.forEach(function(item)
             {
 
@@ -429,6 +430,7 @@ function GetDbSelections() {
         },
 
         error: function(err) {
+          console.log("whoops, error");
         console.log(err);
 
         }
@@ -530,14 +532,15 @@ function AddChildren(children, depth, search_attr_id) {
 function GetAttributeTaxonomy(name, search_attr_id) {
   $(".taxo_display").remove();
 
-    path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy?namespace=" + name ;
+  path = dbprefix + "/api/"+ "ppi" + "/attribute_taxonomy/?namespace=" + name ;
     var ajaxTime= new Date().getTime();
     console.log(path)
     $.ajax({
         type: "GET",
         url: path,
         contentType: "application/json",
-        dataType: "json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+       dataType: "json",
         success: function(response) {
           var totalTime = new Date().getTime()-ajaxTime;
           console.log("total time" , totalTime)
