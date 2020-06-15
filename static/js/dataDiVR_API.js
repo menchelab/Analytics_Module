@@ -10,118 +10,10 @@ function logger(message){
     ue4("log",message);
 }
 
-var CCResponse = ""
-
-
-
-//// FUNCTIONS CALLED BY UE4
-
-ue.interface.setPayload = function(payload)
-{
-    input = JSON.parse(payload);
-    console.log("setPayload says:");
-    console.log(input);
-
-};
-
-ue.interface.getSelection = function(data)
-{
-    //console.log(data);
-   // i
-    //dummydata = '{"node_ids":[12149,108],"selection_name":"somAARGrgARGagname"}';
-    //input = JSON.parse(data);
-    //console.log(input);
-    SaveSelectionDB(data);
-};
-
-ue.interface.getRandomWalkResult = function(data)
-{
-    input = JSON.parse(data);
-    console.log("getSelection triggered");
-    console.log(input);
-    reloadForceLayout (input);
-};
-
-// call a function named route + "Trigger" defined below for each input field
-ue.interface.VRkeyboard = function(payload)
-{
-    input = JSON.parse(payload);
-// Call function dynamically
-    var fnName = input.route + "Trigger";;
-    window[fnName](input);
-    console.log("VRKeyboard triggered:"+ fnName);
-};
-
-// TEXT INPUT FIELDS
-function searchInput1Trigger(data){
-    //console.log(data);
-    // SET BUTTON TEXT
-    console.log("Yep, definitely running!");
-    var element = "#" + data.route;
-    $(element).html(data.content);
-    //console.log(data.content);
-    GetDbSearchTerms(data.content,$('#searchAttribute1').val());
-
-/*     if (data.end == 1){
-        console.log(data.route + " Event Fired");
-    } */
-}
-
-function SaveSearchTrigger(data){
-    console.log(data);
-    // SET BUTTON TEXT
-    //var element = "#" + data.route;
-    //$(element).html(data.content);
-
-    if (data.end == 1){
-        ue4("getSelection", data.content);
-        console.log(data.route + " Event Fired");
-    }
-}
-
-function saveSelTrigger(data){
-/*     console.log(data);
-    var element = "#" + data.route;
-    $(element).html(data.content); */
-
-
-    if (data.end == 1){  //USER PRESST ENTER KEY
-        // Get Selection from UE4 somehow
-        ue4("getSelection", data.content);
-        //var dummySelData =  {"selection_name": data.content,"node_ids":[1,2,3,4,5,99,666,1337]};
-        console.log(data.route + " Event Fired");
-    }
-}
-
-
-
-
-
-ue.interface.setFilenames = function(payload)
-{
-    input = JSON.parse(payload);
-    //console.log("setFilenames says:");
-    //console.log(input.nodes[1]);
-
-        // POPULATE UI DROPDOWN
-             input.nodes.forEach(function(item)
-            {
-                  $('#selections').append($('<option>', {
-                  value: 1,
-                  text: item}));
-            });
-
-};
-
 var dbdata;
 var thisNamespace;
 
-//// Functions that POST to UE4 //////
 
-function ActivateVRkeyboard(route){
-    ue4("VRkeyboard", route);
-    console.log("vrkeyboard");
-}
 
 ////put functions that POST to Flask HERE vvv
 function UpdateNamespace(name) {
@@ -132,23 +24,27 @@ function UpdateNamespace(name) {
     GetDbSelections(); //LOAD SELECTION FILES FOR PROJECT
 }
 
-function GetDbFileNames1() {
+function GetDbFileNames() {
 
-    //var requestTxt = {"name": name};
-    //payload = JSON.stringify(requestTxt)
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
+  console.log("getting filenames");
     path = dbprefix + '/api/namespace/summary' ;
     $.ajax({
         type: "GET",
         url: path,
         contentType: "application/json",
-        //data: payload,
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         dataType: "json",
         success: function(response) {
-            //console.log(response);
         // POPULATE UI DROPDOWN
             dbdata = response.slice(); //DEEP COPY !!!!
-            //console.log(dbdata)
 
             response[0].layouts.forEach(function(item)
             {
@@ -177,82 +73,6 @@ function GetDbFileNames1() {
     });
 //event.preventDefault();
 
-}
-
-
-function GetDbNodeList1(name) {
-
-    path = dbprefix + "/api/" + thisNamespace.namespace + "/layout/"  + name;
-    $.ajax({
-        type: "GET",
-        url: path,
-        contentType: "application/json",
-        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-        dataType: "json",
-        success: function(response) {
-            ue4("LoadDbNodeList", response);
-            //console.log(response.["a"]);
-            GetDbLabelList1(name);
-
-/*             response.forEach(function(item)
-            {
-
-                 console.log(item["a"][0])
-            }); */
-        },
-
-        error: function(err) {
-        console.log(err);
-
-        }
-    });
-//event.preventDefault();
-
-}
-
-
-
-function GetDbLinkList1() {
-
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/edge";
-        $.ajax({
-            type: "GET",
-            url: path,
-            contentType: "application/json",
-
-            headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-            dataType: "json",
-                success: function(response) {
-                    ue4("LoadDbLinkList", response);
-                    console.log("linklist loaded" + path);
-            },
-        error: function(err) {
-        console.log(err);
-        }
-    });
-}
-
-
-
-
-function GetDbLabelList1(name) {
-
-
-    path = dbprefix + "/api/" + thisNamespace.namespace + "/label/" + name;
-        $.ajax({
-            type: "GET",
-            url: path,
-            contentType: "application/json",
-            headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
-            dataType: "json",
-                success: function(response) {
-                    ue4("LoadDbLabelList", response);
-                    //console.log(response);
-            },
-        error: function(err) {
-        console.log(err);
-        }
-    });
 }
 
 
@@ -300,11 +120,8 @@ function GetDbSearchTerms(name, namespace, search_attr_id) {
 
         }
     });
-//event.preventDefault();
     }
-
 }
-
 
 function createButton(Bname,Bid,Parent, search_attr_id) {
 

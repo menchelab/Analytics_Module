@@ -8,23 +8,20 @@ $(document).ready(function () {
 
 
   //LOAD NAMESPACE MENU TAB 1
-  $(function () {
-    $("#namespaces").selectmenu();
-  });
+  $("#namespaces").selectmenu();
 
   $('#namespaces').on('selectmenuselect', function () {
     var name = $('#namespaces').find(':selected').text();
     //console.log(name);
     console.log(name);
     UpdateNamespace(name);
-
   });
 
 $(function () {
     $("#test").button();
     $("#test").click(function (event) {
         event.preventDefault();
-        console.log("oggggoggogg");
+        console.log("This button does literally nothing!");
     });
 });
 
@@ -39,7 +36,6 @@ $(function () {
   //selection menu tab-2
 
    $(function () {
-        console.log("appending optiomns");
         $("#selectMode").selectmenu();
         $('#selectMode').append($('<option>', {value: "NEW",text: "NEW",}));
         $('#selectMode').append($('<option>', {value: "ADD",text: "ADD",}));
@@ -51,16 +47,14 @@ $(function () {
     });
 
     $('#selectMode').on('selectmenuselect', function () {
-
-        console.log($('#selectMode').val());
+      // Do something useful I guess
+      console.log($('#selectMode').val());
     });
 
 
 
 
-  $(function () {
-    $("#selections").selectmenu();
-  });
+  $("#selections").selectmenu();
 
   $('#selections').on('selectmenuselect', function () {
     var id = $('#selections').find(':selected').val();
@@ -70,25 +64,21 @@ $(function () {
       input_string = input_string.concat(input_string, "predicate0=", $(search))
     }
 
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search/?subject0=attribute&object0=" + id ;
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
         type: "GET",
         url: path,
         contentType: "application/json",
         //data: payload,
         dataType: "json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
       success: function(response) {
         for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
-
             createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
-
         }
         // Open the results tab, which is 4 when 0-indexed.
         $('#tabs').tabs( "option", "active", 3 );
-
       }
-
-
     });
   });
 
@@ -101,23 +91,13 @@ $(function () {
         });
     });
 
-
-
-
   $(function () {
     $("#saveSel").button();
     $("#saveSel").click(function (event) {
-        event.preventDefault();
-
-        ActivateVRkeyboard("saveSel");
+      event.preventDefault();
+      console.log("do something useful");
     });
   });
-
-
-    
-
-
-
 
   // SLIDERS FOR RANDOMWALK tab-6
 
@@ -170,8 +150,6 @@ $(".search-predicate").each(function() {
 $("#searchPredicate1-button").hide();
 
 
-
-
   $(function () {
     $(".search-button").each( function() {
       $(this).button();
@@ -213,7 +191,6 @@ $("#searchPredicate1-button").hide();
       $("#search_bar").attr("active_row")
      );
    });
-
 
 
     $(function () {
@@ -260,7 +237,7 @@ $("#searchPredicate1-button").hide();
       event.preventDefault();
       var span_Text = document.getElementById("restart_probability").innerText;
       console.log(span_Text)
-      ue4("StartRandomWalk", span_Text);
+      // ue4("StartRandomWalk", span_Text);
       reloadForceLayout (inputdata1);
     });
   });
@@ -276,6 +253,6 @@ $("#searchPredicate1-button").hide();
 
   ///////INIT HERE
 
- GetDbFileNames1();
+ GetDbFileNames();
 
 });
