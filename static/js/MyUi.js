@@ -70,7 +70,7 @@ $(function () {
       input_string = input_string.concat(input_string, "predicate0=", $(search))
     }
 
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search/?subject0=attribute&object0=" + id ;
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
         type: "GET",
         url: path,
