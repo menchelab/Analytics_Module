@@ -64,7 +64,13 @@ $(function () {
 
   $('#selections').on('selectmenuselect', function () {
     var id = $('#selections').find(':selected').val();
-    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
+
+    // Compute search string.
+    if ($("#searchInput1").text() != "INPUT1") {
+      input_string = input_string.concat(input_string, "predicate0=", $(search))
+    }
+
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search/?subject0=attribute&object0=" + id ;
     $.ajax({
         type: "GET",
         url: path,
@@ -132,10 +138,9 @@ $(function () {
 
 
 // TAB4 SEARCH
-    $(function () {
+// $(function () {
       $(".search-attribute").each( function() {
         var id_num = $(this).attr('id').substr(-1);
-        console.log(id_num);
         $(this).selectmenu();
         $(this).append($('<option>', {value: "DISEASE",text: "DISEASE",}));
         $(this).append($('<option>', {value: "PATHWAY",text: "PATHWAY",}));
@@ -152,7 +157,17 @@ $(function () {
       })
 
     });
-    });
+//     });
+
+
+$(".search-predicate").each(function() {
+    $(this).selectmenu();
+    $(this).append($('<option>', {value: "AND",text: "AND",}));
+    $(this).append($('<option>', {value: "OR",text: "OR",}));
+    $(this).val("AND");   //SET ACTIVE SLOT
+    $(this).selectmenu("refresh");
+  });
+$("#searchPredicate1-button").hide();
 
 
 
@@ -167,9 +182,36 @@ $(function () {
     });
   });
 
+  for (var i = 2; i <= 4; i++) {
+  $("#showInput" + i).click(function(event) {
+      event.preventDefault();
+      $(this).hide();
+    $("#search_field_" + $(this).attr("id").substr(-1)).show();
+    setActiveSearchRow($(this).attr("id").substr(-1))
+
+    });
+  };
+
+  for (var i = 2; i <= 4; i++) {
+  $("#hideInput" + i).click(function(event) {
+      event.preventDefault();
+      $("#showInput" + $(this).attr("id").substr(-1)).show();
+    console.log($("#searchAttribute" + $(this).attr("id").substr(-1)));
+      $("#searchInput" + $(this).attr("id").substr(-1)).text('INPUT'+$(this).attr("id").substr(-1))
+    $("#search_field_" + $(this).attr("id").substr(-1)).hide();
+
+  });
+  };
+
   //desktop version input field1
+    setActiveSearchRow(1);
+
    $("#search_txt").keyup(function(){
-       GetDbSearchTerms($(this).val(),$('#searchAttribute1').val());
+      console.log("clicked", $("#search_bar").attr("active_row"));
+     GetDbSearchTerms($(this).val(),
+       $('#searchAttribute' + $("#search_bar").attr("active_row")).val(),
+      $("#search_bar").attr("active_row")
+     );
    });
 
 
@@ -185,14 +227,18 @@ $(function () {
 
     });
 
-
+  for (var i = 1; i <= 4; i++) {
+    $('#search_field_' + i).click(function() {
+      setActiveSearchRow($(this).attr("id").substr(-1))
+    });
+  }
 
 
  $(function () {
     $("#searchGO").button();
     $("#searchGO").click(function (event) {
         event.preventDefault();
-        var id = $("#searchInput1").attr("searchID");
+        var id = $("#searchInput" + $("#search_bar").attr("active_row")).attr("searchID");
 
         SimpleSearch(id);
     });
