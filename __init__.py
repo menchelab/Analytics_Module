@@ -14,7 +14,7 @@ from werkzeug.contrib.cache import SimpleCache
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-cors = CORS(app)
+cors = CORS(app, send_wildcard=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 cache = SimpleCache()
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -198,6 +198,8 @@ def attributes_for_node(db_namespace):
         return jsonify(Attribute.attributes_for_autocomplete(db_namespace, prefix, attr_namespace))
     if external_ids:
         return jsonify(Attribute.attributes_for_external_ids(db_namespace, external_ids))
+    if attr_namespace:
+        return jsonify(Attribute.all_attribute_names(db_namespace, attr_namespace))
     else:
         return "no arguments supplied!"
 
