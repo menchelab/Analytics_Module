@@ -26,15 +26,6 @@ function UpdateNamespace(name) {
 
 function GetDbFileNames() {
 
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
-  console.log("getting filenames");
     path = dbprefix + '/api/namespace/summary' ;
     $.ajax({
         type: "GET",
@@ -77,7 +68,7 @@ function GetDbFileNames() {
 
 
 function setActiveSearchRow(row_num) {
-  console.log("setting");
+  console.log("setting " + row_num);
   if($("#search_bar").attr("active_row") != row_num) {
     $("#search_bar").attr("active_row", row_num)
     clearButtons("autocomp");

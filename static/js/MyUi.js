@@ -174,6 +174,8 @@ $("#searchPredicate1-button").hide();
   $("#hideInput" + i).click(function(event) {
       event.preventDefault();
       $("#showInput" + $(this).attr("id").substr(-1)).show();
+      setActiveSearchRow($(this).attr("id").substr(-1) - 1)
+
     console.log($("#searchAttribute" + $(this).attr("id").substr(-1)));
       $("#searchInput" + $(this).attr("id").substr(-1)).text('INPUT'+$(this).attr("id").substr(-1))
     $("#search_field_" + $(this).attr("id").substr(-1)).hide();
@@ -205,7 +207,10 @@ $("#searchPredicate1-button").hide();
     });
 
   for (var i = 1; i <= 4; i++) {
-    $('#search_field_' + i).click(function() {
+    $('#SearchPredicate' + i).click(function() {
+      setActiveSearchRow($(this).attr("id").substr(-1))
+    });
+    $('#SearchAttribute' + i).click(function() {
       setActiveSearchRow($(this).attr("id").substr(-1))
     });
   }
