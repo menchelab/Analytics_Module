@@ -435,6 +435,11 @@ class Attribute:
         cursor = Base.execute_query(query)
         attr_id = cursor.fetchone()["id"]
         query = """
+            INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
+            VALUES (%d, %d, 0, "SELECTION")
+        """ % (db_namespace, attr_id, attr_id)
+        cursor = Base.execute_query(query)
+        query = """
             INSERT INTO %s.nodes_attributes(node_id, attribute_id)
             VALUES %s
         """ %(db_namespace, ",".join(['(%s, %d)' % (x, attr_id) for x in node_ids]))
