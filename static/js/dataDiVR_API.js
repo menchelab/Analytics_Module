@@ -13,6 +13,7 @@ function logger(message){
 var dbdata;
 var thisNamespace;
 var mySelection = [];
+var mySelectionName = "";
 
 
 
@@ -286,9 +287,7 @@ function SimpleSearch(id) {
               createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
             }
             mySelection = mySelection.concat(response.nodes);
-            for (var i = 0; i < mySelection.length; i++) {
-              createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"shopping_cart");
-            }
+            PopulateShoppingCart();
             // Open the results tab, which is 4 when 0-indexed.
             $('#tabs').tabs( "option", "active", 3 );
 
@@ -373,6 +372,8 @@ function GetAttributeTaxonomy(name, search_attr_id) {
 }
 
 function SaveSelectionDB(data) {
+  console.log(JSON.stringify(data));
+  return;
 
    payload = JSON.stringify(data);
     //console.log(payload);
@@ -393,4 +394,23 @@ function SaveSelectionDB(data) {
         }
     });
 //event.preventDefault();
+}
+
+function PopulateShoppingCart() {
+  $("#shopping_cart_inner").empty();
+  if (mySelection.length == 0) {
+    mySelectionName = '';
+    $('#selection_name_button').prop('disabled',true).css('opacity', 0.5);
+    $('#selection_name_input').empty().css('opacity', 0.5);
+    return;
+  }
+  console.log("here", mySelectionName);
+  $('#selection_name_button').prop('disabled', false).css('opacity', 1.0);
+  $('#selection_name_input').val(mySelectionName).css('opacity', 1.0);
+  for (var i = 0; i < mySelection.length; i++) {
+    console.log(mySelection[i].name);
+    createNodeButton(mySelection[i].name,
+      mySelection[i].symbol,mySelection[i].node_id,
+      "shopping_cart_inner");
+  }
 }

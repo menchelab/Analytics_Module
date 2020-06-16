@@ -60,6 +60,7 @@ $(function () {
 
   $('#selections').on('selectmenuselect', function () {
     var id = $('#selections').find(':selected').val();
+    const name = $('#selections').find(':selected').text();
 
     path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
@@ -71,9 +72,8 @@ $(function () {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
       success: function(response) {
         mySelection = response.nodes;
-        for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
-            createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"shopping_cart");
-        }
+        mySelectionName = name;
+        PopulateShoppingCart();
         // Open the results tab, which is 4 when 0-indexed.
         $('#tabs').tabs( "option", "active", 3 );
       }
@@ -246,6 +246,16 @@ $("#searchPredicate1-button").hide();
       ue4("ClearRandomWalk", "bla");
       clearForceLayout (inputdata);
     });
+  });
+
+  $("#clear_cart").button();
+  $("#save_cart").button();
+  $("#clear_cart").click(function (event) {
+    mySelection = [];
+    PopulateShoppingCart();
+  });
+  $("#save_cart").click(function (event) {
+    SaveSelectionDB({"selection_name": $('#selection_name_input').val(), "node_ids": mySelection.map(item => item.node_id)});
   });
 
   ///////INIT HERE

@@ -121,7 +121,7 @@
        <p id="ResultsLabel">RESULTS</p>
       <p>
         <select name="searchMode1" id="searchMode1" style="display: none;">
-          <option value="NEW">Create new selection</option>
+          <option value="NEW">Start new selection</option>
           <option value="ADD">Add to current selection</option>
           <option value="SUB">Subtract from existing selection</option>
         </select>
@@ -161,6 +161,13 @@
             src="{{ url_for('static', filename='img/active_open.png') }}" /></a></li>
     </ul>
   <div class="shopping_cart" id="shopping_cart">
+    <div class="shopping_cart_controls" id="shopping_cart_controls">
+      <button id="clear_cart">Clear</button>
+      <button id="save_cart">Save</button>
+      <input id="selection_name_input" />
+    </div>  <!-- #shopping_cart_controls -->
+    <div class="shopping_cart_inner" id="shopping_cart_inner">
+  </div>  <!-- #shopping_cart_inner -->
   </div>  <!-- #shopping_cart -->
   </div>  <!-- #right -->
   </div>  <!-- #container -->
