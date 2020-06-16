@@ -32,6 +32,8 @@
 
 
 
+  <div id="container">
+  <div id="left">
   <div id="tabs" class="disable-select">
     <ul>
       <li><a href="#tab_namespaces"><img draggable="false" onmousedown="return false" height='60' width='60'
@@ -72,12 +74,6 @@
 
     <div id="tab_search">
       <p>SEARCH </p>
-       <p> <select name="searchMode1" id="searchMode1"></select>
-       <button name="searchGO" id="searchGO">GO!</button>
-       &nbsp;
-       <button name="SaveSearch" id="SaveSearch">SAVE
-      </button>
-       </p>
        <table id=search_bar>
     <tr id=search_field_1>
       <th><select name="searchPredicate1" class="search-predicate" id="searchPredicate1"></select></th>
@@ -106,6 +102,7 @@
       <th><button name	="hideInput4" class="search-button" id="hideInput4">-</button></th>
     </tr>
       </table>
+        <button name="searchGO" id="searchGO">GO!</button>
 
       <p>
         <p id="sResults">SEARCH BY NAME</p>
@@ -113,7 +110,7 @@
       <input type="text" id="search_txt" name="search_txt" />
       <div id="autocomp">
       </div
-       </p>
+      </p>
        <p id=taxonomy_bar_outer>
         <p id="tex">TAXONOMY EXPLORER</p>
         <p id=taxonomy_bar> </p>
@@ -122,6 +119,15 @@
 
     <div id="tab_nodes">
        <p id="ResultsLabel">RESULTS</p>
+      <p>
+        <select name="searchMode1" id="searchMode1" style="display: none;">
+          <option value="NEW">Create new selection</option>
+          <option value="ADD">Add to current selection</option>
+          <option value="SUB">Subtract from existing selection</option>
+        </select>
+        &nbsp;
+        <button name="SaveSearch" id="SaveSearch">SAVE</button>
+       </p>
       <div id="ResultList">
     </div>
     </div>
@@ -146,7 +152,18 @@
     <div id="tab_info">
       <p>PUBLICATIONS</p>
     </div>
-  </div>
+  </div>  <!-- #tabs -->
+  </div>  <!-- #left -->
+
+  <div id="right">
+    <ul>
+      <li><a href="#shopping_cart"><img draggable="false" onmousedown="return false" height='60' width='60'
+            src="{{ url_for('static', filename='img/active_open.png') }}" /></a></li>
+    </ul>
+  <div class="shopping_cart" id="shopping_cart">
+  </div>  <!-- #shopping_cart -->
+  </div>  <!-- #right -->
+  </div>  <!-- #container -->
 
   <div class="page" id="page"></div>
 

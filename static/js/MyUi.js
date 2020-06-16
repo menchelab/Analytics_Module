@@ -30,6 +30,8 @@ $(function () {
 
   $(function () {
     $("#tabs").tabs();
+    $("#right").tabs();
+
   });
 
 
@@ -59,11 +61,6 @@ $(function () {
   $('#selections').on('selectmenuselect', function () {
     var id = $('#selections').find(':selected').val();
 
-    // Compute search string.
-    if ($("#searchInput1").text() != "INPUT1") {
-      input_string = input_string.concat(input_string, "predicate0=", $(search))
-    }
-
     path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
         type: "GET",
@@ -73,8 +70,9 @@ $(function () {
         dataType: "json",
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
       success: function(response) {
+        mySelection = response.nodes;
         for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
-            createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
+            createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"shopping_cart");
         }
         // Open the results tab, which is 4 when 0-indexed.
         $('#tabs').tabs( "option", "active", 3 );
@@ -197,12 +195,6 @@ $("#searchPredicate1-button").hide();
 
     $(function () {
         $("#searchMode1").selectmenu();
-        $('#searchMode1').append($('<option>', {value: "NEW",text: "NEW",}));
-        $('#searchMode1').append($('<option>', {value: "ADD",text: "ADD",}));
-        $('#searchMode1').append($('<option>', {value: "SUB",text: "SUB",}));
-        $('#searchMode1').val("NEW");   //SET ACTIVE SLOT
-        $('#searchMode1').hide();
-        $('#searchMode1').selectmenu("refresh");
 
     });
 
@@ -230,7 +222,7 @@ $("#searchPredicate1-button").hide();
     $("#SaveSearch").button();
     $("#SaveSearch").click(function (event) {
         event.preventDefault();
-        ActivateVRkeyboard("SaveSearch");
+      console.log($('#searchMode1').val());
     });
  });
 

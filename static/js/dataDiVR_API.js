@@ -12,6 +12,7 @@ function logger(message){
 
 var dbdata;
 var thisNamespace;
+var mySelection = [];
 
 
 
@@ -223,20 +224,14 @@ function GetDbSelections() {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         dataType: "json",
         success: function(response) {
-
-
-
-            console.log(response);
             response.forEach(function(item)
             {
-
                  $('#selections').append($('<option>', {value: item.id, text: item.name}));
             });
             $('#selections').val( response[0].namespace);
             $("#selections").selectmenu("refresh");
         console.log(response);
         },
-
         error: function(err) {
           console.log("whoops, error");
         console.log(err);
@@ -273,6 +268,7 @@ function SimpleSearch(id) {
         dataType: "json",
         success: function(response) {
 
+          console.log(response);
             response.mode = $('#searchMode1').val();
             console.log(response);
             document.getElementById("sResults").innerHTML = "FOUND " + response.nodes.length + " NODES FOR " + $('#searchInput1').text();
@@ -287,9 +283,11 @@ function SimpleSearch(id) {
             }); */
 
             for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
-
-                createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
-
+              createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
+            }
+            mySelection = mySelection.concat(response.nodes);
+            for (var i = 0; i < mySelection.length; i++) {
+              createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"shopping_cart");
             }
             // Open the results tab, which is 4 when 0-indexed.
             $('#tabs').tabs( "option", "active", 3 );

@@ -9,6 +9,24 @@
 img{-webkit-user-drag: none;
 }
 
+#container {
+  width: 100%;
+  background-color: black;
+}
+
+#left {
+  display: inline-block;
+  width: 60%;
+  height: 100%;
+  background-color: black;
+}
+#right {
+  display: inline-block;
+  width: 30%;
+  height: 100%;
+  background-color: black;
+}
+
 /* added comment */
 .ui-slider-horizontal {
   margin: 30px 8px 30px 8px;
