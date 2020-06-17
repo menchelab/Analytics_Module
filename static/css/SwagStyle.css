@@ -19,12 +19,14 @@ img{-webkit-user-drag: none;
   width: 60%;
   height: 100%;
   background-color: black;
+  vertical-align:top;
 }
 #right {
   display: inline-block;
   width: 30%;
   height: 100%;
   background-color: black;
+  vertical-align:top;
 }
 
 /* added comment */
