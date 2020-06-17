@@ -41,7 +41,8 @@ def create_attributes(cursor):
       `name` varchar(1000) DEFAULT NULL,
       `description` varchar(4000) DEFAULT NULL,
       `namespace` varchar(155) NOT NULL,
-      PRIMARY KEY (`id`)
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `ix_attributes_external_id` (`external_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     '''
     )
@@ -51,6 +52,7 @@ def create_nodes_attributes(cursor):
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `node_id` int(11) DEFAULT NULL,
       `attribute_id` int(11) DEFAULT NULL,
+      `value` double DEFAULT NULL,
       PRIMARY KEY (`id`),
       KEY `node_id` (`node_id`),
       KEY `attribute_id` (`attribute_id`)
@@ -69,6 +71,21 @@ def create_attribute_taxonomies(cursor):
       PRIMARY KEY (`id`),
       KEY `child_id` (`child_id`),
       KEY `parent_id` (`parent_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    '''
+    )
+
+def create_attribute_relations(cursor):
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS `attribute_relations` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `attr1_id` int(11) DEFAULT NULL,
+      `attr2_id` int(11) DEFAULT NULL,
+      `value` double DEFAULT NULL,
+      `comment` varchar(1000) DEFAULT NULL,
+      PRIMARY KEY (`id`),
+      KEY `attr1_id` (`attr1_id`),
+      KEY `attr2_id` (`attr2_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     '''
     )
