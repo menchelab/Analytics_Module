@@ -121,14 +121,14 @@ class Node:
         #JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
         #    AND attribute_taxonomies.parent_id in (%s)
         query = """
-            SELECT DISTINCT nodes.id, nodes.name, nodes.symbol
+            SELECT DISTINCT nodes.id AS node_id, nodes.name, nodes.symbol
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
             JOIN %s.attribute_taxonomies at on at.child_id = attribute_id
             AND parent_id in (%s)
         """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        return {"nodes": cursor.fetchall()}
 
     @staticmethod
     def nodes_for_autocomplete(db_namespace, name_prefix):
@@ -262,9 +262,8 @@ class Node:
             return({"nodes": [], "summary_stats": []})
         if have_name and not have_attributes:
             name_select_clause = """
-                SELECT id, name, symbol FROM %s.nodes WHERE
+                SELECT id AS node_id, name, symbol FROM %s.nodes WHERE
             """ % db_namespace
-            print("hello! I'm just a name")
             query = name_select_clause + " AND ".join(filter_clauses)
             cursor = Base.execute_query(query)
             nodes = cursor.fetchall()
