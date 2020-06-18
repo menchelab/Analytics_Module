@@ -258,6 +258,31 @@ $("#searchPredicate1-button").hide();
     SaveSelectionDB({"selection_name": $('#selection_name_input').val(), "node_ids": mySelection.map(item => item.node_id)});
   });
 
+
+$("#upload_button").button();
+$("#upload_form").submit(function(event) {
+  event.preventDefault();
+
+  var form = $(this);
+  var formData = new FormData(this);
+  var url = "/upload";
+      console.log(form.serialize());
+
+    $.ajax({
+      type: "POST",
+      url: url,
+      data: formData, // serializes the form's elements.
+      cache: false,
+      contentType: false,
+      processData: false,
+      success: function(data)
+      {
+          console.log("hello"); // show response from the php script.
+      }
+    });
+
+});
+
   ///////INIT HERE
 
  GetDbFileNames();

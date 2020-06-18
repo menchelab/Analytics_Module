@@ -59,6 +59,28 @@
       </select>
       <button name="test" id="test">TEST
       </button>
+      <h1>Upload new Network</h1>
+      <p>
+      Please upload layouts, links, and labels here.
+      <p>
+      </p>
+      Note that all external IDs in the links table must match nodes in the layouts table.
+      </p>
+
+      <form id="upload_form" method=post enctype=multipart/form-data>
+          <input type="radio" name="namespace" value="existing" checked>Use existing project<br>
+          <select name="existing_namespace">
+            {% for x in [] %}
+            <option value="{{x['namespace']}}">{{x['namespace']}}</option>
+            {% endfor %}
+          </select><br>
+          <input type="radio" name="namespace" value="New">Create new project<br>
+        <input type="text" name="new_name"><br>
+        Select Layouts: <input type=file name=layouts multiple><br>
+        Select Links: <input type=file name=links multiple><br>
+        Select Labels: <input type=file name=labels multiple><br>
+        <input type=submit value=Upload id=upload_button>
+      </form>
 
     </div>
 

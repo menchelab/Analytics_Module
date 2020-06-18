@@ -51,7 +51,7 @@ def upload_file():
         if not namespace:
             return "namespace fail"
         Upload.create_new_temp_namespace(namespace)
-        Upload.upload_to_new_namespace(namespace, request.files.getlist("layouts"))
+        Upload.upload_layouts_to_new_namespace(namespace, request.files.getlist("layouts"))
         Upload.upload_edges_to_new_namespace(namespace, request.files.getlist("links"))
         Upload.upload_labels_to_new_namespace(namespace, request.files.getlist("labels"))
         return "hello"
