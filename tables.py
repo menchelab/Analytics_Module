@@ -160,23 +160,23 @@ class Node:
                 neighbors[edge[0]].append(edge[1])
         visited_nodes = [0] * 20000
         starting_node = random.choice(starting_nodes)
-        
-        
+
+
         for i in range (num_trials):
             if random.random() < restart_probability:
                 starting_node = random.choice(starting_nodes)
             else:
                 starting_node = random.choice(neighbors[starting_node])
             visited_nodes[starting_node] += 1
-            
+
         query2 = """
             SELECT DISTINCT name, symbol, id FROM %s.nodes
         """ % namespace
         cursor = Base.execute_query(query2)
         d_i_name = cursor.fetchall()
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
-        
-        
+
+
         kept_values = [{'id': i,'symbol': d_i_name[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         return kept_values
@@ -813,7 +813,7 @@ def add_layout_to_db(namespace, filename, layout):
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     ''' % namespace
     )
-    layout_rows = [ "(" + ",".join(line.split(",")[:7]) + 
+    layout_rows = [ "(" + ",".join(line.split(",")[:7]) +
                    "".join([',"',line.split(",")[-1], '","', filename, '")']) \
                    for i , line in enumerate(layout)]
     print(layout_rows);
