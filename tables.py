@@ -137,14 +137,14 @@ class Node:
         #JOIN %s.attribute_taxonomies ON nodes_attributes.attribute_id = attribute_taxonomies.child_id
         #    AND attribute_taxonomies.parent_id in (%s)
         query = """
-            SELECT DISTINCT nodes.id, nodes.name, nodes.symbol
+            SELECT DISTINCT nodes.id AS node_id, nodes.name, nodes.symbol
             FROM %s.nodes
             JOIN %s.nodes_attributes ON nodes.id = nodes_attributes.node_id
             JOIN %s.attribute_taxonomies at on at.child_id = attribute_id
             AND parent_id in (%s)
         """ % (db_namespace, db_namespace, db_namespace, ",".join(attr_id))
         cursor = Base.execute_query(query)
-        return cursor.fetchall()
+        return {"nodes": cursor.fetchall()}
 
     @staticmethod
     def nodes_for_autocomplete(db_namespace, name_prefix):
@@ -176,23 +176,23 @@ class Node:
                 neighbors[edge[0]].append(edge[1])
         visited_nodes = [0] * 20000
         starting_node = random.choice(starting_nodes)
-        
-        
+
+
         for i in range (num_trials):
             if random.random() < restart_probability:
                 starting_node = random.choice(starting_nodes)
             else:
                 starting_node = random.choice(neighbors[starting_node])
             visited_nodes[starting_node] += 1
-            
+
         query2 = """
             SELECT DISTINCT name, symbol, id FROM %s.nodes
         """ % namespace
         cursor = Base.execute_query(query2)
         d_i_name = cursor.fetchall()
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
-        
-        
+
+
         kept_values = [{'id': i,'symbol': d_i_name[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         return kept_values
@@ -287,9 +287,8 @@ class Node:
             return({"nodes": [], "summary_stats": []})
         if have_name and not have_attributes:
             name_select_clause = """
-                SELECT id, name, symbol FROM %s.nodes WHERE
+                SELECT id AS node_id, name, symbol FROM %s.nodes WHERE
             """ % db_namespace
-            print("hello! I'm just a name")
             query = name_select_clause + " AND ".join(filter_clauses)
             cursor = Base.execute_query(query)
             nodes = cursor.fetchall()
@@ -755,7 +754,6 @@ def validate_index(x, num_points):
         return False
 
 def validate_layout(layout):
-    #print("Evaluating layout ", os.path.join(LAYOUTS_DIR, layout))
     line_count = 0
     bad_lines = {"len": [], "xyz":[], "rgb":[], "dup": []}
     num_col_errors = 0
@@ -769,13 +767,25 @@ def validate_layout(layout):
             continue
         line_count += 1
         line = line.split(",")
-        # Check number of columns (columns are comma-separated; commas may not be escaped in any way)
-        if len(line) != 8:
+        if len(line) != 9:
             num_col_errors += 1
             if num_col_errors < ERRORS_TO_SHOW:
-                bad_lines["len"].append(["Illegal number of columns", 8, len(line), i, ",".join(line)])
+                bad_lines["len"].append(["Illegal number of columns", 9, len(line), i, ",".join(line)])
         try:
-            for x in range(3):
+            if len(line[0]) == 0:
+                num_id_errors += 1
+                if num_id < ERRORS_TO_SHOW:
+                    bad_lines["id"].append(["Missing ID", "string or numeric ID", line[0], i, ",".join(line)])
+            else:
+                if line[0] in ids:
+                    num_id_errors += 1
+                    if num_id < ERRORS_TO_SHOW:
+                        bad_lines["id"].append(["Duplicate ID", "All ids must be unique", line[x], i, ""])
+            ids.add(line[0])
+        except:
+            pass
+        try:
+            for x in range(1, 4):
                 if x >= len(line):
                     continue
                 if not validate_coordinate(line[x]):
@@ -785,7 +795,7 @@ def validate_layout(layout):
         except:
             pass
         try:
-            for x in range(3, 7):
+            for x in range(4, 8):
                 if x >= len(line):
                     continue
                 if not validate_color_value(line[x]):
@@ -796,14 +806,15 @@ def validate_layout(layout):
         except:
             pass
         try:
-            descriptors = line[7].split(";")
-            if descriptors[0] in ids:
+            if len(line[8]) == 0:
                 if num_id_errors < ERRORS_TO_SHOW:
-                    bad_lines["len"].append(["Duplicate ID", "All ids must be unique", line[x], i, ""])
+                    bad_lines["name"].append(["Missing namespace", "namespace", line[x], i, ""])
                 num_id_errors += 1
         except:
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
+    print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
+    print(bad_lines)
     print(len(layout), total_errors, bad_lines)
     return(len(layout), total_errors, bad_lines)
 
@@ -827,6 +838,7 @@ def add_layout_to_db(namespace, filename, layout):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
     Base.execute_query('''
     CREATE TABLE IF NOT EXISTS `tmp_%s`.`layouts_tmp` (
+      `id` varchar(255) not null,
       `x_loc` float(10,7) DEFAULT NULL,
       `y_loc` float(10,7) DEFAULT NULL,
       `z_loc` float(10,7) DEFAULT NULL,
@@ -834,20 +846,19 @@ def add_layout_to_db(namespace, filename, layout):
       `g_val` int(11) DEFAULT NULL,
       `b_val` int(11) DEFAULT NULL,
       `a_val` int(11) DEFAULT NULL,
-      `id` varchar(255) not null,
       `namespace` varchar(255) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     ''' % namespace
     )
-    layout_rows = [ "(" + ",".join(line.split(",")[:7]) + 
-                   "".join([',"',line.split(",")[-1], '","', filename, '")']) \
-                   for i , line in enumerate(layout)]
-    print(layout_rows);
+    # layout_rows = [ "(" + ",".join(line.split(",")[:7]) +
+    #                "".join([',"',line.split(",")[-1], '","', filename, '")']) \
+    #                for i , line in enumerate(layout)]
+    layout_rows = ["(" + ",".join(line.split(",")[:-1]) + ',"' + line.split(",")[-1] + '"' + ")" for line in layout]
     query = """
-    insert into `tmp_%s`.layouts_tmp (x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, id, namespace)
+    insert into `tmp_%s`.layouts_tmp (id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
     values %s
     """ % (namespace, ",".join(layout_rows))
-    print(query)
+    #print(query)
     cursor = Base.execute_query(query)
     if run_db_layout_validations(namespace):
         pass
@@ -867,11 +878,8 @@ def add_edges_to_db(namespace, filename, layout):
     ''' % namespace
     )
     lines = layout.split("\n")
-    print(lines[0])
-    print(lines[0].split(","))
-    print(lines[-1])
     query = "insert into `tmp_%s`.edges_tmp (node1, node2, namespace) values %s" % \
-            (namespace, ",".join(["(%s, \"%s\")" % (line, filename) for line in layout.split("\n")]))
+            (namespace, ",".join(["(%s, '%s')" % (line, filename) for line in layout.split("\n")]))
     cursor = Base.execute_query(query)
     if run_db_edge_validations(namespace):
         pass
@@ -893,9 +901,6 @@ def add_labels_to_db(namespace, filename, labels):
     ''' % namespace
     )
     lines = labels.split("\n")
-    print(lines[0].split(",")  + [filename] )
-    print(lines[0].split(","))
-    print(lines[-1])
     query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
             (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")  + [filename]) for line in lines]))
     cursor = Base.execute_query(query)
@@ -1032,15 +1037,15 @@ class Upload:
 
 
     @staticmethod
-    def upload_to_new_namespace(namespace, layout_files):
+    def upload_layouts_to_new_namespace(namespace, layout_files):
         print("layout files", layout_files)
         for file in layout_files:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
             x = validate_layout(contents.split("\n"))
+            print("layout errors are", x)
             if x[1] == 0:
-                print(name)
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
 
     def upload_edges_to_new_namespace(namespace, links_files):
