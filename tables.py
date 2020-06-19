@@ -748,10 +748,14 @@ def validate_layout(layout):
                 bad_lines["len"].append(["Illegal number of columns", 9, len(line), i, ",".join(line)])
         try:
             if len(line[0]) == 0:
-                bad_lines["id"].append(["Missing ID", "string or numeric ID", line[0], i, ",".join(line)])
+                num_id_errors += 1
+                if num_id < ERRORS_TO_SHOW:
+                    bad_lines["id"].append(["Missing ID", "string or numeric ID", line[0], i, ",".join(line)])
             else:
                 if line[0] in ids:
-                    bad_lines["id"].append(["Duplicate ID", "All ids must be unique", line[x], i, ""])
+                    num_id_errors += 1
+                    if num_id < ERRORS_TO_SHOW:
+                        bad_lines["id"].append(["Duplicate ID", "All ids must be unique", line[x], i, ""])
             ids.add(line[0])
         except:
             pass
@@ -784,6 +788,8 @@ def validate_layout(layout):
         except:
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
+    print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
+    print(bad_lines)
     print(len(layout), total_errors, bad_lines)
     return(len(layout), total_errors, bad_lines)
 
@@ -822,11 +828,12 @@ def add_layout_to_db(namespace, filename, layout):
     # layout_rows = [ "(" + ",".join(line.split(",")[:7]) +
     #                "".join([',"',line.split(",")[-1], '","', filename, '")']) \
     #                for i , line in enumerate(layout)]
-    layout_rows = ["(" + line + ")" for line in layout]
+    layout_rows = ["(" + ",".join(line.split(",")[:-1]) + ',"' + line.split(",")[-1] + '"' + ")" for line in layout]
     query = """
     insert into `tmp_%s`.layouts_tmp (id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
     values %s
     """ % (namespace, ",".join(layout_rows))
+    #print(query)
     cursor = Base.execute_query(query)
     if run_db_layout_validations(namespace):
         pass
@@ -846,9 +853,6 @@ def add_edges_to_db(namespace, filename, layout):
     ''' % namespace
     )
     lines = layout.split("\n")
-    print(lines[0])
-    print(lines[0].split(","))
-    print(lines[-1])
     query = "insert into `tmp_%s`.edges_tmp (node1, node2, namespace) values %s" % \
             (namespace, ",".join(["(%s, '%s')" % (line, filename) for line in layout.split("\n")]))
     cursor = Base.execute_query(query)
@@ -872,9 +876,6 @@ def add_labels_to_db(namespace, filename, labels):
     ''' % namespace
     )
     lines = labels.split("\n")
-    print(lines[0].split(",")  + [filename] )
-    print(lines[0].split(","))
-    print(lines[-1])
     query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
             (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")  + [filename]) for line in lines]))
     cursor = Base.execute_query(query)
@@ -1018,8 +1019,8 @@ class Upload:
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
             x = validate_layout(contents.split("\n"))
+            print("layout errors are", x)
             if x[1] == 0:
-                print(name)
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
 
     def upload_edges_to_new_namespace(namespace, links_files):
