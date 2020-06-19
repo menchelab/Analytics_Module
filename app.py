@@ -164,7 +164,7 @@ def shortest_path(db_namespace):
     
     from_id = request.args.get("from")
     to_id = request.args.get("to")
-    return jsonify(Node.shortest_path(db_namespace, from_id, to_id))
+    return Node.shortest_path(db_namespace, from_id, to_id)
    
 
 

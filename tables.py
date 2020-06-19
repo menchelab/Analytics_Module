@@ -2,6 +2,7 @@ import random
 import datetime
 import sys
 import os
+import json
 from .db_config import DATABASE as dbconf
 from .table_utils.taxonomy import *
 from . import populate_db_data_agnostic
@@ -76,10 +77,25 @@ class Node:
         return cursor.fetchall()
 
     @staticmethod
-    def get(db_namespace, node_ids):
+    def get(db_namespace, node_ids):        
         query = """
             SELECT DISTINCT name, symbol, id FROM %s.nodes where id in (%s)
         """ % (db_namespace, ",".join(node_ids))
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+        
+    @staticmethod
+    def get_sym_name(db_namespace, node_ids):
+        print('get functions gets:', node_ids)
+        # print('and makes sql strg:', ",".join(node_ids))
+        spc = [str(x)+',' for x in node_ids]
+        spl_str = ''
+        spl_str = spl_str.join(spc)
+        spl_str = '(' + spl_str[:-1] + ')'
+        print(spl_str)
+        query = """
+            SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id in %s
+        """ % (db_namespace,spl_str)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -184,10 +200,10 @@ class Node:
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges
-        print(from_id," ",to_id)
+        print("Path from ", from_id," to ",to_id)
         query = """
-        SELECT edges.node1_id, edges.node2_id
-        FROM %s.edges
+                SELECT edges.node1_id, edges.node2_id
+                FROM %s.edges
         """ % db_namespace
         cursor = Base.execute_query(query)
         edges = cursor.fetchall()
@@ -197,7 +213,16 @@ class Node:
             t = x['node2_id']
             G.add_edge(s,t)
         sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
-        return sp
+        print('path nodes:', sp)
+        # get symbol and name
+        sym_name_data = Node.get_sym_name(db_namespace, sp)
+        # jsonify output
+        out_str = ''
+        for x in sym_name_data:
+            out_str += str(json.dumps(x)) + ','
+        json_out = '{"nodes":[' + out_str[:-1] + ']}'
+        
+        return json_out
 
     @staticmethod
     def search(db_namespace, clauses):
