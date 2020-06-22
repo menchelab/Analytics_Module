@@ -155,7 +155,9 @@ def random_walk(db_namespace):
         data = request.args
 #    node_ids = data.node_ids
     node_ids = [int(x) for x in data['node_ids']]
-    print(node_ids)
+    variants = [int(x) for x in data['variants']]
+
+    # print(node_ids)
     #node_ids = [int(x) for x in data.getlist("node_ids")]
     restart_probability = data["restart_probability"]
     restart_probability = float(restart_probability or 0.9)
@@ -165,7 +167,7 @@ def random_walk(db_namespace):
     #
     # out_str = jsonify(edges)# + str(jsonify(edges))
     
-    return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
+    return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,min_frequency))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
