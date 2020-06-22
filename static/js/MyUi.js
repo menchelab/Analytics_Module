@@ -324,9 +324,6 @@ $("#upload_form").submit(function(event) {
 
 
   var url = "/upload";
-
-  return;
-
   $.ajax({
     type: "POST",
     url: url,

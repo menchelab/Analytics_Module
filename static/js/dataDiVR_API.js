@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-// var dbprefix = ""
+// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -245,7 +245,6 @@ function GetDbSelections() {
 }
 
 function SimpleSearch(id) {
-    
     var input_string = ""
     for (var i = 1; i <=4; i++) {
       if ($("#searchInput" + i).text() != "INPUT" + i) {

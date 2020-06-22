@@ -35,43 +35,48 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/upload', methods=['GET', 'POST'])
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        #print(request.args)
-        print("namespace", request.args.get("namespace"))
-        form = request.form.to_dict()
-        print(request.files)
-        if form["namespace"] == "New":
-            namespace = form["new_name"]
-            Upload.create_new_namespace(form["new_name"])
-        else:
-            namespace = form["existing_namespace"]
-        if not namespace:
-            return "namespace fail"
-        Upload.create_new_temp_namespace(namespace)
-        Upload.upload_to_new_namespace(namespace, request.files.getlist("layouts"))
-        Upload.upload_edges_to_new_namespace(namespace, request.files.getlist("links"))
-        Upload.upload_labels_to_new_namespace(namespace, request.files.getlist("labels"))
-        return "hello"
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
-    data = Data.summary()
-    print(data)
-    return render_template('upload.html', data=data)
+    print("namespace", request.args.get("namespace"))
+    form = request.form.to_dict()
+    print(request.files)
+    if form["namespace"] == "New":
+        namespace = form["new_name"]
+        Upload.create_new_namespace(form["new_name"])
+    else:
+        namespace = form["existing_namespace"]
+    if not namespace:
+        return "namespace fail"
+    Upload.create_new_temp_namespace(namespace)
+    layout_files = request.files.getlist("layouts")
+    print(layout_files)
+    if len(layout_files) > 0 and len(layout_files[0].filename) > 0:
+        print("loading layouts", len(layout_files))
+        Upload.upload_layouts(namespace, layout_files)
+    edge_files = request.files.getlist("links")
+    if len(edge_files) > 0 and len(edge_files[0].filename) > 0:
+        Upload.upload_edges(namespace, edge_files)
+    attribute_files = request.files.getlist("attributes")
+    if len(attribute_files) > 0:
+        Upload.upload_attributes(namespace, attribute_files)
+    label_files = request.files.getlist("labels")
+    if len(label_files) > 0:
+        Upload.upload_labels(namespace, request.files.getlist("labels"))
+    return "success"
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return redirect(url_for('uploaded_file',
+                                filename=filename))
 
 @app.route('/uploaded_file', methods=['GET'])
 def uploaded_file():

@@ -33,6 +33,23 @@ class Base:
         connection.close()
         return cursor
 
+    def execute_queries(queries, db = None):
+        if not db:
+            db = dbconf['database']
+        connection = pymysql.connect(host=dbconf["host"],
+                             user=dbconf["user"],
+                             password=dbconf["password"],
+                             db=db,
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+        cursor = connection.cursor()
+        #print(query)
+        for query in queries:
+            cursor.execute(query)
+        connection.commit()
+        connection.close()
+        return cursor
+
     @staticmethod
     def sanitize_string(string):
         string = string.replace("'", r"\'")
@@ -888,6 +905,50 @@ def validate_edges(namespace, links):
                 column_errors.append(["Illegal number of columns", 2, len(line), i, ",".join(line)])
     return(len(links), num_col_errors, column_errors)
 
+def validate_attributes(namespace, attributes):
+    # Columns are node_id, attribute_id, attribute_namespace, attribute_name, attribute_description
+    column_errors = []
+    num_col_errors = 0
+    print(attributes)
+
+    for i, line in enumerate(attributes.split("\n")):
+        if not line:
+            continue  # Ignore empty lines.
+        line = line.split(",")
+        print("line is ")
+        print(line)
+        # Validate number of columns
+        if len(line) != 5:
+            num_col_errors += 1
+            if num_col_errors < ERRORS_TO_SHOW:
+                column_errors.append(["Illegal number of columns", 5, len(line), i, ",".join(line)])
+        elif len(line[0]) < 1 or len(line[1]) < 1 or len(line[2]) < 1:
+            num_col_errors += 1
+            if num_col_errors < ERRORS_TO_SHOW:
+                column_errors.append(["Missing values", "First three columns must be nonempty", "", i, ",".join(line)])
+    return(len(attributes), num_col_errors, column_errors)
+
+
+def add_attributes_to_db(namespace, attributes):
+    Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`attributes`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`attributes` (
+      `node_id` varchar(255) not null,
+      `attribute_id` varchar(255) not null,
+      `attribute_namespace` varchar(255) NOT NULL,
+      `attribute_name` varchar(255) DEFAULT NULL,
+      `attribute_description` varchar(255) DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+    query = "INSERT INTO `tmp_%s`.attributes VALUES (%s)" % \
+            (namespace,
+             "),(".join([",".join(['"%s"' % i for x in attributes for i in x.split(",")])]))
+    cursor = Base.execute_query(query)
+    if run_db_attribute_validations(namespace):
+        print("problem!")
+    else:
+        write_attributes(namespace)
 
 def add_layout_to_db(namespace, filename, layout):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
@@ -1000,6 +1061,18 @@ def run_db_edge_validations(namespace):
     unknown_nodes = cursor.fetchall()
     return unknown_nodes
 
+def run_db_attribute_validations(namespace):
+    query = """
+    SELECT DISTINCT node_id
+    FROM tmp_%s.attributes a
+    LEFT JOIN %s.nodes n ON n.external_id = a.node_id
+    WHERE n.id IS NULL
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+    unknown_nodes = cursor.fetchall()
+    print(unknown_nodes)
+    return unknown_nodes
+
 def write_layouts(namespace):
     query = """
     INSERT INTO %s.nodes (external_id)
@@ -1018,6 +1091,45 @@ def write_layouts(namespace):
     """ % (namespace, namespace, namespace)
     cursor = Base.execute_query(query)
 
+
+def write_attributes(namespace):
+    queries = []
+    query = """
+    INSERT INTO %s.attributes(external_id, namespace, name, description)
+    SELECT attribute_id, attribute_namespace, max(attribute_name), max(attribute_description)
+    FROM `tmp_%s`.attributes new_attrs
+    LEFT JOIN %s.attributes attrs ON attrs.external_id = new_attrs.attribute_id
+        AND attrs.namespace = new_attrs.attribute_namespace
+    WHERE attrs.id IS NULL
+    GROUP BY 1, 2
+    """ % (namespace, namespace, namespace)
+    print(query)
+    queries.append(query)
+
+    query = """
+    INSERT INTO %s.attribute_taxonomies(parent_id, child_id, distance, namespace)
+    SELECT attrs.id, attrs.id, 1, attrs.namespace
+    FROM `%s`.attributes attrs
+    JOIN `tmp_%s`.attributes new_attrs on new_attrs.attribute_id = attrs.external_id
+    LEFT JOIN `%s`.attribute_taxonomies at ON at.parent_id = attrs.id
+        AND at.child_id = attrs.id AND at.namespace = attrs.namespace
+        WHERE at.id IS NULL
+    """ % (namespace, namespace, namespace, namespace)
+    print(query)
+    queries.append(query)
+
+    query = """
+    INSERT INTO %s.nodes_attributes(node_id, attribute_id)
+    SELECT nodes.id, attrs.id
+    FROM `%s`.attributes attrs
+    JOIN `tmp_%s`.attributes new_attrs on new_attrs.attribute_id = attrs.external_id
+    JOIN `%s`.nodes ON nodes.external_id = new_attrs.node_id
+    LEFT JOIN `%s`.nodes_attributes na ON na.node_id = nodes.id
+        AND na.attribute_id = attrs.id
+        WHERE na.id IS NULL
+    """ % (namespace, namespace, namespace, namespace, namespace)
+    queries.append(query)
+    cursor = Base.execute_queries(queries)
 
 def write_edges(namespace):
     # Namespaces
@@ -1092,7 +1204,7 @@ class Upload:
 
 
     @staticmethod
-    def upload_layouts_to_new_namespace(namespace, layout_files):
+    def upload_layouts(namespace, layout_files):
         print("layout files", layout_files)
         for file in layout_files:
             # TODO: fix the below line to account for dots in filenames
@@ -1103,7 +1215,7 @@ class Upload:
             if x[1] == 0:
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
 
-    def upload_edges_to_new_namespace(namespace, links_files):
+    def upload_edges(namespace, links_files):
         print("links_files", links_files)
         for file in links_files:
             # TODO: fix the below line to account for dots in filenames
@@ -1121,7 +1233,16 @@ class Upload:
                 print(x)
                 print("!!! Error!!!!")
 
-    def upload_labels_to_new_namespace(namespace, labels_files):
+    def upload_attributes(namespace, attribute_files):
+        for file in attribute_files:
+            name = file.filename.split(".")[0]
+            contents = file.read().decode('utf-8')
+            x = validate_attributes(namespace, contents)
+            print("attribute errors are", x)
+            if x[1] == 0:
+                add_attributes_to_db(namespace, contents.rstrip().split("\n"))
+
+    def upload_labels(namespace, labels_files):
         print("labels_files", labels_files)
         for file in labels_files:
             # TODO: fix the below line to account for dots in filenames
