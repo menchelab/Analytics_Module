@@ -63,13 +63,13 @@
       </p>
 
       <form id="upload_form" method=post enctype=multipart/form-data>
-          <input type="radio" name="namespace" value="existing" checked>Add to current project<br>
-          <input type="radio" name="namespace" id="radio_new_namespace" value="New">Create new project<br>
-        <input type="text" id="new_namespace_name" name="new_name" hidden><br>
         Select Layouts: <input type=file name=layouts multiple><br>
         Select Links: <input type=file name=links multiple><br>
         Select Attributes: <input type=file name=attributes multiple><br>
         Select Cluster Labels: <input type=file name=labels multiple><br>
+        <input type="radio" name="namespace" value="existing" checked>Add to current project<br>
+        <input type="radio" name="namespace" id="radio_new_namespace" value="New">Create new project<br>
+        <input type="text" id="new_namespace_name" name="new_name" hidden><br>
         <p id="submit_warnings"></p>
         <input type=submit value=Upload  disabled=true id=upload_button />
       </form>
