@@ -263,17 +263,10 @@ class Node:
                 cc += 1
         set_linkers = set(l_linkerset) - set(seeds)
                 
-        # sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
-        # print('path nodes:', sp)
-        # # get symbol and name
-        # sym_name_data = Node.get_sym_name(db_namespace, sp)
-        # # jsonify output
         out_str = '{"seeds":['
         for x in seeds:
             out_str += str(json.dumps(x)) + ','
-        print('inter out', out_str)
         out_str = out_str[:-1] + '],"variants":['
-        print('inter out 2', out_str)
         
         for x in variants:
             out_str += str(json.dumps(x)) + ','
@@ -282,11 +275,8 @@ class Node:
         for x in set_linkers:
             out_str += str(json.dumps(x)) + ','
         out_str = out_str[:-1] + ']}'
-        print('OUT', out_str)
-        
-        json_out = '{"seeds":[0]}'
-        
-        return json_out
+                
+        return out_str
         
         
     @staticmethod
