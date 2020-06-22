@@ -223,7 +223,72 @@ class Node:
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
         
         return json_out
-
+        
+        
+    @staticmethod
+    def connect_set_dfs(db_namespace, seeds, variants):
+        
+        # PPI GENERATOR
+        #DB query for edges
+        query = """
+                SELECT edges.node1_id, edges.node2_id
+                FROM %s.edges
+        """ % db_namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        G = nx.Graph()
+        for x in edges:
+            s = x['node1_id']
+            t = x['node2_id']
+            G.add_edge(s,t)
+            
+        print(seeds)
+        
+        l_linkerset = []
+        for start_variant in variants:
+            # start_variant = list(l_vars_onppi)[1]
+            # print('start at variant: %s (k = %s)' %(start_variant,G_ppi.degree(start_variant)))
+            cc = 1
+            for path in nx.dfs_edges(G,start_variant,2):
+                if path[0] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=1')
+                    l_linkerset.append(path[0])
+                if path[1] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=2')
+                    l_linkerset.append(path[0])
+                    l_linkerset.append(path[1])
+                else:
+                    pass
+            #         print(cc,set(path))
+                cc += 1
+        set_linkers = set(l_linkerset) - set(seeds)
+                
+        # sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
+        # print('path nodes:', sp)
+        # # get symbol and name
+        # sym_name_data = Node.get_sym_name(db_namespace, sp)
+        # # jsonify output
+        out_str = '{"seeds":['
+        for x in seeds:
+            out_str += str(json.dumps(x)) + ','
+        print('inter out', out_str)
+        out_str = out_str[:-1] + '],"variants":['
+        print('inter out 2', out_str)
+        
+        for x in variants:
+            out_str += str(json.dumps(x)) + ','
+        out_str = out_str[:-1] + '],"linker":['
+        
+        for x in set_linkers:
+            out_str += str(json.dumps(x)) + ','
+        out_str = out_str[:-1] + ']}'
+        print('OUT', out_str)
+        
+        json_out = '{"seeds":[0]}'
+        
+        return json_out
+        
+        
     @staticmethod
     def search(db_namespace, clauses):
         print(clauses)

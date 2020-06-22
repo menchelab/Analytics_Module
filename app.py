@@ -51,7 +51,7 @@ def upload_file():
         if not namespace:
             return "namespace fail"
         Upload.create_new_temp_namespace(namespace)
-        Upload.upload_layouts_to_new_namespace(namespace, request.files.getlist("layouts"))
+        Upload.upload_to_new_namespace(namespace, request.files.getlist("layouts"))
         Upload.upload_edges_to_new_namespace(namespace, request.files.getlist("links"))
         Upload.upload_labels_to_new_namespace(namespace, request.files.getlist("labels"))
         return "hello"
@@ -166,7 +166,15 @@ def shortest_path(db_namespace):
     to_id = request.args.get("to")
     return Node.shortest_path(db_namespace, from_id, to_id)
    
-
+@app.route('/api/<string:db_namespace>/node/connect_set_dfs', methods=['POST'])
+@cross_origin()
+def connect_set_dfs(db_namespace):
+    data =request.get_json()
+    seeds = data["seeds"]
+    variants = data["variants"]
+    
+    return Node.connect_set_dfs(db_namespace, seeds, variants)
+   
 
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
