@@ -260,26 +260,85 @@ $("#searchPredicate1-button").hide();
 
 
 $("#upload_button").button();
+$("input:radio[name='namespace']").change( function() {
+  if ($(this).val() == "New") {
+    $("#new_namespace_name").show();
+  } else {
+    $("#new_namespace_name").hide();
+
+  }
+});
+
+$('form :input').on('change input', function() {
+  console.log("changed!");
+  var formData = new FormData(document.getElementById('upload_form'));
+  let namespace = formData.get("namespace");
+  if (namespace == "New") {
+    existing_selections = allNamespaces.map(function(x) {return x.namespace});
+    let new_name = formData.get("new_name");
+    console.log(new_name);
+    console.log(existing_selections);
+    if (existing_selections.includes(new_name)) {
+      $("#submit_warnings").html("This name is already taken!")
+      $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
+      return
+    } else if (formData.get("layouts").size > 0)  {  // We need at least one layout to create a namespace
+      $("#submit_warnings").html("")
+      $("#upload_button").attr("disabled", false).removeClass("ui-state-disabled");
+      return
+    } else {
+      $("#submit_warnings").html("Please add at least one layout to create a new namespace!")
+      $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
+    }
+  } else {
+    if (formData.get('layouts').size > 0 ||
+        formData.get('links').size > 0 ||
+        formData.get('labels').size > 0 ||
+        formData.get('attributes').size > 0) {
+      $("#submit_warnings").html("")
+      $("#upload_button").attr("disabled", false).removeClass("ui-state-disabled");
+      return
+    }
+  }
+  $("#submit_warnings").html("Please add at least one object to upload!")
+  $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
+});
+
+
+
 $("#upload_form").submit(function(event) {
   event.preventDefault();
 
   var form = $(this);
   var formData = new FormData(this);
-  var url = "/upload";
-      console.log(form.serialize());
+  if (formData.get("namespace") == 'existing') {
+    formData.append('existing_namespace', $('#namespaces').val());
+  }
+  let it = formData.keys();
+  let result = it.next();
+  while (!result.done) {
+ console.log(result.value); // 1 3 5 7 9
+    console.log(formData.get(result.value))
+ result = it.next();
+}
 
-    $.ajax({
-      type: "POST",
-      url: url,
-      data: formData, // serializes the form's elements.
-      cache: false,
-      contentType: false,
-      processData: false,
-      success: function(data)
-      {
-          console.log("hello"); // show response from the php script.
-      }
-    });
+
+  var url = "/upload";
+
+  return;
+
+  $.ajax({
+    type: "POST",
+    url: url,
+    data: formData, // serializes the form's elements.
+    cache: false,
+    contentType: false,
+    processData: false,
+    success: function(data)
+    {
+        console.log("Uploaded successfully!"); // show response from the php script.
+    }
+  });
 
 });
 

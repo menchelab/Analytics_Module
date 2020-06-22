@@ -12,6 +12,7 @@ function logger(message){
 
 var dbdata;
 var thisNamespace;
+var allNamespaces = [];
 var mySelection = [];
 var mySelectionName = "";
 
@@ -38,6 +39,7 @@ function GetDbFileNames() {
         success: function(response) {
         // POPULATE UI DROPDOWN
             dbdata = response.slice(); //DEEP COPY !!!!
+            allNamespaces = response.slice();
 
             response[0].layouts.forEach(function(item)
             {
@@ -231,7 +233,6 @@ function GetDbSelections() {
             });
             $('#selections').val( response[0].namespace);
             $("#selections").selectmenu("refresh");
-        console.log(response);
         },
         error: function(err) {
           console.log("whoops, error");

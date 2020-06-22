@@ -57,29 +57,21 @@
           <option value="{{namespace['namespace']}}">{{namespace['namespace']}}</option>
         {% endfor %}
       </select>
-      <button name="test" id="test">TEST
-      </button>
-      <h1>Upload new Network</h1>
+      <h1>Upload new data</h1>
       <p>
       Please upload layouts, links, and labels here.
-      <p>
-      </p>
-      Note that all external IDs in the links table must match nodes in the layouts table.
       </p>
 
       <form id="upload_form" method=post enctype=multipart/form-data>
-          <input type="radio" name="namespace" value="existing" checked>Use existing project<br>
-          <select name="existing_namespace">
-            {% for x in [] %}
-            <option value="{{x['namespace']}}">{{x['namespace']}}</option>
-            {% endfor %}
-          </select><br>
-          <input type="radio" name="namespace" value="New">Create new project<br>
-        <input type="text" name="new_name"><br>
+          <input type="radio" name="namespace" value="existing" checked>Add to current project<br>
+          <input type="radio" name="namespace" id="radio_new_namespace" value="New">Create new project<br>
+        <input type="text" id="new_namespace_name" name="new_name" hidden><br>
         Select Layouts: <input type=file name=layouts multiple><br>
         Select Links: <input type=file name=links multiple><br>
-        Select Labels: <input type=file name=labels multiple><br>
-        <input type=submit value=Upload id=upload_button>
+        Select Attributes: <input type=file name=attributes multiple><br>
+        Select Cluster Labels: <input type=file name=labels multiple><br>
+        <p id="submit_warnings"></p>
+        <input type=submit value=Upload  disabled=true id=upload_button />
       </form>
 
     </div>
