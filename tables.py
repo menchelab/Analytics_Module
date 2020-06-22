@@ -160,7 +160,7 @@ class Node:
 
     @staticmethod
     def random_walk(namespace, starting_nodes, restart_probability, min_frequency):
-        num_trials = 10000
+        num_trials = 1000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -193,10 +193,27 @@ class Node:
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
 
-        kept_values = [{'id': i,'symbol': d_i_name[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+        kept_values = [{'id': i,'symbol': d_i_name[i],'group': '0', 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+        # print('Values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
-        return kept_values
+        # print('out nodes:', ','.join(map(str,kept_values)))
+        
+        
+        kept_node_ids = [x['id'] for x in kept_values]
+        
+        # print('visited nodes type', type(kept_values))
+        # print('visited nodes', kept_node_ids)
 
+        edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
+        # print('edges:', edges_kept)
+        l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
+        # for s,t in edges_kept:
+        # print('out edges:', l_edges_kept)
+        # return '{"nodes":' + jsonify(kept_values) +'{"links":' + jsonify(l_edges_kept) + '}'
+        # return "{'nodes':[" + ','.join(map(str,kept_values)) + "],'links':[" +  ','.join(map(str,l_edges_kept)) + ']}'
+        return d_data_kept
+        
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges

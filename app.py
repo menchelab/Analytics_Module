@@ -156,6 +156,10 @@ def random_walk(db_namespace):
     restart_probability = float(restart_probability or 0.9)
     min_frequency = data["min_frequency"]
     min_frequency = float(min_frequency or 0)
+    # nodes, edges =  Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency)
+    #
+    # out_str = jsonify(edges)# + str(jsonify(edges))
+    
     return jsonify(Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
