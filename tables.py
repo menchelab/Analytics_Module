@@ -177,7 +177,7 @@ class Node:
 
     @staticmethod
     def random_walk(namespace, starting_nodes,variants, restart_probability, min_frequency):
-        num_trials = 1000
+        num_trials = 100000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
