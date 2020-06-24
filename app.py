@@ -161,13 +161,13 @@ def random_walk(db_namespace):
     #node_ids = [int(x) for x in data.getlist("node_ids")]
     restart_probability = data["restart_probability"]
     restart_probability = float(restart_probability or 0.9)
-    min_frequency = data["min_frequency"]
-    min_frequency = float(min_frequency or 0)
+    max_elements = data["max_elements"]
+    max_elements = int(max_elements or 200)
     # nodes, edges =  Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency)
     #
     # out_str = jsonify(edges)# + str(jsonify(edges))
     
-    return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,min_frequency))
+    return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
@@ -176,7 +176,15 @@ def shortest_path(db_namespace):
     from_id = request.args.get("from")
     to_id = request.args.get("to")
     return Node.shortest_path(db_namespace, from_id, to_id)
-   
+    
+# @app.route('/api/<string:db_namespace>/node/expression', methods=['GET'])
+# @cross_origin()
+# def shortest_path(db_namespace):
+#
+#     from_id = request.args.get("from")
+#     to_id = request.args.get("to")
+#     return Node.expression(db_namespace, from_id, to_id)
+#
 @app.route('/api/<string:db_namespace>/node/connect_set_dfs', methods=['POST'])
 @cross_origin()
 def connect_set_dfs(db_namespace):

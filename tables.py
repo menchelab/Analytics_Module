@@ -176,8 +176,8 @@ class Node:
 
 
     @staticmethod
-    def random_walk(namespace, starting_nodes,variants, restart_probability, min_frequency):
-        num_trials = 100000
+    def random_walk(namespace, starting_nodes,variants, restart_probability, max_elements):
+        num_trials = 1000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -211,6 +211,7 @@ class Node:
 
         # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
         d_node2group = {}
+        print('visited nodes',visited_nodes )
         for i, x in enumerate(visited_nodes):
             if i in starting_nodes:
                 d_node2group[i] = 0
@@ -220,7 +221,9 @@ class Node:
                 d_node2group[i] = 1
                 
 
-        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+        # kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i<=max_elements]
+
         # print('Values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         # print('out nodes:', ','.join(map(str,kept_values)))
