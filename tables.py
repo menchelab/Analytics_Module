@@ -177,7 +177,7 @@ class Node:
 
     @staticmethod
     def random_walk(namespace, starting_nodes,variants, restart_probability, max_elements):
-        num_trials = 1000
+        num_trials = 100000
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -211,7 +211,7 @@ class Node:
 
         # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
         d_node2group = {}
-        print('visited nodes',visited_nodes )
+        # print('visited nodes',visited_nodes )
         for i, x in enumerate(visited_nodes):
             if i in starting_nodes:
                 d_node2group[i] = 0
@@ -220,12 +220,23 @@ class Node:
             else:
                 d_node2group[i] = 1
                 
+        min_frequency = 0         
+        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
 
-        # kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
-        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i<=max_elements]
-
-        # print('Values:', kept_values)
+        # print('kept_values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
+        kept_values = kept_values[:max_elements]
+        # print('kept_values:', len(kept_values),kept_values)
+        
+        # add variants if not empty
+        if len(variants)>0:
+            add_variants = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i in variants]
+            add_variants.sort(key=lambda x: x['frequency'], reverse=True)
+            # print('added variants', add_variants)
+            kept_values +=  add_variants
+            # print('added variants', add_variants)
+
+        
         # print('out nodes:', ','.join(map(str,kept_values)))
         kept_node_ids = [x['id'] for x in kept_values]
         
