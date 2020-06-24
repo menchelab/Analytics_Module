@@ -1,45 +1,39 @@
 
 var inputdata = {
     "nodes": [
-      {"id": "Knapp", "group": 1},
-      {"id": "Bock", "group": 2},
-      {"id": "Binder", "group": 3},
-      {"id": "Bergthaler", "group": 4},
-      {"id": "Boztug", "group": 5},
-      {"id": "Bennett", "group": 6},
-      {"id": "Superti-Furga", "group": 7},
-      {"id": "Loizou", "group": 8},
-      {"id": "Kralovics", "group": 9},
-      {"id": "Kubicek", "group": 10},
-      {"id": "Menche", "group": 11}
+      {"id": 111,"symbol": "ASS1", "col": "#00548c","frequency": 0.1},
+      {"id": 123,"symbol": "ASS1", "col": "#007dd1","frequency": 0.2},
+      {"id": 234, "symbol": "ASS1", "col": "#007dd1","frequency": 0.3},
+      {"id": 7856,"symbol": "ASS1", "col": "#007dd1","frequency": 0.4},
+      {"id": 5,"symbol": "ASS1", "col": "#007dd1","frequency": 0.5},
+      {"id": 678,"symbol": "ASS1", "col": "#007dd1","frequency": 0.6},
+      {"id": 36, "symbol": "ASS1", "col": "#007dd1","frequency": 0.7},
+      {"id": 88, "symbol": "ASS1", "col": "#007dd1","frequency": 0.8},
+      {"id": 678, "symbol": "ASS1", "col": "#007dd1","frequency": 0.9},
+      {"id": 666, "symbol": "ASS1", "col": "#007dd1","frequency": 0.95},
+      {"id": 656, "symbol": "ASS1", "col": "#007dd1","frequency": 0.99}
     ],
     "links": [
-      {"source": "Knapp", "target": "Bock", "value": 4},
-      {"source": "Knapp", "target": "Binder", "value": 6},
-      {"source": "Knapp", "target": "Bergthaler", "value": 2},
-      {"source": "Knapp", "target": "Boztug", "value": 1},
-      {"source": "Knapp", "target": "Bennett", "value": 9}
+      {"source": 656, "target": 111, "value": 4},
+      {"source": 656, "target":123, "value": 6},
+      {"source": 656, "target": 5, "value": 2},
+      {"source": 656, "target":7856, "value": 1},
+      {"source": 36, "target":7856, "value": 1},
+      {"source": 88, "target":7856, "value": 1},
+      {"source": 656, "target": 666, "value": 99}
     ]
   };
   
-var inputdata1 ={
-  "nodes": [
-    {"id": "Myriel", "group": 1},
-    {"id": "Napoleon", "group": 1}
 
-  ],
-  "links": [
-    {"source": "Napoleon", "target": "Myriel", "value": 1}
-  ]
-};
 
-  
-
+ // needs some zoom
+// https://stackoverflow.com/questions/16236600/d3-js-force-layout-auto-zoom-scale-after-loading
     
 function drawit(data) {
      // if (error) throw error;
-     d3.selectAll("svg > *").remove();
-     var svg = d3.select("svg"),
+    d3.selectAll("#forceLayout > *").remove();
+
+     var svg = d3.select("#forceLayout"),
      width = +svg.attr("width"),
      height = +svg.attr("height");
     
@@ -48,11 +42,11 @@ function drawit(data) {
     var simulation = d3.forceSimulation()
         
         .force("link", d3.forceLink().id(function(d) { return d.id; }))
-        .force("charge", d3.forceManyBody().strength(-5.5))
+        .force("charge", d3.forceManyBody().strength(-10.5))
+        //.force("size",[width, height])
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-    
-    
+
     var link = svg.append("g")
           .attr("class", "links")
         .selectAll("line")
@@ -65,16 +59,30 @@ function drawit(data) {
         .selectAll("circle")
         .data(data.nodes)
         .enter().append("circle")
-         .attr("r", function(d) { return d.r *10 + 2; })
+         .attr("r", function(d) { return d.frequency * data.numSeeds * 10 + 2; })
           //.attr("r",10.44)
-          .attr("fill", function(d) { return color(d.group); })
+        .attr("fill", function(d) {
+            if (d.group == 0) {
+              return "#fcba03";
+            } else if (d.group == 1) {
+              return "#00548c";  //#00548c"
+            } else if (d.group == 2) {
+              return "#fc5a03";  //#00548c"
+            } else {
+            return "#003047";
+            }
+          })
+         // .attr("fill", function(d) { return "#007dd1"; })
           .call(d3.drag()
               .on("start", dragstarted)
               .on("drag", dragged)
               .on("end", dragended));
     
       node.append("title")
-          .text(function(d) { return d.id; });
+        .style("text-anchor", "middle")
+        .style("fill", "white")
+        .attr("dy", "1.3em")
+        .text(function(d) { return d.label; });
     
       simulation
           .nodes(data.nodes)

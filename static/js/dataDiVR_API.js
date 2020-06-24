@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-var dbprefix = ""
+var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+// var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -412,4 +412,31 @@ function PopulateShoppingCart() {
       mySelection[i].symbol,mySelection[i].node_id,
       "shopping_cart_inner");
   }
+}
+
+function startRandomWalk(restart_probability, nodes) {
+  let data = {}
+  data["restart_probability"] = 0.9
+  data["min_frequency"] = 0.00001
+  data["node_ids"] = [2, 1234]
+  payload = JSON.stringify(data);
+  console.log(payload)
+  path = dbprefix + "/api/ppi/node/random_walk";
+    $.ajax({
+        type: "POST",
+        url: path,
+        contentType: "application/json",
+        data: payload,
+        dataType: "json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+        success: function(response) {
+
+          console.log(response);
+          drawBarChart(response)
+            },
+        error: function(err) {
+        console.log(err);
+        }
+    });
+
 }

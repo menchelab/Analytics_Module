@@ -18,9 +18,10 @@
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3barchart.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataDiVR_API.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/MyUi.js') }}"></script>
-  <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
 
   <!-- add d3 for fun and profit (and for the randomwalk tab) -->
 
@@ -181,8 +182,14 @@
       <input id="selection_name_input" />
     </div>  <!-- #shopping_cart_controls -->
     <div class="shopping_cart_inner" id="shopping_cart_inner">
-  </div>  <!-- #shopping_cart_inner -->
+    </div>  <!-- #shopping_cart_inner -->
   </div>  <!-- #shopping_cart -->
+  <div id="random_walk_display">
+    <svg id="barChart" width="512" height="512"></svg>
+  </div>  <!-- #random_walk_display -->
+
+
+
   </div>  <!-- #right -->
   </div>  <!-- #container -->
 

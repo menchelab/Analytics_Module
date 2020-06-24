@@ -1,19 +1,13 @@
-.disable-select {
-    user-select: none; /* supported by Chrome and Opera */
-   -webkit-user-select: none; /* Safari */
-   -khtml-user-select: none; /* Konqueror HTML */
-   -moz-user-select: none; /* Firefox */
-   -ms-user-select: none; /* Internet Explorer/Edge */
+:focus{
+
+    user-select: none;
+    outline: none !important;
 }
 /*disable dragging on images */
-img{-webkit-user-drag: none;
-}
-
-#container {
-  width: 100%;
-  background-color: black;
-}
-
+/* img{-webkit-user-drag: none;
+        
+} */
+ 
 #left {
   display: inline-block;
   width: 60%;
@@ -29,20 +23,90 @@ img{-webkit-user-drag: none;
   vertical-align:top;
 }
 
-/* added comment */
-.ui-slider-horizontal {
-  margin: 30px 8px 30px 8px;
-  height: 12px;
+.disable-select {
+     
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 
+.swagLabelSmall {
+
+    color:white;
+    font-size:12px;
+    /* font: 'Roboto'; */
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+}
+
+.swagLabel {
+    color:white;
+    font-size:24px;
+    /* font: 'Roboto'; */
+    font-family: 'Roboto', sans-serif;
+    font-weight: lighter;
+}
+/* added comment */
+
+.ui-widget-header {
+	
+	background: #333333 url("images/network1.gif") 100% 100% repeat; 
+	font-weight: lighter;
+}
+
+.ui-widget .ui-widget{
+     font-size:20px;
+
+}
+
+.ui-widget.ui-widget-content {
+    border: 0px;
+    outline: none;
+    }
+    
+.ui-button {
+    font-weight: normal;
+    outline: none;
+    padding: 2px 5px;
+    margin: 3px 3px;
+    
+}
+
+
+.ui-slider.ui-slider-horizontal {
+  margin: 0px 0px 5px 0px;
+  height: 40px;
+  /* border: 1px solid #666666; */
+  background: transparent url(images/slider2.png);
+}
+.ui-slider-range.ui-corner-all.ui-widget-header.ui-slider-range-max{
+
+   background: #000000 url(images/slider1.png);
+   /* border: 1px solid #666666; */
+}
+
+
+
 .ui-slider .ui-slider-handle {
-	position: absolute;
+	/* position: absolute; */
+    border: 0px solid #666666;
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+    top: -0em;
+    left: -0.1em;
 	z-index: 2;
 	width: 40px;
 	height: 40px;
 	cursor: default;
-	-ms-touch-action: none;
-  touch-action: none;
+	 
+   touch-action: none;
+   background: transparent url(images/slider_customHandle.png) no-repeat 0 0;
 }
 
 
@@ -66,12 +130,22 @@ img{-webkit-user-drag: none;
 .ui-state-focus,
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus,
-.ui-button:hover,
+.ui-button:hover,  
 .ui-button:focus {
-	border: 1px solid #0f0f0f;
+	border: 0px solid #666666;
 	background: #0f0f0f;
-	font-weight: bold;
+	font-weight: normal;
 	color: #ffffff;
+    outline: 1px
+}
+
+.ui-slider-handle:hover,
+.ui-slider-handle:focus {
+	border: 0px solid #1c58fb;
+	background: transparent url(images/slider_customHandle_active.png) no-repeat 0 0;
+	font-weight: normal;
+    outline: none;
+	/* color: #ffffff; */
 }
 
 /* for debugging i make the background of body and ui widget contents transparent */
@@ -84,4 +158,25 @@ img{-webkit-user-drag: none;
   /* color: white; */
   /* background-color:rgba(0, 0, 0, 0); */
 /* } */
+.bar {
+  /* fill: steelblue; */
+}
 
+.bar:hover {
+  fill: #7500fa;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: white;
+  stroke: white;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
