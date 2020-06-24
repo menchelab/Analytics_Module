@@ -341,6 +341,29 @@ $("#upload_form").submit(function(event) {
 
 });
 
+
+$(function() {
+  $('.hover_button').on('hover', function() {
+    if($(this).hasClass('selected')) {
+      deselect($(this));
+    } else {
+      $(this).addClass('selected');
+      $('.pop').slideFadeToggle();
+    }
+    return false;
+  }
+  );
+
+  $('.close').on('click', function() {
+    deselect($('#contact'));
+    return false;
+  });
+});
+
+$.fn.slideFadeToggle = function(easing, callback) {
+  return this.animate({ opacity: 'toggle', height: 'toggle' }, 'fast', easing, callback);
+};
+
   ///////INIT HERE
 
  GetDbFileNames();

@@ -119,12 +119,12 @@ function GetDbSearchTerms(name, namespace, search_attr_id) {
 }
 
 function createButton(Bname,Bid,Parent, search_attr_id) {
+  console.log("creating hover");
 
     var r=$('<input/>').attr({
         type: "button",
         id: Bid,
-        value: Bname
-
+        value: Bname,
     });
     Parent.append(r);
     $(r).button();
@@ -132,6 +132,7 @@ function createButton(Bname,Bid,Parent, search_attr_id) {
         $("#searchInput" + search_attr_id).text(Bname);
         $("#searchInput" + search_attr_id).attr("searchID",Bid);
     });
+
 }
 
 function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id) {
@@ -152,18 +153,41 @@ function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id)
     });
 }
 
+function deselect(e) {
+  $('.pop').hide(function() {
+    e.removeClass('selected');
+  });    
+}
+
 function createNodeButton(Bname,Bsym,Bid,Parent) {
  //for resultList
 
     var r=$('<input/>').attr({
         type: "button",
         id: Bid,
-        value:Bsym + " - " + Bname
+        value: Bsym
 
     });
     var p = '#' + Parent;
     $(p).append(r);
     $(r).button();
+    console.log("creating hover");
+      $(r).hover (function(event) {
+        console.log("hovering");
+        console.log(event.pageX);
+        let left = event.pageX;
+        let top = event.pageY;
+        if($(r).hasClass('selected')) {
+          deselect($(this));
+        } else {
+          $(this).addClass('selected');
+          $('.pop').html(Bname)
+          $('.pop').css({top:top, left:left})
+          $('.pop').show();
+        }
+        return false;
+      }
+    );
     $(r).click(function() {
        // $("#searchInput1").text(Bname);
       //  $("#searchInput1").attr("searchID",Bid);
@@ -407,7 +431,6 @@ function PopulateShoppingCart() {
   $('#selection_name_button').prop('disabled', false).css('opacity', 1.0);
   $('#selection_name_input').val(mySelectionName).css('opacity', 1.0);
   for (var i = 0; i < mySelection.length; i++) {
-    console.log(mySelection[i].name);
     createNodeButton(mySelection[i].name,
       mySelection[i].symbol,mySelection[i].node_id,
       "shopping_cart_inner");
