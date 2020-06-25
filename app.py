@@ -167,7 +167,7 @@ def random_walk(db_namespace):
     #
     # out_str = jsonify(edges)# + str(jsonify(edges))
     
-    return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements))
+    return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()

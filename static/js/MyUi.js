@@ -105,12 +105,19 @@ $(function () {
       range: "max",
       min: 1,
       max: 100,
-      value: 20,
+      value: 90,
       slide: function (event, ui) {
         $("#restart_probability").html(ui.value / 100);
       }
     });
-    $("#restart_probability").val($("#slider-range-min").slider("value"));
+  });
+
+  $("#start_randomwalk_button").click( function() {
+    let nodes = [2, 1234];
+    let restart_probability = $("#slider-restart_probability").slider("value") / 100;
+
+    startRandomWalk(restart_probability, nodes);
+
   });
 
 
@@ -228,16 +235,16 @@ $("#searchPredicate1-button").hide();
 
   //buttons fuer randomwalk
 
-  $(function () {
-    $("#start_randomwalk_button").button();
-    $("#start_randomwalk_button").click(function (event) {
-      event.preventDefault();
-      var span_Text = document.getElementById("restart_probability").innerText;
-      console.log(span_Text)
-      // ue4("StartRandomWalk", span_Text);
-      reloadForceLayout (inputdata1);
-    });
-  });
+// $(function () {
+//     $("#start_randomwalk_button").button();
+//     $("#start_randomwalk_button").click(function (event) {
+//       event.preventDefault();
+//       var span_Text = document.getElementById("restart_probability").innerText;
+//       console.log(span_Text)
+//       // ue4("StartRandomWalk", span_Text);
+//       reloadForceLayout (inputdata1);
+//     });
+//   });
 
   $(function () {
     $("#clear_randomwalk_button").button();
