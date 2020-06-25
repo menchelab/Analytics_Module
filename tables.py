@@ -13,20 +13,20 @@ import pymysql
 import pymysql.cursors
 import random
 import networkx as nx
-from werkzeug.contrib.cache import SimpleCache
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
-def get_cached_edges(db_namespace):
+def get_cached_edges(cache, db_namespace):
     zkey = "edges_" + db_namespace
     dtc = cache.get(zkey)
     if dtc is None:
+        print("!!!!!!! querying")
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
-        """ % namespace
+        """ % db_namespace
         cursor = Base.execute_query(query)
         edges = cursor.fetchall()
-        edges = [[x["node1_id"], x["node2_id"]] for x in edges]
+        dtc = [[x["node1_id"], x["node2_id"]] for x in edges]
         cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
     return dtc
 
@@ -195,7 +195,7 @@ class Node:
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
         num_trials = 100000
 
-        edges = get_cached_edges(namespace)
+        edges = get_cached_edges(cache, namespace)
         neighbors = {}
         for edge in edges:
             if edge[0] not in neighbors.keys():

@@ -240,8 +240,9 @@ def get_attribute_taxonomy(db_namespace, root_node_id):
     zkey = 'attribute_taxonomy_parents-%s-%d' % (db_namespace, root_node_id)
     dtc = cache.get(zkey)
     if dtc is None:
+        print("!!FEFDKJBFSKD")
         dtc = AttributeTaxonomy.construct_taxonomy(db_namespace, root_node_id)
-        cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24)
+        cache.set(zkey, dtc, timeout=5 * 60 * 60 * 24 * 1000)
     return dtc
 
 @app.route("/api/<string:db_namespace>/attribute_taxonomy/<int:root_node_id>", methods=['GET'])
