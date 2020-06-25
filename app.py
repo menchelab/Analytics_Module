@@ -155,14 +155,19 @@ def random_walk(db_namespace):
         data = request.args
 #    node_ids = data.node_ids
     node_ids = [int(x) for x in data['node_ids']]
-    variants = [int(x) for x in data['variants']]
+    if 'variants' in data.keys():
+        variants = [int(x) for x in data['variants']]
+    else:
+        variants = []
 
     # print(node_ids)
     #node_ids = [int(x) for x in data.getlist("node_ids")]
     restart_probability = data["restart_probability"]
     restart_probability = float(restart_probability or 0.9)
-    max_elements = data["max_elements"]
-    max_elements = int(max_elements or 200)
+    if "max_elements" in data.keys():
+        max_elements = data["max_elements"]
+    else:
+        max_elements = 200
     # nodes, edges =  Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency)
     #
     # out_str = jsonify(edges)# + str(jsonify(edges))
