@@ -276,9 +276,10 @@ $('form :input').on('change input', function() {
   if (namespace == "New") {
     existing_selections = allNamespaces.map(function(x) {return x.namespace});
     let new_name = formData.get("new_name");
-    console.log(new_name);
-    console.log(existing_selections);
-    if (existing_selections.includes(new_name)) {
+      $("#submit_warnings").html("Please provide a new name!")
+      $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
+    if (new_name == "") {
+    } else if (existing_selections.includes(new_name)) {
       $("#submit_warnings").html("This name is already taken!")
       $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
       return
@@ -303,6 +304,7 @@ $('form :input').on('change input', function() {
   $("#submit_warnings").html("Please add at least one object to upload!")
   $("#upload_button").attr("disabled", true).addClass("ui-state-disabled");
 });
+
 
 
 
@@ -338,6 +340,29 @@ $("#upload_form").submit(function(event) {
   });
 
 });
+
+
+$(function() {
+  $('.hover_button').on('hover', function() {
+    if($(this).hasClass('selected')) {
+      deselect($(this));
+    } else {
+      $(this).addClass('selected');
+      $('.pop').slideFadeToggle();
+    }
+    return false;
+  }
+  );
+
+  $('.close').on('click', function() {
+    deselect($('#contact'));
+    return false;
+  });
+});
+
+$.fn.slideFadeToggle = function(easing, callback) {
+  return this.animate({ opacity: 'toggle', height: 'toggle' }, 'fast', easing, callback);
+};
 
   ///////INIT HERE
 

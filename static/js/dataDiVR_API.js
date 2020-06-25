@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-var dbprefix = ""
+var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+// var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -119,12 +119,12 @@ function GetDbSearchTerms(name, namespace, search_attr_id) {
 }
 
 function createButton(Bname,Bid,Parent, search_attr_id) {
+  console.log("creating hover");
 
     var r=$('<input/>').attr({
         type: "button",
         id: Bid,
-        value: Bname
-
+        value: Bname,
     });
     Parent.append(r);
     $(r).button();
@@ -132,6 +132,7 @@ function createButton(Bname,Bid,Parent, search_attr_id) {
         $("#searchInput" + search_attr_id).text(Bname);
         $("#searchInput" + search_attr_id).attr("searchID",Bid);
     });
+
 }
 
 function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id) {
@@ -152,18 +153,41 @@ function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id)
     });
 }
 
+function deselect(e) {
+  $('.pop').hide(function() {
+    e.removeClass('selected');
+  });    
+}
+
 function createNodeButton(Bname,Bsym,Bid,Parent) {
  //for resultList
 
     var r=$('<input/>').attr({
         type: "button",
         id: Bid,
-        value:Bsym + " - " + Bname
+        value: Bsym
 
     });
     var p = '#' + Parent;
     $(p).append(r);
     $(r).button();
+    console.log("creating hover");
+      $(r).hover (function(event) {
+        console.log("hovering");
+        console.log(event.pageX);
+        let left = event.pageX;
+        let top = event.pageY;
+        if($(r).hasClass('selected')) {
+          deselect($(this));
+        } else {
+          $(this).addClass('selected');
+          $('.pop').html(Bname)
+          $('.pop').css({top:top, left:left})
+          $('.pop').show();
+        }
+        return false;
+      }
+    );
     $(r).click(function() {
        // $("#searchInput1").text(Bname);
       //  $("#searchInput1").attr("searchID",Bid);
@@ -407,9 +431,35 @@ function PopulateShoppingCart() {
   $('#selection_name_button').prop('disabled', false).css('opacity', 1.0);
   $('#selection_name_input').val(mySelectionName).css('opacity', 1.0);
   for (var i = 0; i < mySelection.length; i++) {
-    console.log(mySelection[i].name);
     createNodeButton(mySelection[i].name,
       mySelection[i].symbol,mySelection[i].node_id,
       "shopping_cart_inner");
   }
+}
+
+function startRandomWalk(restart_probability, nodes) {
+  let data = {}
+  data["restart_probability"] = 0.9
+  data["min_frequency"] = 0.00001
+  data["node_ids"] = [2, 1234]
+  payload = JSON.stringify(data);
+  console.log(payload)
+  path = dbprefix + "/api/ppi/node/random_walk";
+    $.ajax({
+        type: "POST",
+        url: path,
+        contentType: "application/json",
+        data: payload,
+        dataType: "json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+        success: function(response) {
+
+          console.log(response);
+          drawBarChart(response)
+            },
+        error: function(err) {
+        console.log(err);
+        }
+    });
+
 }
