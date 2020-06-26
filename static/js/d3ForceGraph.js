@@ -59,8 +59,8 @@ function drawit(data) {
         .selectAll("circle")
         .data(data.nodes)
         .enter().append("circle")
-         .attr("r", function(d) { return d.frequency * data.numSeeds * 10 + 2; })
-          //.attr("r",10.44)
+        // .attr("r", function(d) { return d.frequency * data.numSeeds * 10 + 2; })
+          .attr("r",5)
         .attr("fill", function(d) {
             if (d.group == 0) {
               return "#fcba03";
@@ -113,6 +113,7 @@ function drawit(data) {
           d.fx = d.x;
           d.fy = d.y;
           logger( d.id);
+          $("#graphDisplay").text(d.symbol);
         }
         
         function dragged(d) {

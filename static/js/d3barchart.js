@@ -4,7 +4,7 @@
 // https://stackoverflow.com/questions/16236600/d3-js-force-layout-auto-zoom-scale-after-loading
 
 function clearBarChart(){
-  d3.selectAll("svg > *").remove();  
+  d3.selectAll("#barChart > *").remove();  
     
 }
     
@@ -62,12 +62,15 @@ var svg = d3.select("#barChart").append("svg")
       .attr("class", "bar")
       
       //.attr("x", function(d) { return x(d.frequency); })
-      .attr("width", function(d) {return x(d.frequency); } )
+      .attr("width", function(d) {return x(d.frequency + 0.0001); } )
       //.attr("y", function(d) { return y(d.id); })
       .attr("y", function(d) { return y(d.id); })
       .attr("height", y.bandwidth())
       .attr("fill", function(d) {
-            if (d.group == 0) {
+          
+            if (d.frequency == 0.00) { 
+              return "#616161";
+            } else if (d.group == 0) {
               return "#fcba03";
             } else if (d.group == 1) {
               return "#00548c";  //#00548c"
@@ -80,7 +83,7 @@ var svg = d3.select("#barChart").append("svg")
         .on("mousemove", function(d){
             
             //console.log(d.id);
-            $("#barchartdisplay").text(d.symbol + " " +d.frequency);
+            $("#barchartdisplay").text(d.symbol);
 /*             tooltip
               .style("left", d3.event.pageX - 50 + "px")
               .style("top", d3.event.pageY - 70 + "px")

@@ -7,6 +7,7 @@
 
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dataswimmer.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown.css') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -142,6 +143,7 @@
         <select name="searchMode1" id="searchMode1" style="display: none;">
           <option value="NEW">Start new selection</option>
           <option value="ADD">Add to current selection</option>
+          <option value="INT">Intersect with existing selection</option>
           <option value="SUB">Subtract from existing selection</option>
         </select>
         &nbsp;
@@ -180,7 +182,7 @@
       <li><a href="#shopping_cart"><img draggable="false" onmousedown="return false" height='60' width='60'
             src="{{ url_for('static', filename='img/active_open.png') }}" /></a></li>
     </ul>
-  <div class="shopping_cart" id="shopping_cart">
+  <div class="shopping_cart" id="shopping_cart" style="max-height:400px; overflow-y:scroll">
     <div class="shopping_cart_controls" id="shopping_cart_controls">
       <button id="clear_cart">Clear</button>
       <button id="save_cart">Save</button>
@@ -190,8 +192,12 @@
     </div>  <!-- #shopping_cart_inner -->
   </div>  <!-- #shopping_cart -->
   <div id="random_walk_display">
-    <svg id="barChart" width="512" height="512"></svg>
+    <svg id="barChart" width="500" height="500"></svg>
   </div>  <!-- #random_walk_display -->
+  <div id="force_graph">
+     <div id="graphDisplay"></div>
+     <svg id="forceLayout" width="500" height="500"></svg>
+  </div>
 
 
 

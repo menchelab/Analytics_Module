@@ -113,7 +113,7 @@ $(function () {
   });
 
   $("#start_randomwalk_button").click( function() {
-    let nodes = [2, 1234];
+    let nodes = $('#shopping_cart_inner').children().map(function() {return $(this).attr("id")});
     let restart_probability = $("#slider-restart_probability").slider("value") / 100;
 
     startRandomWalk(restart_probability, nodes);
@@ -228,8 +228,31 @@ $("#searchPredicate1-button").hide();
   $(function () {
     $("#SaveSearch").button();
     $("#SaveSearch").click(function (event) {
-        event.preventDefault();
-      console.log($('#searchMode1').val());
+      event.preventDefault();
+      let action = $('#searchMode1').val();
+      if (action == "NEW") {
+        mySelection = mySearchResult.slice();
+        mySelectionName = "";
+      } else if (action == "ADD") {
+        let existing_ids = mySelection.map(function(node) {return node.node_id})
+        mySearchResult.forEach(function(node) {
+          if (!(existing_ids.includes(node.node_id))) {
+            mySelection.push(node);
+          }
+        })
+      } else if (action == "INT") {
+        let new_ids = mySearchResult.map(function(node) {return node.node_id})
+        mySelection = mySelection.filter(function(node) {
+          var node_id = node.node_id;
+          return new_ids.includes(node.node_id);
+        })
+      } else if (action == "SUB") {
+        let new_ids = mySearchResult.map(function(node) {return node.node_id})
+        mySelection = mySelection.filter(function(node) {
+          return !(new_ids.includes(node.node_id));
+        })
+      }
+      PopulateShoppingCart();
     });
  });
 
@@ -262,7 +285,8 @@ $("#searchPredicate1-button").hide();
     PopulateShoppingCart();
   });
   $("#save_cart").click(function (event) {
-    SaveSelectionDB({"selection_name": $('#selection_name_input').val(), "node_ids": mySelection.map(item => item.node_id)});
+    SaveSelectionDB({"selection_name": $('#selection_name_input').val(),
+      "node_ids": mySelection.map(item => item.node_id)});
   });
 
 

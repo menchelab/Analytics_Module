@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-// var dbprefix = ""
+// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -14,6 +14,7 @@ var dbdata;
 var thisNamespace;
 var allNamespaces = [];
 var mySelection = [];
+var mySearchResult = [];
 var mySelectionName = "";
 
 
@@ -310,8 +311,8 @@ function SimpleSearch(id) {
             for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
               createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
             }
-            mySelection = mySelection.concat(response.nodes);
-            PopulateShoppingCart();
+            mySearchResult = mySelection.concat(response.nodes);
+            // PopulateShoppingCart();
             // Open the results tab, which is 4 when 0-indexed.
             $('#tabs').tabs( "option", "active", 3 );
 
@@ -324,7 +325,6 @@ function SimpleSearch(id) {
         }
     });
 //event.preventDefault();
-
 }
 
 function AddChild(parent, child, depth, search_attr_id) {
@@ -427,7 +427,6 @@ function PopulateShoppingCart() {
     $('#selection_name_input').val("").css('opacity', 0.5);
     return;
   }
-  console.log("here", mySelectionName);
   $('#selection_name_button').prop('disabled', false).css('opacity', 1.0);
   $('#selection_name_input').val(mySelectionName).css('opacity', 1.0);
   for (var i = 0; i < mySelection.length; i++) {
@@ -441,7 +440,7 @@ function startRandomWalk(restart_probability, nodes) {
   let data = {}
   data["restart_probability"] = 0.9
   data["min_frequency"] = 0.00001
-  data["node_ids"] = [2, 1234]
+  data["node_ids"] = Array.from(nodes)
   payload = JSON.stringify(data);
   console.log(payload)
   path = dbprefix + "/api/ppi/node/random_walk";
@@ -455,7 +454,8 @@ function startRandomWalk(restart_probability, nodes) {
         success: function(response) {
 
           console.log(response);
-          drawBarChart(response)
+          drawBarChart(response.nodes)
+          reloadForceLayout(response)
             },
         error: function(err) {
         console.log(err);

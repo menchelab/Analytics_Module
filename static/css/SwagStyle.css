@@ -7,34 +7,6 @@
 /* img{-webkit-user-drag: none;
         
 } */
- 
-#left {
-  display: inline-block;
-  width: 60%;
-  height: 100%;
-  background-color: black;
-  vertical-align:top;
-}
-#right {
-  display: inline-block;
-  width: 30%;
-  height: 100%;
-  background-color: black;
-  vertical-align:top;
-}
-
-.genepop {
-  background-color:#FFFFFF;
-  border:1px solid #999999;
-  cursor:default;
-  display:none;
-  margin-top: 15px;
-  position: absolute;
-  text-align:left;
-  width:394px;
-  z-index:50;
-  padding: 25px 25px 20px;
-}
 
 .disable-select {
      
@@ -171,6 +143,28 @@
   /* color: white; */
   /* background-color:rgba(0, 0, 0, 0); */
 /* } */
+/* width */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 6px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #0089cc; 
+  border-radius: 6px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #00abff; 
+}
+
 .bar {
   /* fill: steelblue; */
 }
@@ -181,6 +175,8 @@
 
 .axis {
   font: 10px sans-serif;
+    fill: white;
+  stroke: white;
 }
 
 .axis path,
@@ -192,4 +188,9 @@
 
 .x.axis path {
   display: none;
+}
+
+.g tick{
+      fill: white;
+  stroke: white;
 }
