@@ -192,6 +192,54 @@ class Node:
 
 
     @staticmethod
+    def gene_card(namespace, node, cache):
+        # num_trials = 100000
+
+        query = """
+            SELECT * FROM %s.gene_card WHERE node_id = %s
+        """ %(namespace,node)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        # print(data)
+        nid = [x["node_id"] for x in data][0]
+        symbol = [x["symbol"] for x in data][0]
+        name = [x["gene_name"] for x in data][0]
+        k = [x["degree"] for x in data][0]
+        funs = [x["functions"] for x in data][0]
+        dis = [x["diseases"] for x in data][0]
+        # print(nid,symbol,name,k)
+        
+        l_functions = []
+        for fs in funs.split('|'):
+            l_functions.append(fs)
+
+        l_diseases = []
+        for ds in dis.split('|'):
+            l_diseases.append(ds)
+        
+        # print('gene_data', gene_data)
+        query2 = """        
+            SELECT
+                aa.external_id symbol,
+                FLOOR(RAND()*(50-10)+10) value
+            FROM %s.nodes_attributes na
+            INNER JOIN %s.attributes aa
+            ON na.attribute_id = aa.id
+            WHERE na.node_id = %s
+            AND aa.namespace = 'GTEx'
+        """ %(namespace,namespace,node)
+        cursor = Base.execute_query(query2)
+        data2 = cursor.fetchall()
+        
+        gene_data = [{'node_id': nid,'symbol': symbol,'name': name, 'degree': k,
+                        'functions': l_functions, 'diseases': l_diseases,
+                    'tissue': data2}]
+        # print('gene_data', gene_data)
+
+        return gene_data
+
+
+    @staticmethod
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
         num_trials = 100000
 
@@ -347,6 +395,62 @@ class Node:
                 
         return out_str
         
+    @staticmethod
+    def layout(db_namespace, nodes,cache):
+        
+        # PPI GENERATOR
+        #DB query for edges
+        query = """
+                SELECT edges.node1_id, edges.node2_id
+                FROM %s.edges
+        """ % db_namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        G = nx.Graph()
+        for x in edges:
+            s = x['node1_id']
+            t = x['node2_id']
+            G.add_edge(s,t)
+            
+            
+        G_sub = nx.subgraph(G,nodes)
+
+        Glcc = G_sub.subgraph(max(nx.connected_components(G_sub), key=len))  # extract lcc graph
+
+        pos = nx.spring_layout(Glcc,dim=3)
+        
+        
+        # NORMALIZAION
+        l_x = [xyz[0] for k, xyz in sorted(pos.items())]
+        l_y = [xyz[1] for k, xyz in sorted(pos.items())]
+        l_z = [xyz[2] for k, xyz in sorted(pos.items())]
+        x_min = min(l_x)
+        x_max = max(l_x)
+        y_min = min(l_y)
+        y_max = max(l_y)
+        z_min = min(l_z)
+        z_max = max(l_z)
+        l_xn = [(x-x_min)/(x_max-x_min) for x in l_x]
+        l_yn = [(y-y_min)/(y_max-y_min) for y in l_y]
+        l_zn = [(z-z_min)/(z_max-z_min) for z in l_z]
+
+        pos_norm = {}
+        for i,gene in enumerate(sorted(pos.keys())):
+            pos_norm[gene] = (l_xn[i],l_yn[i],l_zn[i])
+        
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % db_namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+        
+        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
+        print('result:', result)
+        
+        
+        return result        
+
         
     @staticmethod
     def search(db_namespace, clauses):

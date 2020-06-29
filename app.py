@@ -174,6 +174,13 @@ def random_walk(db_namespace):
     
     return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
 
+@app.route('/api/<string:db_namespace>/node/gene_card', methods=['GET'])
+@cross_origin()
+def gene_card(db_namespace):
+    
+    node_id = request.args.get("node_id")
+    return jsonify(Node.gene_card(db_namespace, node_id, cache))
+
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
 def shortest_path(db_namespace):
@@ -199,6 +206,21 @@ def connect_set_dfs(db_namespace):
     
     return Node.connect_set_dfs(db_namespace, seeds, variants)
    
+
+
+@app.route('/api/<string:db_namespace>/node/sub_layout', methods=['POST'])
+@cross_origin()
+def sub_layout(db_namespace):
+
+    data =request.get_json()
+
+#    node_ids = data.node_ids
+    node_ids = [int(x) for x in data['node_ids']]
+
+    return jsonify(Node.layout(db_namespace,node_ids, cache))
+
+
+
 
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
