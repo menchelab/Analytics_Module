@@ -7,9 +7,8 @@
 
 <head>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dataswimmer.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dataswimmer.css') }}">
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
   <!-- <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" -->
@@ -32,9 +31,11 @@
 
 <body>
 
-  <div class="genepop pop">
-        <p><input type="submit" value="Send Message" name="commit" id="message_submit"/> or <a class="close" href="/">Cancel</a></p>
-    </form>
+  <div class="genepop pop" id="node_popup">
+    <p id=node_name></p>
+    <a id=show_attributes_list href="">Show attributes</a>
+    <a id=node_popup_close href="">Close</a>
+    <p id=attributes_list hidden></p>
   </div>
 
 
@@ -52,8 +53,6 @@
             src="{{ url_for('static', filename='img/active_pin.png') }}" /></a></li>
       <li><a href="#tab_analytics"><img draggable="false" onmousedown="return false" height='60' width='60'
             src="{{ url_for('static', filename='img/active_gears.png') }}" /></a></li>
-      <li><a href="#tab_info"><img draggable="false" onmousedown="return false" height='60' width='60'
-            src="{{ url_for('static', filename='img/active_pub.png') }}" /></a></li>
     </ul>
 
     <div id="tab_namespaces">
@@ -149,7 +148,7 @@
         &nbsp;
         <button name="SaveSearch" id="SaveSearch">SAVE</button>
        </p>
-      <div id="ResultList">
+      <div id="ResultList" style="max-height:400px; overflow-y:scroll">
     </div>
     </div>
     <div id="tab_analytics">
@@ -171,9 +170,6 @@
       <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script> -->
     </div>
 
-    <div id="tab_info">
-      <p>PUBLICATIONS</p>
-    </div>
   </div>  <!-- #tabs -->
   </div>  <!-- #left -->
 

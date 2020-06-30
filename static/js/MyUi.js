@@ -71,9 +71,13 @@ $(function () {
         dataType: "json",
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
       success: function(response) {
-        mySelection = response.nodes;
-        mySelectionName = name;
-        PopulateShoppingCart();
+        mySearchResult = response.nodes;
+        PopulateSearchResults();
+        if (mySelection.length == 0 && mySelectionName.length == 0) {
+          mySelection = mySearchResult.slice();
+          mySelectionName = name;
+          PopulateShoppingCart();
+        }
         // Open the results tab, which is 4 when 0-indexed.
         $('#tabs').tabs( "option", "active", 3 );
       }
@@ -112,6 +116,7 @@ $(function () {
     });
   });
 
+    $("#start_randomwalk_button").button();
   $("#start_randomwalk_button").click( function() {
     let nodes = $('#shopping_cart_inner').children().map(function() {return $(this).attr("id")});
     let restart_probability = $("#slider-restart_probability").slider("value") / 100;
@@ -394,6 +399,7 @@ $(function() {
 $.fn.slideFadeToggle = function(easing, callback) {
   return this.animate({ opacity: 'toggle', height: 'toggle' }, 'fast', easing, callback);
 };
+
 
   ///////INIT HERE
 
