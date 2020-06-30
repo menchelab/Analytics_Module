@@ -13,6 +13,7 @@ import pymysql
 import pymysql.cursors
 import random
 import networkx as nx
+import numpy as np
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_cached_edges(cache, db_namespace):
@@ -221,7 +222,7 @@ class Node:
         query2 = """        
             SELECT
                 aa.external_id symbol,
-                FLOOR(RAND()*(50-10)+10) value
+                na.value value
             FROM %s.nodes_attributes na
             INNER JOIN %s.attributes aa
             ON na.attribute_id = aa.id
@@ -449,6 +450,54 @@ class Node:
         print('result:', result)
         
         
+        return result   
+        
+    @staticmethod
+    def scale_selection(db_namespace, nodes,layout,cache):
+        # scaling factor
+        a = .2
+
+        str_nodes = ",".join(nodes)
+        # print(str_nodes)
+        query = """
+                SELECT
+                    node_id,
+                    x_loc,
+                    y_loc,
+                    z_loc
+                FROM %s.layouts
+                WHERE namespace = '%s'
+                AND node_id in (%s)
+        """ %(db_namespace,layout,str_nodes)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        print(data)
+        d_node_xyz = {x["node_id"]: (x["x_loc"],x["y_loc"],x["z_loc"]) for x in data}
+        xm = np.mean([x['x_loc'] for x in data])
+        ym = np.mean([x['y_loc'] for x in data])
+        zm = np.mean([x['z_loc'] for x in data])
+        
+        d_node_xyz_scaled = {}
+        for node, xyz in d_node_xyz.items():
+            x = xyz[0]
+            xs =  a*x + (1-a)*xm
+            y = xyz[1]
+            ys =  a*y + (1-a)*ym
+            z = xyz[2]
+            zs =  a*z + (1-a)*zm
+            d_node_xyz_scaled[node] = (xs,ys,zs)
+            
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % db_namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+
+        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
+        # print('result:', result)
+        #
+        
         return result        
 
         
@@ -600,8 +649,6 @@ class Attribute:
         """ % (db_namespace, attr_id)
 
 
-
-
     @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
@@ -698,6 +745,26 @@ class Attribute:
         cursor = Base.execute_query(query)
         return {"status":"OK"}
 
+    @staticmethod
+    def attribute2attribute(db_namespace,att_id):
+        query = """
+                SELECT
+                    # aa1.external_id,
+                    # aa1.name,
+                    # aa2.external_id,
+                    aa2.name phenotype
+                FROM %s.attribute_relations ar
+                INNER JOIN %s.attributes aa1
+                ON aa1.id = ar.attr1_id
+                INNER JOIN %s.attributes aa2
+                ON aa2.id = ar.attr2_id
+                WHERE ar.attr1_id = '%s'
+        """ % (db_namespace,db_namespace,db_namespace,att_id)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        print(data)
+        # return [x["namespace"] for x in namespaces]
+        return data
 
 class AttributeTaxonomy:
     @staticmethod

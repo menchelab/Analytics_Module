@@ -219,6 +219,17 @@ def sub_layout(db_namespace):
 
     return jsonify(Node.layout(db_namespace,node_ids, cache))
 
+@app.route('/api/<string:db_namespace>/node/scale_selection', methods=['POST'])
+@cross_origin()
+def scale_selection(db_namespace):
+
+    data =request.get_json()
+
+#    node_ids = data.node_ids
+    node_ids = [str(x) for x in data['node_ids']]
+    layout =  data['layout']
+
+    return jsonify(Node.scale_selection(db_namespace,node_ids,layout, cache))
 
 
 
@@ -305,6 +316,13 @@ def create_selection(db_namespace):
     if not selection_name or not node_ids:
         return jsonify({"status": "FAIL", "reason": "invalid request"})
     return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
+
+@app.route("/api/<string:db_namespace>/attribute/attribute2attribute", methods=["GET"])
+@cross_origin()
+def attribute2attribute(db_namespace):
+    att_id = request.args.get("att_id")
+    return jsonify(Attribute.attribute2attribute(db_namespace,att_id))
+
 
 
 ###########
