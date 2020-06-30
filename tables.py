@@ -751,7 +751,7 @@ class Attribute:
                 SELECT
                     # aa1.external_id,
                     # aa1.name,
-                    # aa2.external_id,
+                    aa2.id int_id,
                     aa2.name phenotype
                 FROM %s.attribute_relations ar
                 INNER JOIN %s.attributes aa1
