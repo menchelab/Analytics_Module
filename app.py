@@ -168,11 +168,42 @@ def random_walk(db_namespace):
         max_elements = data["max_elements"]
     else:
         max_elements = 200
-    # nodes, edges =  Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency)
-    #
-    # out_str = jsonify(edges)# + str(jsonify(edges))
-    
+
     return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
+
+@app.route('/api/<string:db_namespace>/node/random_walk_dock2', methods=['GET', 'POST'])
+@cross_origin()
+def random_walk_dock2(db_namespace):
+    if request.method == 'POST':
+        #data = request.form
+        data =request.get_json()
+    else:
+        data = request.args
+#    node_ids = data.node_ids
+    node_ids = [int(x) for x in data['node_ids']]
+    if 'variants' in data.keys():
+        variants = [int(x) for x in data['variants']]
+    else:
+        variants = []
+
+    # print(node_ids)
+    #node_ids = [int(x) for x in data.getlist("node_ids")]
+    restart_probability = data["restart_probability"]
+    restart_probability = float(restart_probability or 0.9)
+    if "max_elements" in data.keys():
+        max_elements = data["max_elements"]
+    else:
+        max_elements = 200
+
+    return jsonify(Node.random_walk_dock2(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
+
+
+@app.route('/api/<string:db_namespace>/node/gene_card', methods=['GET'])
+@cross_origin()
+def gene_card(db_namespace):
+    
+    node_id = request.args.get("node_id")
+    return jsonify(Node.gene_card(db_namespace, node_id, cache))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
@@ -197,8 +228,34 @@ def connect_set_dfs(db_namespace):
     seeds = data["seeds"]
     variants = data["variants"]
     
-    return Node.connect_set_dfs(db_namespace, seeds, variants)
+    return Node.connect_set_dfs(db_namespace, seeds, variants,cache)
    
+
+
+@app.route('/api/<string:db_namespace>/node/sub_layout', methods=['POST'])
+@cross_origin()
+def sub_layout(db_namespace):
+
+    data =request.get_json()
+
+#    node_ids = data.node_ids
+    node_ids = [int(x) for x in data['node_ids']]
+
+    return jsonify(Node.layout(db_namespace,node_ids, cache))
+
+@app.route('/api/<string:db_namespace>/node/scale_selection', methods=['POST'])
+@cross_origin()
+def scale_selection(db_namespace):
+
+    data =request.get_json()
+
+#    node_ids = data.node_ids
+    node_ids = [str(x) for x in data['node_ids']]
+    layout =  data['layout']
+
+    return jsonify(Node.scale_selection(db_namespace,node_ids,layout, cache))
+
+
 
 @app.route("/api/<string:namespace>/node/search", methods=['GET', 'POST'])
 @cross_origin()
@@ -283,6 +340,13 @@ def create_selection(db_namespace):
     if not selection_name or not node_ids:
         return jsonify({"status": "FAIL", "reason": "invalid request"})
     return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
+
+@app.route("/api/<string:db_namespace>/attribute/attribute2attribute", methods=["GET"])
+@cross_origin()
+def attribute2attribute(db_namespace):
+    att_id = request.args.get("att_id")
+    return jsonify(Attribute.attribute2attribute(db_namespace,att_id))
+
 
 
 ###########

@@ -13,6 +13,7 @@ import pymysql
 import pymysql.cursors
 import random
 import networkx as nx
+import numpy as np
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_cached_edges(cache, db_namespace):
@@ -192,6 +193,54 @@ class Node:
 
 
     @staticmethod
+    def gene_card(namespace, node, cache):
+        # num_trials = 100000
+
+        query = """
+            SELECT * FROM %s.gene_card WHERE node_id = %s
+        """ %(namespace,node)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        # print(data)
+        nid = [x["node_id"] for x in data][0]
+        symbol = [x["symbol"] for x in data][0]
+        name = [x["gene_name"] for x in data][0]
+        k = [x["degree"] for x in data][0]
+        funs = [x["functions"] for x in data][0]
+        dis = [x["diseases"] for x in data][0]
+        # print(nid,symbol,name,k)
+        
+        l_functions = []
+        for fs in funs.split('|'):
+            l_functions.append(fs)
+
+        l_diseases = []
+        for ds in dis.split('|'):
+            l_diseases.append(ds)
+        
+        # print('gene_data', gene_data)
+        query2 = """        
+            SELECT
+                aa.external_id symbol,
+                na.value value
+            FROM %s.nodes_attributes na
+            INNER JOIN %s.attributes aa
+            ON na.attribute_id = aa.id
+            WHERE na.node_id = %s
+            AND aa.namespace = 'GTEx'
+        """ %(namespace,namespace,node)
+        cursor = Base.execute_query(query2)
+        data2 = cursor.fetchall()
+        
+        gene_data = [{'node_id': nid,'symbol': symbol,'name': name, 'degree': k,
+                        'functions': l_functions, 'diseases': l_diseases,
+                    'tissue': data2}]
+        # print('gene_data', gene_data)
+
+        return gene_data
+
+
+    @staticmethod
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
         num_trials = 100000
 
@@ -237,7 +286,6 @@ class Node:
         # print('kept_values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         kept_values = kept_values[:max_elements]
-        # print('kept_values:', len(kept_values),kept_values)
         
         # add variants if not empty
         if len(variants)>0:
@@ -247,23 +295,13 @@ class Node:
             kept_values +=  add_variants
             # print('added variants', add_variants)
 
-        
-        # print('out nodes:', ','.join(map(str,kept_values)))
         kept_node_ids = [x['id'] for x in kept_values]
-        
-        
-        
-        # print('visited nodes type', type(kept_values))
-        # print('visited nodes', kept_node_ids)
 
         edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
         # print('edges:', edges_kept)
         l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
         d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
-        # for s,t in edges_kept:
-        # print('out edges:', l_edges_kept)
-        # return '{"nodes":' + jsonify(kept_values) +'{"links":' + jsonify(l_edges_kept) + '}'
-        # return "{'nodes':[" + ','.join(map(str,kept_values)) + "],'links':[" +  ','.join(map(str,l_edges_kept)) + ']}'
+
         return d_data_kept
         
     @staticmethod
@@ -295,21 +333,28 @@ class Node:
         
         
     @staticmethod
-    def connect_set_dfs(db_namespace, seeds, variants):
+    def connect_set_dfs(db_namespace, seeds, variants, cache):
         
         # PPI GENERATOR
         #DB query for edges
-        query = """
-                SELECT edges.node1_id, edges.node2_id
-                FROM %s.edges
-        """ % db_namespace
-        cursor = Base.execute_query(query)
-        edges = cursor.fetchall()
+        # query = """
+        #         SELECT edges.node1_id, edges.node2_id
+        #         FROM %s.edges
+        # """ % db_namespace
+        # cursor = Base.execute_query(query)
+        # edges = cursor.fetchall()
+        edges = get_cached_edges(cache, db_namespace)
+        
         G = nx.Graph()
         for x in edges:
-            s = x['node1_id']
-            t = x['node2_id']
+            # s = x['node1_id']
+            # t = x['node2_id']
+            s = x[0]
+            t = x[1]
             G.add_edge(s,t)
+
+        print(G.number_of_nodes())
+        print(G.number_of_edges())
             
         print(seeds)
         
@@ -346,7 +391,219 @@ class Node:
         out_str = out_str[:-1] + ']}'
                 
         return out_str
+
+################################################################################
+################################################################################
+    @staticmethod
+    def random_walk_dock2(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
+        num_trials = 100000
+
+        edges = get_cached_edges(cache, namespace)
+        neighbors = {}
+        for edge in edges:
+            if edge[0] not in neighbors.keys():
+                neighbors[edge[0]] = [edge[1]]
+            else:
+                neighbors[edge[0]].append(edge[1])
+        visited_nodes = [0] * 20000
+        starting_node = random.choice(starting_nodes)
+
+
+        for i in range (num_trials):
+            if random.random() < restart_probability:
+                starting_node = random.choice(starting_nodes)
+            else:
+                starting_node = random.choice(neighbors[starting_node])
+            visited_nodes[starting_node] += 1
+
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+
+        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
+        d_node2group = {}
+        # print('visited nodes',visited_nodes )
+        for i, x in enumerate(visited_nodes):
+            if i in starting_nodes:
+                d_node2group[i] = 0
+            elif i in variants:
+                d_node2group[i] = 2
+            else:
+                d_node2group[i] = 1
+                
+        min_frequency = 0         
+        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+
+        # print('kept_values:', kept_values)
+        kept_values.sort(key=lambda x: x['frequency'], reverse=True)
+        kept_values = kept_values[:max_elements]
         
+        # add variants if not empty
+        if len(variants)>0:
+            add_variants = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i in variants]
+            add_variants.sort(key=lambda x: x['frequency'], reverse=True)
+            # print('added variants', add_variants)
+            kept_values +=  add_variants
+            # print('added variants', add_variants)
+
+        # kept_node_ids = [x['id'] for x in kept_values]
+        #
+        # edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
+        # print('edges:', edges_kept)
+        # l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        # d_data_kept = {'nodes': kept_values,'links': l_edges_kept}
+
+
+        ##########################
+        # Attach variants to seeds with deep-first-search 
+        G = nx.Graph()
+        for x in edges:
+            # s = x['node1_id']
+            # t = x['node2_id']
+            s = x[0]
+            t = x[1]
+            G.add_edge(s,t)
+
+        # print(G.number_of_nodes())
+        # print(G.number_of_edges())
+        seeds = starting_nodes
+        print(seeds)
+        
+        l_linkerset = []
+        for start_variant in variants:
+            # start_variant = list(l_vars_onppi)[1]
+            # print('start at variant: %s (k = %s)' %(start_variant,G_ppi.degree(start_variant)))
+            cc = 1
+            for path in nx.dfs_edges(G,start_variant,2):
+                if path[0] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=1')
+                    l_linkerset.append(path[0])
+                if path[1] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=2')
+                    l_linkerset.append(path[0])
+                    l_linkerset.append(path[1])
+                else:
+                    pass
+            #         print(cc,set(path))
+                cc += 1
+        set_nodes = set(l_linkerset) | set(seeds) | set(variants)
+
+        edges_kept = [(x,y) for x,y in edges if (x in set_nodes and y in set_nodes)]
+
+        l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
+
+        return d_data_kept        
+################################################################################
+################################################################################        
+        
+    @staticmethod
+    def layout(db_namespace, nodes,cache):
+        
+        # PPI GENERATOR
+        #DB query for edges
+        query = """
+                SELECT edges.node1_id, edges.node2_id
+                FROM %s.edges
+        """ % db_namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        G = nx.Graph()
+        for x in edges:
+            s = x['node1_id']
+            t = x['node2_id']
+            G.add_edge(s,t)
+            
+            
+        G_sub = nx.subgraph(G,nodes)
+
+        Glcc = G_sub.subgraph(max(nx.connected_components(G_sub), key=len))  # extract lcc graph
+
+        pos = nx.spring_layout(Glcc,dim=3)
+        
+        
+        # NORMALIZAION
+        l_x = [xyz[0] for k, xyz in sorted(pos.items())]
+        l_y = [xyz[1] for k, xyz in sorted(pos.items())]
+        l_z = [xyz[2] for k, xyz in sorted(pos.items())]
+        x_min = min(l_x)
+        x_max = max(l_x)
+        y_min = min(l_y)
+        y_max = max(l_y)
+        z_min = min(l_z)
+        z_max = max(l_z)
+        l_xn = [(x-x_min)/(x_max-x_min) for x in l_x]
+        l_yn = [(y-y_min)/(y_max-y_min) for y in l_y]
+        l_zn = [(z-z_min)/(z_max-z_min) for z in l_z]
+
+        pos_norm = {}
+        for i,gene in enumerate(sorted(pos.keys())):
+            pos_norm[gene] = (l_xn[i],l_yn[i],l_zn[i])
+        
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % db_namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+        
+        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
+        print('result:', result)
+        
+        
+        return result   
+        
+    @staticmethod
+    def scale_selection(db_namespace, nodes,layout,cache):
+        # scaling factor
+        a = .2
+
+        str_nodes = ",".join(nodes)
+        # print(str_nodes)
+        query = """
+                SELECT
+                    node_id,
+                    x_loc,
+                    y_loc,
+                    z_loc
+                FROM %s.layouts
+                WHERE namespace = '%s'
+                AND node_id in (%s)
+        """ %(db_namespace,layout,str_nodes)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        print(data)
+        d_node_xyz = {x["node_id"]: (x["x_loc"],x["y_loc"],x["z_loc"]) for x in data}
+        xm = np.mean([x['x_loc'] for x in data])
+        ym = np.mean([x['y_loc'] for x in data])
+        zm = np.mean([x['z_loc'] for x in data])
+        
+        d_node_xyz_scaled = {}
+        for node, xyz in d_node_xyz.items():
+            x = xyz[0]
+            xs =  a*x + (1-a)*xm
+            y = xyz[1]
+            ys =  a*y + (1-a)*ym
+            z = xyz[2]
+            zs =  a*z + (1-a)*zm
+            d_node_xyz_scaled[node] = (xs,ys,zs)
+            
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % db_namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+
+        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
+        # print('result:', result)
+        #
+        
+        return result        
+
         
     @staticmethod
     def search(db_namespace, clauses):
@@ -496,8 +753,6 @@ class Attribute:
         """ % (db_namespace, attr_id)
 
 
-
-
     @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
@@ -594,6 +849,26 @@ class Attribute:
         cursor = Base.execute_query(query)
         return {"status":"OK"}
 
+    @staticmethod
+    def attribute2attribute(db_namespace,att_id):
+        query = """
+                SELECT
+                    # aa1.external_id,
+                    # aa1.name,
+                    aa2.id int_id,
+                    aa2.name phenotype
+                FROM %s.attribute_relations ar
+                INNER JOIN %s.attributes aa1
+                ON aa1.id = ar.attr1_id
+                INNER JOIN %s.attributes aa2
+                ON aa2.id = ar.attr2_id
+                WHERE ar.attr1_id = '%s'
+        """ % (db_namespace,db_namespace,db_namespace,att_id)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        print(data)
+        # return [x["namespace"] for x in namespaces]
+        return data
 
 class AttributeTaxonomy:
     @staticmethod
