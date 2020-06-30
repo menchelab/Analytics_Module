@@ -553,7 +553,7 @@ class Node:
         # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
         
         # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
-        result = {"nodes":[{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in pos_norm.items()]}
+        result = [{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in pos_norm.items()]
 
         # print('result:', result)
         
@@ -603,7 +603,7 @@ class Node:
         # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
         # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
-        result = {"nodes":[{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in d_node_xyz_scaled.items()]}
+        result = [{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in d_node_xyz_scaled.items()]
 
         # print('result:', result)
         #
