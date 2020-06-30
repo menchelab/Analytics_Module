@@ -87,6 +87,14 @@ http://127.0.0.1:5000/api/ppi/attribute/attribute2attribute?att_id=81990
 RETURNS:
 [{"int_id":67976,"phenotype":"Autosomal recessive inheritance"},{"int_id":70435,"phenotype":"Aminoaciduria"}]
 
+###################################################################################
+GET ATTRIBUTES FOR NODES
+GET REQUEST
+http://127.0.0.1:5000/api/ppi/attribute/?node_id=1&namespace=DISEASE 
+(takes all available attribute namespaces)
+RETURNS:
+[{"description":null,"external_id":"DOID:2316","full_name":"","id":4967,"name":"brain ischemia","value":null}]
+
 
 
 ###################################################################################
