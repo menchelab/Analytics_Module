@@ -103,6 +103,7 @@ function GetDbSearchTerms(name, namespace, search_attr_id) {
 
           //clearButtons("autocomp");
 
+          $('#autocomp').empty();
             response.forEach(function(item)
             {
                 createButton(item.name,item.id,$("#autocomp"), search_attr_id);
@@ -172,9 +173,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
     var p = '#' + Parent;
     $(p).append(r);
     $(r).button();
-    console.log("creating hover");
-      $(r).hover (function(event) {
-        console.log("hovering");
+      $(r).click(function(event) {
         console.log(event.pageX);
         let left = event.pageX;
         let top = event.pageY;
@@ -182,7 +181,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
           deselect($(this));
         } else {
           $(this).addClass('selected');
-          $('.pop').html(Bname)
+          $('#node_name').html(Bname)
           $('.pop').css({top:top, left:left})
           $('.pop').show();
         }
@@ -203,7 +202,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
         success: function(response) {
           for (var i = 0; i < 100 && i < response.length ; i++) {
 
-            createAttributeButton(response[i].name,response[i].id,"tab_info");
+            createAttributeButton(response[i].name,response[i].id,"attributes_list");
 
           }
           $('#tabs').tabs( "option", "active", 5 );
@@ -308,7 +307,7 @@ function SimpleSearch(id) {
 
             }); */
 
-            for (var i = 0; i < 100 && i < response.nodes.length ; i++) {
+            for (var i = 0; i < 5000 && i < response.nodes.length ; i++) {
               createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
             }
             mySearchResult = mySelection.concat(response.nodes);
@@ -436,6 +435,15 @@ function PopulateShoppingCart() {
   }
 }
 
+function PopulateSearchResults() {
+  $("#ResultList").empty();
+  for (var i = 0; i < mySearchResult.length; i++) {
+    createNodeButton(mySearchResult[i].name,
+      mySearchResult[i].symbol,mySearchResult[i].node_id,
+      "ResultList");
+  }
+}
+
 function startRandomWalk(restart_probability, nodes) {
   let data = {}
   data["restart_probability"] = 0.9
@@ -452,8 +460,12 @@ function startRandomWalk(restart_probability, nodes) {
         dataType: "json",
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         success: function(response) {
+          mySearchResult = response.nodes;
+          mySearchResult.forEach(function(elem) {elem["node_id"] = elem.id;})
 
           console.log(response);
+          PopulateSearchResults();
+          $('#tabs').tabs( "option", "active", 3 );
           drawBarChart(response.nodes)
           reloadForceLayout(response)
             },
