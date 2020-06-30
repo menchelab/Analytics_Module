@@ -286,7 +286,6 @@ class Node:
         # print('kept_values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         kept_values = kept_values[:max_elements]
-        # print('kept_values:', len(kept_values),kept_values)
         
         # add variants if not empty
         if len(variants)>0:
@@ -296,23 +295,13 @@ class Node:
             kept_values +=  add_variants
             # print('added variants', add_variants)
 
-        
-        # print('out nodes:', ','.join(map(str,kept_values)))
         kept_node_ids = [x['id'] for x in kept_values]
-        
-        
-        
-        # print('visited nodes type', type(kept_values))
-        # print('visited nodes', kept_node_ids)
 
         edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
         # print('edges:', edges_kept)
         l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
         d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
-        # for s,t in edges_kept:
-        # print('out edges:', l_edges_kept)
-        # return '{"nodes":' + jsonify(kept_values) +'{"links":' + jsonify(l_edges_kept) + '}'
-        # return "{'nodes':[" + ','.join(map(str,kept_values)) + "],'links':[" +  ','.join(map(str,l_edges_kept)) + ']}'
+
         return d_data_kept
         
     @staticmethod
@@ -344,21 +333,28 @@ class Node:
         
         
     @staticmethod
-    def connect_set_dfs(db_namespace, seeds, variants):
+    def connect_set_dfs(db_namespace, seeds, variants, cache):
         
         # PPI GENERATOR
         #DB query for edges
-        query = """
-                SELECT edges.node1_id, edges.node2_id
-                FROM %s.edges
-        """ % db_namespace
-        cursor = Base.execute_query(query)
-        edges = cursor.fetchall()
+        # query = """
+        #         SELECT edges.node1_id, edges.node2_id
+        #         FROM %s.edges
+        # """ % db_namespace
+        # cursor = Base.execute_query(query)
+        # edges = cursor.fetchall()
+        edges = get_cached_edges(cache, db_namespace)
+        
         G = nx.Graph()
         for x in edges:
-            s = x['node1_id']
-            t = x['node2_id']
+            # s = x['node1_id']
+            # t = x['node2_id']
+            s = x[0]
+            t = x[1]
             G.add_edge(s,t)
+
+        print(G.number_of_nodes())
+        print(G.number_of_edges())
             
         print(seeds)
         
@@ -395,6 +391,114 @@ class Node:
         out_str = out_str[:-1] + ']}'
                 
         return out_str
+
+################################################################################
+################################################################################
+    @staticmethod
+    def random_walk_dock2(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
+        num_trials = 100000
+
+        edges = get_cached_edges(cache, namespace)
+        neighbors = {}
+        for edge in edges:
+            if edge[0] not in neighbors.keys():
+                neighbors[edge[0]] = [edge[1]]
+            else:
+                neighbors[edge[0]].append(edge[1])
+        visited_nodes = [0] * 20000
+        starting_node = random.choice(starting_nodes)
+
+
+        for i in range (num_trials):
+            if random.random() < restart_probability:
+                starting_node = random.choice(starting_nodes)
+            else:
+                starting_node = random.choice(neighbors[starting_node])
+            visited_nodes[starting_node] += 1
+
+        query2 = """
+            SELECT DISTINCT name, symbol, id FROM %s.nodes
+        """ % namespace
+        cursor = Base.execute_query(query2)
+        d_i_name = cursor.fetchall()
+        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+
+        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
+        d_node2group = {}
+        # print('visited nodes',visited_nodes )
+        for i, x in enumerate(visited_nodes):
+            if i in starting_nodes:
+                d_node2group[i] = 0
+            elif i in variants:
+                d_node2group[i] = 2
+            else:
+                d_node2group[i] = 1
+                
+        min_frequency = 0         
+        kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
+
+        # print('kept_values:', kept_values)
+        kept_values.sort(key=lambda x: x['frequency'], reverse=True)
+        kept_values = kept_values[:max_elements]
+        
+        # add variants if not empty
+        if len(variants)>0:
+            add_variants = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i in variants]
+            add_variants.sort(key=lambda x: x['frequency'], reverse=True)
+            # print('added variants', add_variants)
+            kept_values +=  add_variants
+            # print('added variants', add_variants)
+
+        # kept_node_ids = [x['id'] for x in kept_values]
+        #
+        # edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
+        # print('edges:', edges_kept)
+        # l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        # d_data_kept = {'nodes': kept_values,'links': l_edges_kept}
+
+
+        ##########################
+        # Attach variants to seeds with deep-first-search 
+        G = nx.Graph()
+        for x in edges:
+            # s = x['node1_id']
+            # t = x['node2_id']
+            s = x[0]
+            t = x[1]
+            G.add_edge(s,t)
+
+        # print(G.number_of_nodes())
+        # print(G.number_of_edges())
+        seeds = starting_nodes
+        print(seeds)
+        
+        l_linkerset = []
+        for start_variant in variants:
+            # start_variant = list(l_vars_onppi)[1]
+            # print('start at variant: %s (k = %s)' %(start_variant,G_ppi.degree(start_variant)))
+            cc = 1
+            for path in nx.dfs_edges(G,start_variant,2):
+                if path[0] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=1')
+                    l_linkerset.append(path[0])
+                if path[1] in seeds:
+        #             print(cc,set(path),'SEED REACHED at d=2')
+                    l_linkerset.append(path[0])
+                    l_linkerset.append(path[1])
+                else:
+                    pass
+            #         print(cc,set(path))
+                cc += 1
+        set_nodes = set(l_linkerset) | set(seeds) | set(variants)
+
+        edges_kept = [(x,y) for x,y in edges if (x in set_nodes and y in set_nodes)]
+
+        l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
+
+        return d_data_kept        
+################################################################################
+################################################################################        
         
     @staticmethod
     def layout(db_namespace, nodes,cache):

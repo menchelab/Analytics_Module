@@ -84,4 +84,18 @@ GET REQUEST
 App CALL via
 http://127.0.0.1:5000/api/ppi/attribute/attribute2attribute?att_id=81990
 RETURNS:
-[{"phenotype":"Autosomal recessive inheritance"},{"phenotype":"Aminoaciduria"}]
+[{"int_id":67976,"phenotype":"Autosomal recessive inheritance"},{"int_id":70435,"phenotype":"Aminoaciduria"}]
+
+
+
+###################################################################################
+SPECIAL MODULE -- RANDOM WALK PLUS CONNECTING VARIANTS WITH SEEDS
+Does random walk and connecting two sets by df-search at once
+GET REQUEST
+App CALL via 
+http://127.0.0.1:5000/api/ppi/node/random_walk_dock2
+RETURNS
+{"links":[{"source":2,"target":15465,"values":1},{"source":3,"target":15465,"values":1},{"source":4,"target":16243,"values":1},{"source":5,"target":15465,"values":1},{"source":5,"target":16243,"values":1},{"source":99,"target":100,"values":1},{"source":100,"target":99,"values":1},{"source":15465,"target":2,"values":1},{"source":15465,"target":3,"values":1},{"source":15465,"target":5,"values":1},{"source":16243,"target":4,"values":1},{"source":16243,"target":5,"values":1}],"nodes":[{"frequency":0.20252,"group":0,"id":3,"symbol":"RGS5"},{"frequency":0.20028,"group":0,"id":4,"symbol":"RGS6"},{"frequency":0.19946,"group":0,"id":1,"symbol":"ASIC1"},{"frequency":0.19921,"group":0,"id":2,"symbol":"RGS4"},{"frequency":0.00921,"group":1,"id":15469,"symbol":"GNAO1"},{"frequency":0.00874,"group":1,"id":15466,"symbol":"GNAI2"},{"frequency":0.00845,"group":1,"id":15465,"symbol":"GNAI1"},{"frequency":0.00824,"group":1,"id":15471,"symbol":"GNAQ"},{"frequency":0.00619,"group":1,"id":11900,"symbol":"ADRB2"},{"frequency":0.00602,"group":1,"id":16851,"symbol":"APP"},{"frequency":9e-05,"group":2,"id":5,"symbol":"RGS7"},{"frequency":1e-05,"group":2,"id":99,"symbol":"RPL14"},{"frequency":0.0,"group":2,"id":100,"symbol":"RPL15"}]}
+
+NOTE! "links" result from dfs and "nodes" from random walk
+

@@ -168,11 +168,35 @@ def random_walk(db_namespace):
         max_elements = data["max_elements"]
     else:
         max_elements = 200
-    # nodes, edges =  Node.random_walk(db_namespace, node_ids, restart_probability, min_frequency)
-    #
-    # out_str = jsonify(edges)# + str(jsonify(edges))
-    
+
     return jsonify(Node.random_walk(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
+
+@app.route('/api/<string:db_namespace>/node/random_walk_dock2', methods=['GET', 'POST'])
+@cross_origin()
+def random_walk_dock2(db_namespace):
+    if request.method == 'POST':
+        #data = request.form
+        data =request.get_json()
+    else:
+        data = request.args
+#    node_ids = data.node_ids
+    node_ids = [int(x) for x in data['node_ids']]
+    if 'variants' in data.keys():
+        variants = [int(x) for x in data['variants']]
+    else:
+        variants = []
+
+    # print(node_ids)
+    #node_ids = [int(x) for x in data.getlist("node_ids")]
+    restart_probability = data["restart_probability"]
+    restart_probability = float(restart_probability or 0.9)
+    if "max_elements" in data.keys():
+        max_elements = data["max_elements"]
+    else:
+        max_elements = 200
+
+    return jsonify(Node.random_walk_dock2(db_namespace,node_ids,variants,restart_probability,max_elements, cache))
+
 
 @app.route('/api/<string:db_namespace>/node/gene_card', methods=['GET'])
 @cross_origin()
@@ -204,7 +228,7 @@ def connect_set_dfs(db_namespace):
     seeds = data["seeds"]
     variants = data["variants"]
     
-    return Node.connect_set_dfs(db_namespace, seeds, variants)
+    return Node.connect_set_dfs(db_namespace, seeds, variants,cache)
    
 
 
