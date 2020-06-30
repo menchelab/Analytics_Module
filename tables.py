@@ -299,7 +299,7 @@ class Node:
 
         edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
         # print('edges:', edges_kept)
-        l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
         d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
 
         return d_data_kept
@@ -493,7 +493,7 @@ class Node:
 
         edges_kept = [(x,y) for x,y in edges if (x in set_nodes and y in set_nodes)]
 
-        l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
+        l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
         d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
 
         return d_data_kept        
