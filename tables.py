@@ -505,16 +505,18 @@ class Node:
         
         # PPI GENERATOR
         #DB query for edges
-        query = """
-                SELECT edges.node1_id, edges.node2_id
-                FROM %s.edges
-        """ % db_namespace
-        cursor = Base.execute_query(query)
-        edges = cursor.fetchall()
+        # query = """
+        #         SELECT edges.node1_id, edges.node2_id
+        #         FROM %s.edges
+        # """ % db_namespace
+        # cursor = Base.execute_query(query)
+        # edges = cursor.fetchall()
+        edges = get_cached_edges(cache, db_namespace)
+        
         G = nx.Graph()
         for x in edges:
-            s = x['node1_id']
-            t = x['node2_id']
+            s = x[0]
+            t = x[1]
             G.add_edge(s,t)
             
             
@@ -543,15 +545,17 @@ class Node:
         for i,gene in enumerate(sorted(pos.keys())):
             pos_norm[gene] = (l_xn[i],l_yn[i],l_zn[i])
         
-        query2 = """
-            SELECT DISTINCT name, symbol, id FROM %s.nodes
-        """ % db_namespace
-        cursor = Base.execute_query(query2)
-        d_i_name = cursor.fetchall()
-        d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
+        # query2 = """
+        #     SELECT DISTINCT name, symbol, id FROM %s.nodes
+        # """ % db_namespace
+        # cursor = Base.execute_query(query2)
+        # d_i_name = cursor.fetchall()
+        # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
         
-        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
-        print('result:', result)
+        # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
+        result = {"nodes":[{'id': [i], 'v': [xyz[0],xyz[1],xyz[2]]} for i, xyz in pos_norm.items()]}
+
+        # print('result:', result)
         
         
         return result   
@@ -598,7 +602,9 @@ class Node:
         d_i_name = cursor.fetchall()
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
-        result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
+        # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
+        result = {"nodes":[{'id': [i], 'v': [xyz[0],xyz[1],xyz[2]]} for i, xyz in d_node_xyz_scaled.items()]}
+
         # print('result:', result)
         #
         
