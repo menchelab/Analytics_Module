@@ -25,3 +25,8 @@
   z-index:50;
   padding: 25px 25px 20px;
 }
+
+body {
+  background-image: url("images/ds_background.png");
+  background-size: cover;
+}

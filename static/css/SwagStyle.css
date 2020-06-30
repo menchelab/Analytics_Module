@@ -24,7 +24,7 @@
     color:white;
     font-size:12px;
     /* font: 'Roboto'; */
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif, arial;
     font-weight: normal;
 }
 
@@ -32,7 +32,7 @@
     color:white;
     font-size:24px;
     /* font: 'Roboto'; */
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif, arial;
     font-weight: lighter;
 }
 /* added comment */
