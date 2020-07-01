@@ -392,6 +392,7 @@ class Node:
                 
         return out_str
 
+
 ################################################################################
 ################################################################################
     @staticmethod
@@ -492,6 +493,17 @@ class Node:
         set_nodes = set(l_linkerset) | set(seeds) | set(variants)
 
         edges_kept = [(x,y) for x,y in edges if (x in set_nodes and y in set_nodes)]
+
+        # joerg anfang
+        # adding all nodes in set_nodes to the list of kept_values
+        # find missing nodes:
+        missing_nodes = set_nodes - set([x['id'] for x in kept_values])
+        #print ("%s %s %s nodes report" % (len(missing_nodes),len(set_nodes),len(set([x['id'] for x in kept_values]))))
+        # add the missing nodes with correct info (hardcoding 0 as frequency:
+        missing_nodes_with_info = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 0.0} for i in missing_nodes] 
+        kept_values += missing_nodes_with_info
+        #print ( missing_nodes_with_info)
+        # joerg ende
 
         l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
         d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
