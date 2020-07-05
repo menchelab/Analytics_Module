@@ -192,7 +192,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
        // $("#searchInput1").text(Bname);
       //  $("#searchInput1").attr("searchID",Bid);
         console.log(Bname + " " + Bid + " " + Parent);
-      path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute?node_id=" + Bid ;
+      path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute/?node_id=" + Bid ;
       $.ajax({
           type: "GET",
           url: path,
@@ -463,6 +463,8 @@ function startRandomWalk(restart_probability, nodes) {
           console.log(response);
           PopulateSearchResults();
           $('#tabs').tabs( "option", "active", 3 );
+          $('#random_walk_display').show();
+          $('#force_graph').show();
           drawBarChart(response.nodes)
           reloadForceLayout(response)
             },

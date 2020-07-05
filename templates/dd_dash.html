@@ -33,8 +33,8 @@
 
   <div class="genepop pop" id="node_popup">
     <p id=node_name></p>
-    <a id=show_attributes_list href="">Show attributes</a>
-    <a id=node_popup_close href="">Close</a>
+    <a id=show_attributes_list href="#">Show attributes</a>
+    <a id=node_popup_close href="#">Close</a>
     <p id=attributes_list hidden></p>
   </div>
 
@@ -161,8 +161,15 @@
 
   </div>  <!-- #tabs -->
   <div id=results hidden>
-      <div id="ResultList" style="max-height:400px; overflow-y:scroll">
+    <div id="random_walk_display" hidden>
+      <svg id="barChart" width="500" height="500"></svg>
+    </div>  <!-- #random_walk_display -->
+    <div id="force_graph" hidden>
+       <div id="graphDisplay"></div>
+       <svg id="forceLayout" width="500" height="500"></svg>
     </div>
+        <div id="ResultList" style="max-height:400px; overflow-y:scroll">
+      </div>
       <p id="ResultsLabel">RESULTS</p>
       <p>
         <select name="searchMode1" id="searchMode1" style="display: none;">
@@ -191,13 +198,6 @@
     <div class="shopping_cart_inner" id="shopping_cart_inner">
     </div>  <!-- #shopping_cart_inner -->
   </div>  <!-- #shopping_cart -->
-  <div id="random_walk_display">
-    <svg id="barChart" width="500" height="500"></svg>
-  </div>  <!-- #random_walk_display -->
-  <div id="force_graph">
-     <div id="graphDisplay"></div>
-     <svg id="forceLayout" width="500" height="500"></svg>
-  </div>
 
 
 

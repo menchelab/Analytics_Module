@@ -420,7 +420,8 @@ $.fn.slideFadeToggle = function(easing, callback) {
 
 $("#show_attributes_list").click(function() {
   $("#attributes_list").show();
-  $('.pop').css({top:100, left:100, height:500, width:500})
+  $("#show_attributes_list").hide();
+  $('.pop').css({top:100, left:100, height:600, width:700})
 });
 $("#node_popup_close").click(function() {$("#node_popup").hide();});
 
