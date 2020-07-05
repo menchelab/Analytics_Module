@@ -112,7 +112,8 @@ $(function () {
         //   PopulateShoppingCart();
         // }
         // Open the results tab, which is 4 when 0-indexed.
-        $('#tabs').tabs( "option", "active", 3 );
+        // $('#tabs').tabs( "option", "active", 3 );
+        $('#results').show();
       }
     });
     });
@@ -296,7 +297,6 @@ $("#searchPredicate1-button").hide();
     $("#clear_randomwalk_button").button();
     $("#clear_randomwalk_button").click(function (event) {
       event.preventDefault();
-      ue4("ClearRandomWalk", "bla");
       clearForceLayout (inputdata);
     });
   });

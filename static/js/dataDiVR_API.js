@@ -310,12 +310,9 @@ function SimpleSearch(id) {
             for (var i = 0; i < 5000 && i < response.nodes.length ; i++) {
               createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
             }
-            mySearchResult = mySelection.concat(response.nodes);
-            // PopulateShoppingCart();
-            // Open the results tab, which is 4 when 0-indexed.
-            $('#tabs').tabs( "option", "active", 3 );
-
-
+            mySearchResult = response.nodes;
+            PopulateSearchResults();
+            $('#results').show();
         },
 
         error: function(err) {
