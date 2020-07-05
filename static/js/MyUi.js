@@ -58,9 +58,41 @@ $(function () {
 
   $("#selections").selectmenu();
 
-  $('#selections').on('selectmenuselect', function () {
+// $('#selections').on('selectmenuselect', function () {
+//      var id = $('#selections').find(':selected').val();
+//      const name = $('#selections').find(':selected').text();
+// 
+//      path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
+//      $.ajax({
+//          type: "GET",
+//          url: path,
+//          contentType: "application/json",
+//          //data: payload,
+//          dataType: "json",
+//          headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+//        success: function(response) {
+//          mySearchResult = response.nodes;
+//          PopulateSearchResults();
+//          if (mySelection.length == 0 && mySelectionName.length == 0) {
+//            mySelection = mySearchResult.slice();
+//            mySelectionName = name;
+//            PopulateShoppingCart();
+//          }
+//          // Open the results tab, which is 4 when 0-indexed.
+//          $('#tabs').tabs( "option", "active", 3 );
+//        }
+//      });
+//    });
+
+
+  $(function () {
+  $("#LoadSelection").button();
+  $("#LoadSelection").click(function (event) {
+
+    event.preventDefault();
     var id = $('#selections').find(':selected').val();
     const name = $('#selections').find(':selected').text();
+    console.log(id, name);
 
     path = dbprefix + "/api/"+ thisNamespace.namespace + "/node/search?subject0=attribute&object0=" + id ;
     $.ajax({
@@ -71,35 +103,21 @@ $(function () {
         dataType: "json",
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
       success: function(response) {
+        console.log(path);
         mySearchResult = response.nodes;
         PopulateSearchResults();
-        if (mySelection.length == 0 && mySelectionName.length == 0) {
-          mySelection = mySearchResult.slice();
-          mySelectionName = name;
-          PopulateShoppingCart();
-        }
+        // if (mySelection.length == 0 && mySelectionName.length == 0) {
+        //   mySelection = mySearchResult.slice();
+        //   mySelectionName = name;
+        //   PopulateShoppingCart();
+        // }
         // Open the results tab, which is 4 when 0-indexed.
         $('#tabs').tabs( "option", "active", 3 );
       }
     });
-  });
-
-
-  $(function () {
-    $("#LoadSelection").button();
-        $("#LoadSelection").click(function (event) {
-            event.preventDefault();
-            console.log($("#selectMode").val() + " " + $("#selections").val() );
-        });
+    });
     });
 
-  $(function () {
-    $("#saveSel").button();
-    $("#saveSel").click(function (event) {
-      event.preventDefault();
-      console.log("do something useful");
-    });
-  });
 
   // SLIDERS FOR RANDOMWALK tab-6
 
@@ -400,12 +418,19 @@ $.fn.slideFadeToggle = function(easing, callback) {
   return this.animate({ opacity: 'toggle', height: 'toggle' }, 'fast', easing, callback);
 };
 
+$("#show_attributes_list").click(function() {
+  $("#attributes_list").show();
+  $('.pop').css({top:100, left:100, height:500, width:500})
+});
+$("#node_popup_close").click(function() {$("#node_popup").hide();});
+
+// Hide popup if clicked outside of it.
 $(document).mouseup(function(e)
 {
     var container = $("#node_popup");
 
     // if the target of the click isn't the container nor a descendant of the container
-    if (!container.is(e.target) && container.has(e.target).length === 0) 
+    if (!container.is(e.target) && container.has(e.target).length === 0)
     {
         container.hide();
     }
