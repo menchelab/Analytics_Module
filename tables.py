@@ -344,7 +344,7 @@ class Node:
         for eaSp in sp:
             sym_name_data = Node.get_single_sym_name(db_namespace, eaSp)
             for eaOP in sym_name_data:
-                out_str += str(json.dumps(sym_name_data)) + ','
+                out_str += str(json.dumps(sym_name_data))[1:-1] + ','
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
 
         # # get symbol and name
