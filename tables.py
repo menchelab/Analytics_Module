@@ -323,10 +323,12 @@ class Node:
         print('path nodes:', sp)
 
         # get symbol and name, but in order (CSedit: 20200710)
+        # TODO: do this in not stupid way.
         out_str = ''
         for eaSp in sp:
             sym_name_data = Node.get_sym_name(db_namespace, eaSp)
-            out_str += str(json.dumps(sym_name_data)) + ','
+            for eaOP in sym_name_data:
+                out_str += str(json.dumps(sym_name_data)) + ','
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
 
         # # get symbol and name
