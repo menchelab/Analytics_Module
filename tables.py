@@ -133,6 +133,22 @@ class Node:
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
+    # CS: get single one
+    @staticmethod
+    def get_single_sym_name(db_namespace, node_id):
+        print('get functions gets:', node_id)
+        # print('and makes sql strg:', ",".join(node_ids))
+        # spc = [str(x)+',' for x in node_id]
+        # spl_str = ''
+        # spl_str = spl_str.join(spc)
+        spl_str = '(' + str(node_id) + ')'
+        print(spl_str)
+        query = """
+            SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id in %s
+        """ % (db_namespace,spl_str)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
     @staticmethod
     def get_neighbors(db_namespace, node_ids):
         query = """
@@ -326,7 +342,7 @@ class Node:
         # TODO: do this in not stupid way.
         out_str = ''
         for eaSp in sp:
-            sym_name_data = Node.get_sym_name(db_namespace, eaSp)
+            sym_name_data = Node.get_single_sym_name(db_namespace, eaSp)
             for eaOP in sym_name_data:
                 out_str += str(json.dumps(sym_name_data)) + ','
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
