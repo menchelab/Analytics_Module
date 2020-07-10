@@ -1,7 +1,7 @@
 # DataServer
 
 *The DataServer is a flexible interface between the MySQL database
-containing network data and the VR-baased front end. It is implemented
+containing network data and the VR-based front end. It is implemented
 in Flask, a minimalist Python-based framework for web development.*
 
 # Installing and running locally (mac/linux/windows)
