@@ -84,12 +84,12 @@ def uploaded_file():
     return render_template('uploaded_file.html', filename=filename)
 
 @app.route('/<string:db_namespace>/search', methods=['GET'])
-def show_node(db_namespace):
-    attributes = Attribute.attributes_for_autocomplete(db_namespace, "", "SELECTION")
-    namespaces = Data.summary()
-    print(namespaces)
-    return render_template('dd_dash.html', namespaces = namespaces)
+def old_swimmer(db_namespace):
+    return render_template('dd_dash.html')
 
+@app.route('/swimmer', methods=['GET'])
+def swimmer():
+    return render_template('dd_dash.html')
 
 ########
 # Data #
