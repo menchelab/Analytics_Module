@@ -197,6 +197,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
           type: "GET",
           url: path,
           contentType: "application/json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
           //data: payload,
           dataType: "json",
         success: function(response) {
