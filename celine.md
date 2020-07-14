@@ -1,8 +1,15 @@
-# DataServer
+# Download
+    git clone git@github.com:menchelab/dataserver.git
+    cd dataserver
+    pip install -r requirements.txt
+    export FLASK_APP=app
 
-*The DataServer is a flexible interface between the MySQL database
-containing network data and the VR-based front end. It is implemented
-in Flask, a minimalist Python-based framework for web development.*
+Configure
+
+# Running
+
+# Usage
+
 
 # Installing and running locally (mac/linux/windows)
 
