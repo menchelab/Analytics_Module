@@ -423,7 +423,10 @@ $("#show_attributes_list").click(function() {
   $("#show_attributes_list").hide();
   $('.pop').css({top:100, left:100, height:600, width:700})
 });
-$("#node_popup_close").click(function() {$("#node_popup").hide();});
+$("#node_popup_close").click(function() {
+  $("#show_attributes_list").show();
+  $("#node_popup").hide();
+});
 
 // Hide popup if clicked outside of it.
 $(document).mouseup(function(e)
