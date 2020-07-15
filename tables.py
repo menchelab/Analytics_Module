@@ -111,13 +111,13 @@ class Node:
         return cursor.fetchall()
 
     @staticmethod
-    def get(db_namespace, node_ids):        
+    def get(db_namespace, node_ids):
         query = """
             SELECT DISTINCT name, symbol, id FROM %s.nodes where id in (%s)
         """ % (db_namespace, ",".join(node_ids))
         cursor = Base.execute_query(query)
         return cursor.fetchall()
-        
+
     @staticmethod
     def get_sym_name(db_namespace, node_ids):
         print('get functions gets:', node_ids)
@@ -130,6 +130,16 @@ class Node:
         query = """
             SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id in %s
         """ % (db_namespace,spl_str)
+        cursor = Base.execute_query(query)
+        return cursor.fetchall()
+
+    # CS: get single one
+    @staticmethod
+    def get_single_sym_name(db_namespace, node_id):
+        print('get functions gets:', node_id)
+        query = """
+            SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id = %s
+        """ % (db_namespace,node_id)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -209,7 +219,7 @@ class Node:
         funs = [x["functions"] for x in data][0]
         dis = [x["diseases"] for x in data][0]
         # print(nid,symbol,name,k)
-        
+
         l_functions = []
         for fs in funs.split('|'):
             l_functions.append(fs)
@@ -217,9 +227,9 @@ class Node:
         l_diseases = []
         for ds in dis.split('|'):
             l_diseases.append(ds)
-        
+
         # print('gene_data', gene_data)
-        query2 = """        
+        query2 = """
             SELECT
                 aa.external_id symbol,
                 na.value value
@@ -231,7 +241,7 @@ class Node:
         """ %(namespace,namespace,node)
         cursor = Base.execute_query(query2)
         data2 = cursor.fetchall()
-        
+
         gene_data = [{'node_id': nid,'symbol': symbol,'name': name, 'degree': k,
                         'functions': l_functions, 'diseases': l_diseases,
                     'tissue': data2}]
@@ -269,7 +279,7 @@ class Node:
         d_i_name = cursor.fetchall()
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
-        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
+        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else
         d_node2group = {}
         # print('visited nodes',visited_nodes )
         for i, x in enumerate(visited_nodes):
@@ -279,14 +289,14 @@ class Node:
                 d_node2group[i] = 2
             else:
                 d_node2group[i] = 1
-                
-        min_frequency = 0         
+
+        min_frequency = 0
         kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
 
         # print('kept_values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         kept_values = kept_values[:max_elements]
-        
+
         # add variants if not empty
         if len(variants)>0:
             add_variants = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i in variants]
@@ -300,10 +310,10 @@ class Node:
         edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
         # print('edges:', edges_kept)
         l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
-        d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
+        d_data_kept = {'nodes': kept_values,'links': l_edges_kept}
 
         return d_data_kept
-        
+
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges
@@ -321,20 +331,29 @@ class Node:
             G.add_edge(s,t)
         sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
         print('path nodes:', sp)
-        # get symbol and name
-        sym_name_data = Node.get_sym_name(db_namespace, sp)
-        # jsonify output
+
+        # get symbol and name, but in order (CSedit: 20200710)
+        # TODO: do this in not stupid way.
         out_str = ''
-        for x in sym_name_data:
-            out_str += str(json.dumps(x)) + ','
+        for eaSp in sp:
+            sym_name_data = Node.get_single_sym_name(db_namespace, eaSp)
+            out_str += str(json.dumps(sym_name_data))[1:-1] + ','
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
-        
+
+        # # get symbol and name
+        # sym_name_data = Node.get_sym_name(db_namespace, sp)
+        # # jsonify output
+        # out_str = ''
+        # for x in sym_name_data:
+        #     out_str += str(json.dumps(x)) + ','
+        # json_out = '{"nodes":[' + out_str[:-1] + ']}'
+
         return json_out
-        
-        
+
+
     @staticmethod
     def connect_set_dfs(db_namespace, seeds, variants, cache):
-        
+
         # PPI GENERATOR
         #DB query for edges
         # query = """
@@ -344,7 +363,7 @@ class Node:
         # cursor = Base.execute_query(query)
         # edges = cursor.fetchall()
         edges = get_cached_edges(cache, db_namespace)
-        
+
         G = nx.Graph()
         for x in edges:
             # s = x['node1_id']
@@ -355,9 +374,9 @@ class Node:
 
         print(G.number_of_nodes())
         print(G.number_of_edges())
-            
+
         print(seeds)
-        
+
         l_linkerset = []
         for start_variant in variants:
             # start_variant = list(l_vars_onppi)[1]
@@ -376,21 +395,22 @@ class Node:
             #         print(cc,set(path))
                 cc += 1
         set_linkers = set(l_linkerset) - set(seeds)
-                
+
         out_str = '{"seeds":['
         for x in seeds:
             out_str += str(json.dumps(x)) + ','
         out_str = out_str[:-1] + '],"variants":['
-        
+
         for x in variants:
             out_str += str(json.dumps(x)) + ','
         out_str = out_str[:-1] + '],"linker":['
-        
+
         for x in set_linkers:
             out_str += str(json.dumps(x)) + ','
         out_str = out_str[:-1] + ']}'
-                
+
         return out_str
+
 
 ################################################################################
 ################################################################################
@@ -423,7 +443,7 @@ class Node:
         d_i_name = cursor.fetchall()
         d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
-        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else 
+        # set group 0 for seed, group 2 for genes matching with given variant list, 1 else
         d_node2group = {}
         # print('visited nodes',visited_nodes )
         for i, x in enumerate(visited_nodes):
@@ -433,14 +453,14 @@ class Node:
                 d_node2group[i] = 2
             else:
                 d_node2group[i] = 1
-                
-        min_frequency = 0         
+
+        min_frequency = 0
         kept_values = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if x > min_frequency*num_trials]
 
         # print('kept_values:', kept_values)
         kept_values.sort(key=lambda x: x['frequency'], reverse=True)
         kept_values = kept_values[:max_elements]
-        
+
         # add variants if not empty
         if len(variants)>0:
             add_variants = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 1.0*x/num_trials} for i, x in enumerate(visited_nodes) if i in variants]
@@ -458,7 +478,7 @@ class Node:
 
 
         ##########################
-        # Attach variants to seeds with deep-first-search 
+        # Attach variants to seeds with deep-first-search
         G = nx.Graph()
         for x in edges:
             # s = x['node1_id']
@@ -471,7 +491,7 @@ class Node:
         # print(G.number_of_edges())
         seeds = starting_nodes
         print(seeds)
-        
+
         l_linkerset = []
         for start_variant in variants:
             # start_variant = list(l_vars_onppi)[1]
@@ -493,16 +513,27 @@ class Node:
 
         edges_kept = [(x,y) for x,y in edges if (x in set_nodes and y in set_nodes)]
 
-        l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
-        d_data_kept = {'nodes': kept_values,'links': l_edges_kept} 
+        # joerg anfang
+        # adding all nodes in set_nodes to the list of kept_values
+        # find missing nodes:
+        missing_nodes = set_nodes - set([x['id'] for x in kept_values])
+        #print ("%s %s %s nodes report" % (len(missing_nodes),len(set_nodes),len(set([x['id'] for x in kept_values]))))
+        # add the missing nodes with correct info (hardcoding 0 as frequency:
+        missing_nodes_with_info = [{'id': i,'symbol': d_i_name[i],'group': d_node2group[i], 'frequency': 0.0} for i in missing_nodes]
+        kept_values += missing_nodes_with_info
+        #print ( missing_nodes_with_info)
+        # joerg ende
 
-        return d_data_kept        
+        l_edges_kept = [{'source':s,'target':t,'value':1} for s,t in edges_kept]
+        d_data_kept = {'nodes': kept_values,'links': l_edges_kept}
+
+        return d_data_kept
 ################################################################################
-################################################################################        
-        
+################################################################################
+
     @staticmethod
     def layout(db_namespace, nodes,cache):
-        
+
         # PPI GENERATOR
         #DB query for edges
         # query = """
@@ -512,21 +543,21 @@ class Node:
         # cursor = Base.execute_query(query)
         # edges = cursor.fetchall()
         edges = get_cached_edges(cache, db_namespace)
-        
+
         G = nx.Graph()
         for x in edges:
             s = x[0]
             t = x[1]
             G.add_edge(s,t)
-            
-            
+
+
         G_sub = nx.subgraph(G,nodes)
 
         Glcc = G_sub.subgraph(max(nx.connected_components(G_sub), key=len))  # extract lcc graph
 
         pos = nx.spring_layout(Glcc,dim=3)
-        
-        
+
+
         # NORMALIZAION
         l_x = [xyz[0] for k, xyz in sorted(pos.items())]
         l_y = [xyz[1] for k, xyz in sorted(pos.items())]
@@ -544,22 +575,22 @@ class Node:
         pos_norm = {}
         for i,gene in enumerate(sorted(pos.keys())):
             pos_norm[gene] = (l_xn[i],l_yn[i],l_zn[i])
-        
+
         # query2 = """
         #     SELECT DISTINCT name, symbol, id FROM %s.nodes
         # """ % db_namespace
         # cursor = Base.execute_query(query2)
         # d_i_name = cursor.fetchall()
         # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
-        
+
         # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
         result = [{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in pos_norm.items()]
 
         # print('result:', result)
-        
-        
-        return result   
-        
+
+
+        return result
+
     @staticmethod
     def scale_selection(db_namespace, nodes,layout,cache):
         # scaling factor
@@ -584,7 +615,7 @@ class Node:
         xm = np.mean([x['x_loc'] for x in data])
         ym = np.mean([x['y_loc'] for x in data])
         zm = np.mean([x['z_loc'] for x in data])
-        
+
         d_node_xyz_scaled = {}
         for node, xyz in d_node_xyz.items():
             x = xyz[0]
@@ -594,7 +625,7 @@ class Node:
             z = xyz[2]
             zs =  a*z + (1-a)*zm
             d_node_xyz_scaled[node] = (xs,ys,zs)
-            
+
         # query2 = """
         #     SELECT DISTINCT name, symbol, id FROM %s.nodes
         # """ % db_namespace
@@ -607,10 +638,10 @@ class Node:
 
         # print('result:', result)
         #
-        
-        return result        
 
-        
+        return result
+
+
     @staticmethod
     def search(db_namespace, clauses):
         print(clauses)
@@ -1606,4 +1637,3 @@ if __name__ == '__main__':
     #print(Attribute.attributes_for_node( 4, "DISEASE"))
     print(Layout.all_namespaces())
     print(Layout.fetch("spring"))
-

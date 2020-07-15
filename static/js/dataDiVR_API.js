@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-var dbprefix = ""
+var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+// var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -192,11 +192,12 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
        // $("#searchInput1").text(Bname);
       //  $("#searchInput1").attr("searchID",Bid);
         console.log(Bname + " " + Bid + " " + Parent);
-      path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute?node_id=" + Bid ;
+      path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute/?node_id=" + Bid ;
       $.ajax({
           type: "GET",
           url: path,
           contentType: "application/json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
           //data: payload,
           dataType: "json",
         success: function(response) {
@@ -255,8 +256,8 @@ function GetDbSelections() {
             {
                  $('#selections').append($('<option>', {value: item.id, text: item.name}));
             });
-            $('#selections').val( response[0].namespace);
             $("#selections").selectmenu("refresh");
+            $("#selections").prop("selectedIndex", 0);
         },
         error: function(err) {
           console.log("whoops, error");
@@ -310,12 +311,9 @@ function SimpleSearch(id) {
             for (var i = 0; i < 5000 && i < response.nodes.length ; i++) {
               createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
             }
-            mySearchResult = mySelection.concat(response.nodes);
-            // PopulateShoppingCart();
-            // Open the results tab, which is 4 when 0-indexed.
-            $('#tabs').tabs( "option", "active", 3 );
-
-
+            mySearchResult = response.nodes;
+            PopulateSearchResults();
+            $('#results').show();
         },
 
         error: function(err) {
@@ -466,6 +464,8 @@ function startRandomWalk(restart_probability, nodes) {
           console.log(response);
           PopulateSearchResults();
           $('#tabs').tabs( "option", "active", 3 );
+          $('#random_walk_display').show();
+          $('#force_graph').show();
           drawBarChart(response.nodes)
           reloadForceLayout(response)
             },
