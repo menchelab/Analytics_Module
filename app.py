@@ -149,9 +149,9 @@ def nodes(db_namespace):
 
 
 ## IP_CELINE: implement GSEA
-@app.route('/api/<string:db_namespace>/node/gse', methods=['GET', 'POST'])
+@app.route('/api/<string:db_namespace>/node/gsea', methods=['GET', 'POST'])
 @cross_origin()
-def gse(db_namespace):
+def gsea(db_namespace):
     if request.method == 'POST':
         #data = request.form
         data = request.get_json()
@@ -159,7 +159,7 @@ def gse(db_namespace):
     else:
         data = request#.args
         print([i for i in request.args.keys()])
-    return ('in return')
+    return jsonify(Node.gsea(db_namespace))
 
 
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])

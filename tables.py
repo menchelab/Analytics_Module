@@ -252,6 +252,33 @@ class Node:
 
         return gene_data
 
+    ## IP CELINE: implement GSEA
+    @staticmethod
+    def gsea(namespace):#, selectionNodes, currAnno):
+        selectionNodes = [1, 2, 3, 4, 5]
+        currAnno = 'molecular_function'
+        # collect set of annoTerms in selectionNodes
+        query = """
+            SELECT att.id attribute_ids
+            FROM ppi.attributes att INNER JOIN ppi.nodes_attributes n_att
+            ON att.id = n_att.attribute_id
+            WHERE n_att.node_id IN (1,2,3,4,5)
+            AND att.namespace = 'molecular_function';
+        """ #% namespace, namespace, currAnno  # 3rd argument need 1,2,3,4
+        cursor = Base.execute_query(query)
+        annoTerms = cursor.fetchall()
+
+        print(annoTerms)
+
+        # for eaTerm in annoTerms:
+            # count # of selectionNodes with eaTerm
+            # count # of nodes w
+            # calculate fisher test
+            # add result to dictionary
+        anno_fisherStats = [{'term': 'annotationTerm1', 'p-value': 0.01},
+                            {'term': 'annotationTerm2', 'p-value': 0.01}]
+        return annoTerms
+
 
     @staticmethod
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
