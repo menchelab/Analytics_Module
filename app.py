@@ -8,7 +8,8 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
-from .tables import *
+#from .tables import *
+from tables import *
 from werkzeug.contrib.cache import SimpleCache
 
 
@@ -145,6 +146,22 @@ def nodes(db_namespace):
         return jsonify(Node.nodes_for_attribute(db_namespace, attribute_ids))
     return jsonify(Node.nodes_for_autocomplete(db_namespace, prefix))
 
+
+
+## IP_CELINE: implement GSEA
+@app.route('/api/<string:db_namespace>/node/gse', methods=['GET', 'POST'])
+@cross_origin()
+def gse(db_namespace):
+    if request.method == 'POST':
+        #data = request.form
+        data = request.get_json()
+        print('in POST')
+    else:
+        data = request#.args
+        print([i for i in request.args.keys()])
+    return ('in return')
+
+
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])
 @cross_origin()
 def random_walk(db_namespace):
@@ -201,18 +218,18 @@ def random_walk_dock2(db_namespace):
 @app.route('/api/<string:db_namespace>/node/gene_card', methods=['GET'])
 @cross_origin()
 def gene_card(db_namespace):
-    
+
     node_id = request.args.get("node_id")
     return jsonify(Node.gene_card(db_namespace, node_id, cache))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
 def shortest_path(db_namespace):
-    
+
     from_id = request.args.get("from")
     to_id = request.args.get("to")
     return Node.shortest_path(db_namespace, from_id, to_id)
-    
+
 # @app.route('/api/<string:db_namespace>/node/expression', methods=['GET'])
 # @cross_origin()
 # def shortest_path(db_namespace):
@@ -227,9 +244,9 @@ def connect_set_dfs(db_namespace):
     data =request.get_json()
     seeds = data["seeds"]
     variants = data["variants"]
-    
+
     return Node.connect_set_dfs(db_namespace, seeds, variants,cache)
-   
+
 
 
 @app.route('/api/<string:db_namespace>/node/sub_layout', methods=['POST'])
@@ -341,6 +358,7 @@ def create_selection(db_namespace):
         return jsonify({"status": "FAIL", "reason": "invalid request"})
     return jsonify(Attribute.create_selection(db_namespace, selection_name, node_ids))
 
+
 @app.route("/api/<string:db_namespace>/attribute/attribute2attribute", methods=["GET"])
 @cross_origin()
 def attribute2attribute(db_namespace):
@@ -414,5 +432,5 @@ def get_label(db_namespace, label_namespace):
 
 if __name__ == "__main__":
 
-    #app.debug = True
+    app.debug = True
     app.run()

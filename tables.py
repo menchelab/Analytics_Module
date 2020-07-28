@@ -3,9 +3,12 @@ import datetime
 import sys
 import os
 import json
-from .db_config import DATABASE as dbconf
-from .table_utils.taxonomy import *
-from . import populate_db_data_agnostic
+#from .db_config import DATABASE as dbconf
+from db_config import DATABASE as dbconf
+#from .table_utils.taxonomy import *
+from table_utils.taxonomy import *
+#from . import populate_db_data_agnostic
+import populate_db_data_agnostic
 # from db_config import DATABASE as dbconf
 # from table_utils.taxonomy import *
 import logging
