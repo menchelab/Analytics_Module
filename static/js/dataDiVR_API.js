@@ -252,6 +252,7 @@ function GetDbSelections() {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         dataType: "json",
         success: function(response) {
+            $('#selections').find('option').remove().end();
             response.forEach(function(item)
             {
                  $('#selections').append($('<option>', {value: item.id, text: item.name}));
