@@ -295,6 +295,12 @@ def attributes_for_node(db_namespace):
     else:
         return "no arguments supplied!"
 
+@app.route("/api/<string:db_namespace>/attribute/delete/<int:attr_id>",  methods=['GET'])
+@cross_origin()
+def delete_attribute(db_namespace):
+    return Attribute.delete(db_namespace, attr_id)
+
+
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_attribute_taxonomy(db_namespace, root_node_id):
     zkey = 'attribute_taxonomy_parents-%s-%d' % (db_namespace, root_node_id)

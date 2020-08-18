@@ -798,6 +798,25 @@ class Attribute:
 
 
     @staticmethod
+    def delete(db_namespace, attribute_id):
+        query1 = """
+            DELETE from %s.attribute_taxonomies
+            WHERE parent_id = %d" or child_id = %d;
+        """ %(db_namespace, attribute_id, attribute_id)
+
+        query2 = """
+            DELETE from %s.nodes_attributes
+            WHERE attribute_id = %d";
+        """ %(db_namespace, attribute_id)
+
+        query3 = """
+            DELETE from %s.attributes
+            WHERE id = %d;
+        """ %(db_namespace, attribute_id)
+        cursor = base.execute_queries([query1, query2, query3])
+
+
+    @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
