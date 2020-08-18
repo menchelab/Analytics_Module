@@ -8,7 +8,10 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
-from .tables import *
+if __name__ == '__main__':
+    from tables import *
+else:
+    from .tables import *
 from werkzeug.contrib.cache import SimpleCache
 
 
@@ -201,18 +204,18 @@ def random_walk_dock2(db_namespace):
 @app.route('/api/<string:db_namespace>/node/gene_card', methods=['GET'])
 @cross_origin()
 def gene_card(db_namespace):
-    
+
     node_id = request.args.get("node_id")
     return jsonify(Node.gene_card(db_namespace, node_id, cache))
 
 @app.route('/api/<string:db_namespace>/node/shortest_path', methods=['GET'])
 @cross_origin()
 def shortest_path(db_namespace):
-    
+
     from_id = request.args.get("from")
     to_id = request.args.get("to")
     return Node.shortest_path(db_namespace, from_id, to_id)
-    
+
 # @app.route('/api/<string:db_namespace>/node/expression', methods=['GET'])
 # @cross_origin()
 # def shortest_path(db_namespace):
@@ -227,9 +230,9 @@ def connect_set_dfs(db_namespace):
     data =request.get_json()
     seeds = data["seeds"]
     variants = data["variants"]
-    
+
     return Node.connect_set_dfs(db_namespace, seeds, variants,cache)
-   
+
 
 
 @app.route('/api/<string:db_namespace>/node/sub_layout', methods=['POST'])
