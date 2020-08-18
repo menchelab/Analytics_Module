@@ -688,7 +688,8 @@ class Node:
                         ["name", object.lower()]]
                 column = ""
             else:
-                column = "attribute_id"
+                # column = "attribute_id"
+                column = "parent_id"
                 have_attributes = True
 
             return ["%s = '%s'" % (column, object),
