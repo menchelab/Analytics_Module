@@ -159,8 +159,7 @@ def gsea(db_namespace):
     else:
         data = request#.args
         print([i for i in request.args.keys()])
-    return jsonify(Node.gsea(db_namespace))
-
+    return jsonify(Node.gsea(db_namespace)
 
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])
 @cross_origin()
