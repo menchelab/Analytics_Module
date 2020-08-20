@@ -1,6 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
-var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
-// var dbprefix = ""
+// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -433,6 +433,38 @@ function PopulateShoppingCart() {
       "shopping_cart_inner");
   }
 }
+
+function CheckSelectionExists(selection_name) {
+
+  path = dbprefix + "/api/"+ "ppi" + "/attribute/?prefix=" + selection_name ;
+    console.log(path)
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+       dataType: "json",
+        success: function(response) {
+          console.log(response);
+          response.forEach(function(item) {
+            console.log(item.name);
+            if (item.name == selection_name) {
+              console.log("true");
+            $('<div/>',{
+              text: 'Do you want to clear cart or delete ',
+              class: 'className'
+            }).appendTo('#shopping_cart');
+              return true;}
+          });
+          return false;
+        },
+
+        error: function(err) {
+          console.log(err);
+          return false;
+        }
+
+})};
 
 function PopulateSearchResults() {
   $("#ResultList").empty();
