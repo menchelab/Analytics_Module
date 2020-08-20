@@ -3,9 +3,15 @@ import datetime
 import sys
 import os
 import json
-from .db_config import DATABASE as dbconf
-from .table_utils.taxonomy import *
-from . import populate_db_data_agnostic
+
+if sys.platform == "darwin":
+    from db_config import DATABASE as dbconf
+    from table_utils.taxonomy import *
+    import populate_db_data_agnostic
+else:
+    from .db_config import DATABASE as dbconf
+    from .table_utils.taxonomy import *
+    from . import populate_db_data_agnostic
 # from db_config import DATABASE as dbconf
 # from table_utils.taxonomy import *
 import logging
@@ -789,6 +795,25 @@ class Attribute:
             FROM %s.nodes n JOIN  %s.attribute_taxonomies at on %s.id = at.child_id
             WHERE parent_id = %s
         """ % (db_namespace, attr_id)
+
+
+    @staticmethod
+    def delete(db_namespace, attribute_id):
+        query1 = """
+            DELETE from %s.attribute_taxonomies
+            WHERE parent_id = %d" or child_id = %d;
+        """ %(db_namespace, attribute_id, attribute_id)
+
+        query2 = """
+            DELETE from %s.nodes_attributes
+            WHERE attribute_id = %d";
+        """ %(db_namespace, attribute_id)
+
+        query3 = """
+            DELETE from %s.attributes
+            WHERE id = %d;
+        """ %(db_namespace, attribute_id)
+        cursor = base.execute_queries([query1, query2, query3])
 
 
     @staticmethod
