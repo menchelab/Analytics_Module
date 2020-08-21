@@ -54,13 +54,16 @@
     </ul>
 
     <div id="tab_namespaces">
-      <p>PROJECTS</p>
+      <div class="swagLabel">PROJECTS</div>
       <select name="namespaces" id="namespaces">
         {% for namespace in namespaces %}
           <option value="{{namespace['namespace']}}">{{namespace['namespace']}}</option>
         {% endfor %}
       </select>
-      <h1>Upload new data</h1>
+      <br>
+      <br>
+      <br>
+      <div class="swagLabel">UPLOAD NEW DATA</div>
       <p>
       Please upload layouts, links, and labels here.
       </p>
@@ -210,5 +213,3 @@
   </div>
 
 </body>
-
-

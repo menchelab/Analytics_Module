@@ -5,11 +5,11 @@
 }
 /*disable dragging on images */
 /* img{-webkit-user-drag: none;
-        
+
 } */
 
 .disable-select {
-     
+
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
      -khtml-user-select: none; /* Konqueror HTML */
@@ -24,7 +24,7 @@
     color:white;
     font-size:12px;
     /* font: 'Roboto'; */
-    font-family: 'Roboto', sans-serif, arial;
+    font-family: 'Roboto', sans-serif;
     font-weight: normal;
 }
 
@@ -32,14 +32,14 @@
     color:white;
     font-size:24px;
     /* font: 'Roboto'; */
-    font-family: 'Roboto', sans-serif, arial;
+    font-family: 'Roboto', sans-serif;
     font-weight: lighter;
 }
 /* added comment */
 
 .ui-widget-header {
-	
-	background: #333333 url("images/network1.gif") 100% 100% repeat; 
+
+	background: #333333 url("images/network1.gif") 100% 100% repeat;
 	font-weight: lighter;
 }
 
@@ -52,13 +52,13 @@
     border: 0px;
     outline: none;
     }
-    
+
 .ui-button {
     font-weight: normal;
     outline: none;
     padding: 2px 5px;
     margin: 3px 3px;
-    
+
 }
 
 
@@ -89,7 +89,7 @@
 	width: 40px;
 	height: 40px;
 	cursor: default;
-	 
+
    touch-action: none;
    background: transparent url(images/slider_customHandle.png) no-repeat 0 0;
 }
@@ -115,7 +115,7 @@
 .ui-state-focus,
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus,
-.ui-button:hover,  
+.ui-button:hover,
 .ui-button:focus {
 	border: 0px solid #666666;
 	background: #0f0f0f;
@@ -150,19 +150,19 @@
 
 /* Track */
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey; 
+  box-shadow: inset 0 0 5px grey;
   border-radius: 6px;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #0089cc; 
+  background: #0089cc;
   border-radius: 6px;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #00abff; 
+  background: #00abff;
 }
 
 .bar {
