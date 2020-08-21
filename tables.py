@@ -805,19 +805,20 @@ class Attribute:
     def delete(db_namespace, attribute_id):
         query1 = """
             DELETE from %s.attribute_taxonomies
-            WHERE parent_id = %d" or child_id = %d;
+            WHERE parent_id = %d or child_id = %d;
         """ %(db_namespace, attribute_id, attribute_id)
 
         query2 = """
             DELETE from %s.nodes_attributes
-            WHERE attribute_id = %d";
+            WHERE attribute_id = %d;
         """ %(db_namespace, attribute_id)
 
         query3 = """
             DELETE from %s.attributes
             WHERE id = %d;
         """ %(db_namespace, attribute_id)
-        cursor = base.execute_queries([query1, query2, query3])
+        cursor = Base.execute_queries([query1, query2, query3])
+        return {"status" : "OK"}
 
 
     @staticmethod

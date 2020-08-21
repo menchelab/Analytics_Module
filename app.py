@@ -297,7 +297,7 @@ def attributes_for_node(db_namespace):
 
 @app.route("/api/<string:db_namespace>/attribute/delete/<int:attr_id>",  methods=['GET'])
 @cross_origin()
-def delete_attribute(db_namespace):
+def delete_attribute(db_namespace, attr_id):
     return Attribute.delete(db_namespace, attr_id)
 
 

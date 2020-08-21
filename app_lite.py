@@ -8,7 +8,6 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
-from .tables import *
 from werkzeug.contrib.cache import SimpleCache
 
 

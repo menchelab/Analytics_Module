@@ -1,4 +1,6 @@
 ///////GLOBAL VARS vvvvvvv
+// var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
+// var dbprefix = ""
 var dbprefix = 'http://vrnetzer.westeurope.cloudapp.azure.com:8887';
 // var dbprefix = ""
 //create the global ue4(...) helper function
@@ -433,6 +435,38 @@ function PopulateShoppingCart() {
       "shopping_cart_inner");
   }
 }
+
+function CheckSelectionExists(selection_name) {
+
+  path = dbprefix + "/api/"+ "ppi" + "/attribute/?prefix=" + selection_name ;
+    console.log(path)
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+       dataType: "json",
+        success: function(response) {
+          console.log(response);
+          response.forEach(function(item) {
+            console.log(item.name);
+            if (item.name == selection_name) {
+              console.log("true");
+            $('<div/>',{
+              text: 'Do you want to clear cart or delete ',
+              class: 'className'
+            }).appendTo('#shopping_cart');
+              return true;}
+          });
+          return false;
+        },
+
+        error: function(err) {
+          console.log(err);
+          return false;
+        }
+
+})};
 
 function PopulateSearchResults() {
   $("#ResultList").empty();
