@@ -415,13 +415,15 @@ def get_label(db_namespace, label_namespace):
 def export_dashboard_data(db_namespace):
 
     data =request.get_json()
+    Exports.export_dashboard_data(db_namespace,data)
+    return 0
 
-#    node_ids = data.node_ids
-    # node_ids = [str(x) for x in data['node_ids']]
-    # layout =  data['layout']
 
-    return jsonify(Exports.export_dashboard_data(db_namespace,str(data)))
+@app.route('/api/<string:db_namespace>/import/results2swimmer')
+@cross_origin()
+def import_json2swimmer(db_namespace):
 
+    return jsonify(Exports.import_json2swimmer(db_namespace))
 
 
 

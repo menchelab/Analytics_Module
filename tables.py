@@ -805,20 +805,19 @@ class Attribute:
     def delete(db_namespace, attribute_id):
         query1 = """
             DELETE from %s.attribute_taxonomies
-            WHERE parent_id = %d or child_id = %d;
+            WHERE parent_id = %d" or child_id = %d;
         """ %(db_namespace, attribute_id, attribute_id)
 
         query2 = """
             DELETE from %s.nodes_attributes
-            WHERE attribute_id = %d;
+            WHERE attribute_id = %d";
         """ %(db_namespace, attribute_id)
 
         query3 = """
             DELETE from %s.attributes
             WHERE id = %d;
         """ %(db_namespace, attribute_id)
-        cursor = Base.execute_queries([query1, query2, query3])
-        return {"status" : "OK"}
+        cursor = base.execute_queries([query1, query2, query3])
 
 
     @staticmethod
@@ -1163,6 +1162,23 @@ class Exports:
         cursor = Base.execute_query(query)
 
         return 0
+
+    @staticmethod
+    def import_json2swimmer(db_namespace):
+        
+        query = """
+            SELECT
+            json_str
+            FROM %s.current_utterances
+            ORDER BY creation_time DESC
+            LIMIT 1
+        """ % (db_namespace)
+        
+        # print(query)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        # print(data)
+        return data[0]
 
         #
         # query = """
