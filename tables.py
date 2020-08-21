@@ -4,6 +4,7 @@ import sys
 import os
 import json
 
+print(sys.platform)
 if sys.platform == "darwin":
     from db_config import DATABASE as dbconf
     from table_utils.taxonomy import *
@@ -20,6 +21,9 @@ import pymysql.cursors
 import random
 import networkx as nx
 import numpy as np
+
+
+
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_cached_edges(cache, db_namespace):
@@ -1139,6 +1143,40 @@ class Label:
         label = cursor.fetchall()
         return [{'loc': [r["x_loc"], r["y_loc"], r["z_loc"]],
                  'text': r["text"]} for r in label]
+
+
+class Exports:
+    
+    @staticmethod
+    def export_dashboard_data(db_namespace, json_str):
+        
+        #DB query for edges
+        # print("Path from ", from_id," to ",to_id)
+        print(json_str)
+        query = """
+            INSERT INTO %s.current_utterances(json_str) VALUES ("%s")
+
+        """ % (db_namespace,json_str)
+        
+        print(query)
+        cursor = Base.execute_query(query)
+
+        return 0
+
+        #
+        # query = """
+        #     INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
+        #     VALUES (%d, %d, 0, "SELECTION")
+        # """ % (db_namespace, attr_id, attr_id)
+        # cursor = Base.execute_query(query)
+        # query = """
+        #     INSERT INTO %s.nodes_attributes(node_id, attribute_id)
+        #     VALUES %s
+        # """ %(db_namespace, ",".join(['(%s, %d)' % (x, attr_id) for x in node_ids]))
+        # cursor = Base.execute_query(query)
+        # return {"status":"OK"}
+        #
+        #
 
 # class SavedView:
 #     @staticmethod

@@ -405,6 +405,26 @@ def get_layout(db_namespace, layout_namespace):
 def get_label(db_namespace, label_namespace):
     return jsonify(Label.fetch(db_namespace, label_namespace))
 
+
+##################
+# EXPORT RESULTS #
+##################
+
+@app.route('/api/<string:db_namespace>/export/results', methods=['POST'])
+@cross_origin()
+def export_dashboard_data(db_namespace):
+
+    data =request.get_json()
+
+#    node_ids = data.node_ids
+    # node_ids = [str(x) for x in data['node_ids']]
+    # layout =  data['layout']
+
+    return jsonify(Exports.export_dashboard_data(db_namespace,str(data)))
+
+
+
+
 #############
 # SavedView #
 #############
