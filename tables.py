@@ -1168,7 +1168,8 @@ class Exports:
         
         query = """
             SELECT
-            json_str
+            replace(json_str,"\'",\'"\')
+            
             FROM %s.current_utterances
             ORDER BY creation_time DESC
             LIMIT 1
@@ -1178,7 +1179,7 @@ class Exports:
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
         # print(str(data[0].values())[:100])
-        return list(data[0].values())[0]#.replace('"','')
+        return list(data[0].values())[0]#.replace(''','"')
 
         #
         # query = """
