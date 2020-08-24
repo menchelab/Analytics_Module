@@ -1178,7 +1178,7 @@ class Exports:
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
         # print(str(data[0].values())[:100])
-        return list(data[0].values())[0]
+        return list(data[0].values())[0]#.replace('"','')
 
         #
         # query = """

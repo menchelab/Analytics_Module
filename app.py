@@ -423,8 +423,7 @@ def export_dashboard_data(db_namespace):
 @cross_origin()
 def import_json2swimmer(db_namespace):
 
-    return jsonify(Exports.import_json2swimmer(db_namespace))
-
+    return Exports.import_json2swimmer(db_namespace)
 
 
 #############
