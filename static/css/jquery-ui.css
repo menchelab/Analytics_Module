@@ -834,7 +834,7 @@ button.ui-button::-moz-focus-inner {
 .ui-tabs {
 	position: relative;/* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
 	padding: .2em;
-    
+
 }
 .ui-tabs .ui-tabs-nav {
 	margin: 0;
@@ -886,7 +886,7 @@ body .ui-tooltip {
 /* Component containers
 ----------------------------------*/
 .ui-widget {
-	font-family: Roboto;
+	font-family: 'Roboto', sans-serif;
 	font-size: 1.1em;
 }
 .ui-widget .ui-widget {
@@ -896,7 +896,7 @@ body .ui-tooltip {
 .ui-widget select,
 .ui-widget textarea,
 .ui-widget button {
-	font-family: Roboto;
+	font-family: 'Roboto', sans-serif;
 	font-size: 1em;
 }
 .ui-widget.ui-widget-content {
@@ -904,7 +904,7 @@ body .ui-tooltip {
 }
 .ui-widget-content {
 	border: 1px solid #666666;
-	background: #000000;
+	background: #666666;
 	color: #ffffff;
 }
 .ui-widget-content a {

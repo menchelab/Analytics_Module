@@ -405,6 +405,27 @@ def get_layout(db_namespace, layout_namespace):
 def get_label(db_namespace, label_namespace):
     return jsonify(Label.fetch(db_namespace, label_namespace))
 
+
+##################
+# EXPORT RESULTS #
+##################
+
+@app.route('/api/<string:db_namespace>/export/results', methods=['POST'])
+@cross_origin()
+def export_dashboard_data(db_namespace):
+
+    data =request.get_json()
+    Exports.export_dashboard_data(db_namespace,data)
+    return 0
+
+
+@app.route('/api/<string:db_namespace>/import/results2swimmer')
+@cross_origin()
+def import_json2swimmer(db_namespace):
+
+    return Exports.import_json2swimmer(db_namespace)
+
+
 #############
 # SavedView #
 #############

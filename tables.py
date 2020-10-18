@@ -4,6 +4,7 @@ import sys
 import os
 import json
 
+print(sys.platform)
 if sys.platform == "darwin":
     from db_config import DATABASE as dbconf
     from table_utils.taxonomy import *
@@ -20,6 +21,9 @@ import pymysql.cursors
 import random
 import networkx as nx
 import numpy as np
+
+
+
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_cached_edges(cache, db_namespace):
@@ -801,20 +805,19 @@ class Attribute:
     def delete(db_namespace, attribute_id):
         query1 = """
             DELETE from %s.attribute_taxonomies
-            WHERE parent_id = %d or child_id = %d;
+            WHERE parent_id = %d" or child_id = %d;
         """ %(db_namespace, attribute_id, attribute_id)
 
         query2 = """
             DELETE from %s.nodes_attributes
-            WHERE attribute_id = %d;
+            WHERE attribute_id = %d";
         """ %(db_namespace, attribute_id)
 
         query3 = """
             DELETE from %s.attributes
             WHERE id = %d;
         """ %(db_namespace, attribute_id)
-        cursor = Base.execute_queries([query1, query2, query3])
-        return {"status" : "OK"}
+        cursor = base.execute_queries([query1, query2, query3])
 
 
     @staticmethod
@@ -1140,6 +1143,58 @@ class Label:
         label = cursor.fetchall()
         return [{'loc': [r["x_loc"], r["y_loc"], r["z_loc"]],
                  'text': r["text"]} for r in label]
+
+
+class Exports:
+    
+    @staticmethod
+    def export_dashboard_data(db_namespace, json_str):
+        
+        #DB query for edges
+        # print("Path from ", from_id," to ",to_id)
+        print(json_str)
+        query = """
+            INSERT INTO %s.current_utterances(json_str) VALUES ("%s")
+
+        """ % (db_namespace,json_str)
+        
+        print(query)
+        cursor = Base.execute_query(query)
+
+        return 0
+
+    @staticmethod
+    def import_json2swimmer(db_namespace):
+        
+        query = """
+            SELECT
+            replace(json_str,"\'",\'"\')
+            
+            FROM %s.current_utterances
+            ORDER BY creation_time DESC
+            LIMIT 1
+        """ % (db_namespace)
+        
+        # print(query)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        # print(str(data[0].values())[:100])
+        return list(data[0].values())[0]#.replace(''','"')
+
+        #
+        # query = """
+        #     INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
+        #     VALUES (%d, %d, 0, "SELECTION")
+        # """ % (db_namespace, attr_id, attr_id)
+        # cursor = Base.execute_query(query)
+        # query = """
+        #     INSERT INTO %s.nodes_attributes(node_id, attribute_id)
+        #     VALUES %s
+        # """ %(db_namespace, ",".join(['(%s, %d)' % (x, attr_id) for x in node_ids]))
+        # cursor = Base.execute_query(query)
+        # return {"status":"OK"}
+        #
+        #
 
 # class SavedView:
 #     @staticmethod
