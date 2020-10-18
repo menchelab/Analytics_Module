@@ -20,6 +20,7 @@
 
   <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/d3barchart.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/d3barchartNodes.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/dataDiVR_API.js') }}"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='js/MyUi.js') }}"></script>
 
@@ -33,6 +34,11 @@
 
   <div class="genepop pop" id="node_popup">
     <p id=node_name></p>
+      <div  id="BarChartbox"  style="max-height:500px;overflow-y:auto;">
+        <svg id="NodeBarChart" width="500" height="500" ></svg>
+        <div id = "idisbox" >DISEASES</div>
+        <div id = "ifunbox" >FUNCTIONS</div>
+      </div>
     <a id=show_attributes_list href="#">Show attributes</a>
     <a id=node_popup_close href="#">Close</a>
     <p id=attributes_list hidden style="max-height:500px; overflow-y:scroll"></p>
@@ -123,7 +129,7 @@
         Enter search term:
       <input type="text" id="search_txt" name="search_txt" />
       <div id="autocomp">
-      </div
+      </div>
       </p>
        <p id=taxonomy_bar_outer>
         <p id="tex">TAXONOMY EXPLORER</p>
@@ -162,15 +168,8 @@
 
   </div>  <!-- #tabs -->
   <div id=results hidden>
-    <div id="random_walk_display" hidden>
-      <svg id="barChart" width="500" height="500"></svg>
-    </div>  <!-- #random_walk_display -->
-    <div id="force_graph" hidden>
-       <div id="graphDisplay"></div>
-       <svg id="forceLayout" width="500" height="500"></svg>
-    </div>
-        <div id="ResultList" style="max-height:400px; overflow-y:scroll">
-      </div>
+      <div id="ResultList" style="max-height:400px; overflow-y:scroll">
+      </div>  <!-- #ResultList -->
       <p id="ResultsLabel">RESULTS</p>
       <p>
         <select name="searchMode1" id="searchMode1" style="display: none;">
@@ -203,6 +202,16 @@
 
 
   </div>  <!-- #right -->
+  <div id="graphs" style="background-color:blue">
+    HWLLFEFE
+    <div id="random_walk_display" hidden style="display:inline-block">
+      <svg id="barChart" width="700" height="700"></svg>
+    </div>  <!-- #random_walk_display -->
+    <div id="force_graph" hidden style-"display:inline-block">
+       <div id="graphDisplay"></div>
+       <svg id="forceLayout" width="700" height="700"></svg>
+    </div>  <!-- #force_graph -->
+  </div>
   </div>  <!-- #container -->
 
 
