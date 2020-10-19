@@ -1390,7 +1390,9 @@ def add_attributes_to_db(namespace, attributes):
     query = "INSERT INTO `tmp_%s`.attributes VALUES (%s)" % \
             (namespace,
              "),(".join([",".join(['"%s"' % i for x in attributes for i in x.split(",")])]))
+    #print(query)
     cursor = Base.execute_query(query)
+    #print(query)
     if run_db_attribute_validations(namespace):
         print("problem!")
     else:
@@ -1422,6 +1424,7 @@ def add_layout_to_db(namespace, filename, layout):
     """ % (namespace, ",".join(layout_rows))
     #print(query)
     cursor = Base.execute_query(query)
+    #print('query executed')
     if run_db_layout_validations(namespace):
         pass
         # return errors
@@ -1636,6 +1639,7 @@ class Upload:
         connection.commit()
         query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
         cursor = Base.execute_query(query)
+        #print('namespace created')
         #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
         #cursor = Base.execute_query(query)
 
@@ -1659,7 +1663,9 @@ class Upload:
             x = validate_layout(contents.split("\n"))
             print("layout errors are", x)
             if x[1] == 0:
+                #print('uploading layouts')
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
+                #print('layouts uploaded')
 
     def upload_edges(namespace, links_files):
         print("links_files", links_files)
@@ -1683,9 +1689,12 @@ class Upload:
         for file in attribute_files:
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
+            if not contents:
+                return
             x = validate_attributes(namespace, contents)
             print("attribute errors are", x)
             if x[1] == 0:
+                #print('loading attributes')
                 add_attributes_to_db(namespace, contents.rstrip().split("\n"))
 
     def upload_labels(namespace, labels_files):
