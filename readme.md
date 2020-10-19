@@ -21,3 +21,17 @@ in Flask, a minimalist Python-based framework for web development.*
 1. Finally, spin up the server: `flask run`. The output message
    in the console will tell you the web address for the server,
    typically http://127.0.0.1:5000/.
+
+
+# Uploading a Layout / File structure
+
+The file format for uploading a new layout into VR should be a .csv with the following structure :
+The file should contain columns with the following content: ID X Y Z R G B A Namespace (i.e. layout type)
+
+### Data types of each column : 
+- ID = string of gene IDs
+- X, Y, Z = floats or coordinates
+- R, G, B  = color values as integer in the range of 0 - 255
+- A = opacity (100 = full saturated; 128 - 200 = glowing)
+- Namespace of layout = string with layout type (same value for each row, for nodes in a layout) 
+
