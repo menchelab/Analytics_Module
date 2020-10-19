@@ -30,7 +30,7 @@ The file should be composed of nine columns with the following content: ID | X |
 
 #### Data types of each column : 
 - ID = string of gene IDs
-- X, Y, Z = floats or coordinates
+- X, Y, Z = floats of coordinates
 - R, G, B  = color values as integer in the range of 0 - 255
 - A = opacity (100 = full saturated; 128 - 200 = glowing)
 - Namespace of layout = string with layout type (same value for each row, for nodes in a layout) 
