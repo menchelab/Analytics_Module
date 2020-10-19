@@ -26,7 +26,7 @@ in Flask, a minimalist Python-based framework for web development.*
 # Uploading a Layout / File structure
 
 The file format for uploading a new layout into VR should be a .csv with the following structure.
-The file should contain columns with the following content: ID | X | Y | Z | R | G | B | A | Layout type
+The file should be composed of nine columns with the following content: ID | X | Y | Z | R | G | B | A | Layout type
 
 #### Data types of each column : 
 - ID = string of gene IDs
