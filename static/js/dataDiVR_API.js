@@ -164,16 +164,12 @@ function deselect(e) {
 }
 
 function createNodeButton(Bname,Bsym,Bid,Parent) {
- //for resultList
-
     var r=$('<input/>').attr({
         type: "button",
         id: Bid,
         value: Bsym
-
     });
-    var p = '#' + Parent;
-    $(p).append(r);
+    Parent.append(r);
     $(r).button();
       $(r).click(function(event) {
         console.log(event.pageX);
@@ -191,8 +187,6 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
       }
     );
     $(r).click(function() {
-       // $("#searchInput1").text(Bname);
-      //  $("#searchInput1").attr("searchID",Bid);
         console.log(Bname + " " + Bid + " " + Parent);
       path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute/?node_id=" + Bid ;
       $.ajax({
@@ -313,7 +307,7 @@ function SimpleSearch(id) {
             }); */
 
             for (var i = 0; i < 5000 && i < response.nodes.length ; i++) {
-              createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,"ResultList");
+              createNodeButton(response.nodes[i].name,response.nodes[i].symbol,response.nodes[i].node_id,$("#ResultList"));
             }
             mySearchResult = response.nodes;
             PopulateSearchResults();
@@ -474,7 +468,7 @@ function PopulateSearchResults() {
   for (var i = 0; i < mySearchResult.length; i++) {
     createNodeButton(mySearchResult[i].name,
       mySearchResult[i].symbol,mySearchResult[i].node_id,
-      "ResultList");
+      $("#ResultList"));
   }
 }
 
@@ -519,6 +513,48 @@ function nodePanelRequest(data){
 
         }
     });
+}
+
+function GetNodesForAttributes(instring) {
+
+    path = dbprefix + "/api/ppi/node?" + instring;
+
+    logger(path);
+    $.ajax({
+        type: "GET",
+        url: path,
+
+        contentType: "application/json",
+        headers: {
+            "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')
+        },
+        dataType: "json",
+        success: function (response) {
+            logger(response);
+          // document.getElementById("seedbox").innerHTML = "SEEDS - FOUND " + response.nodes.length + " NODES ";
+
+            response.nodes.sort(function (a, b) {
+                var x = a.symbol.toLowerCase(),
+                y = b.symbol.toLowerCase();
+                return x < y ? -1 : x > y ? 1 : 0;
+            });
+
+            $("#seedbox").empty();
+            for (var i = 0; i < 100 && i < response.nodes.length; i++) {
+
+                createNodeButton("", response.nodes[i].symbol, response.nodes[i].node_id, $("#seedbox"));
+
+            }
+
+        },
+
+        error: function (err) {
+            logger(err);
+
+        }
+    });
+    //event.preventDefault();
+
 }
 
 
