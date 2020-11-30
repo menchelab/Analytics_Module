@@ -8,15 +8,10 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
-<<<<<<< HEAD
-#from .tables import *
-from tables import *
-=======
 if __name__ == '__main__':
     from tables import *
 else:
     from .tables import *
->>>>>>> master
 from werkzeug.contrib.cache import SimpleCache
 
 
