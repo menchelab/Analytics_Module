@@ -1,6 +1,8 @@
 ///////GLOBAL VARS vvvvvvv
 var dbprefix = 'http://asimov.westeurope.cloudapp.azure.com:8887';
 // var dbprefix = ""
+// var dbprefix = 'http://vrnetzer.westeurope.cloudapp.azure.com:8887';
+// var dbprefix = ""
 //create the global ue4(...) helper function
 "object"!=typeof ue||"object"!=typeof ue.interface?("object"!=typeof ue&&(ue={}),ue.interface={},ue.interface.broadcast=function(e,t){if("string"==typeof e){var o=[e,""];void 0!==t&&(o[1]=t);var n=encodeURIComponent(JSON.stringify(o));"object"==typeof history&&"function"==typeof history.pushState?(history.pushState({},"","#"+n),history.pushState({},"","#"+encodeURIComponent("[]"))):(document.location.hash=n,document.location.hash=encodeURIComponent("[]"))}}):function(e){ue.interface={},ue.interface.broadcast=function(t,o){"string"==typeof t&&(void 0!==o?e.broadcast(t,JSON.stringify(o)):e.broadcast(t,""))}}(ue.interface),(ue4=ue.interface.broadcast);
 ////  API DEFENITION
@@ -158,7 +160,7 @@ function createDropdownButton(Bname,Bid,Parent, depth, children, search_attr_id)
 function deselect(e) {
   $('.pop').hide(function() {
     e.removeClass('selected');
-  });    
+  });
 }
 
 function createNodeButton(Bname,Bsym,Bid,Parent) {
@@ -210,6 +212,7 @@ function createNodeButton(Bname,Bsym,Bid,Parent) {
 
         }
       });
+      nodePanelRequest(Bid);
   }
     )};
 
@@ -252,6 +255,7 @@ function GetDbSelections() {
         headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
         dataType: "json",
         success: function(response) {
+            $('#selections').find('option').remove().end();
             response.forEach(function(item)
             {
                  $('#selections').append($('<option>', {value: item.id, text: item.name}));
@@ -433,6 +437,38 @@ function PopulateShoppingCart() {
   }
 }
 
+function CheckSelectionExists(selection_name) {
+
+  path = dbprefix + "/api/"+ "ppi" + "/attribute/?prefix=" + selection_name ;
+    console.log(path)
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+       dataType: "json",
+        success: function(response) {
+          console.log(response);
+          response.forEach(function(item) {
+            console.log(item.name);
+            if (item.name == selection_name) {
+              console.log("true");
+            $('<div/>',{
+              text: 'Do you want to clear cart or delete ',
+              class: 'className'
+            }).appendTo('#shopping_cart');
+              return true;}
+          });
+          return false;
+        },
+
+        error: function(err) {
+          console.log(err);
+          return false;
+        }
+
+})};
+
 function PopulateSearchResults() {
   $("#ResultList").empty();
   for (var i = 0; i < mySearchResult.length; i++) {
@@ -441,6 +477,50 @@ function PopulateSearchResults() {
       "ResultList");
   }
 }
+
+function nodePanelRequest(data){
+    
+  console.log("requesting", data);
+    path = dbprefix + "/api/ppi/node/gene_card?node_id=" + data;
+    
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        headers: {
+            "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')
+        },
+        dataType: "json",
+        success: function (response) {
+
+            $("#iSym").text(response[0].symbol);
+            $("#iName").text(response[0].name);
+            $("#iDeg").text(response[0].degree + " Neighbors");
+
+            var dtext = "DISEASES: ";
+            for (var i = 0; i < 100 && i < response[0].diseases.length; i++) {
+                dtext = dtext + response[0].diseases[i] + "\n";
+            }
+            $("#idisbox").text(dtext);
+
+            var ftext = "FUNCTIONS: ";
+            for (var i = 0; i < 100 && i < response[0].functions.length; i++) {
+                ftext = ftext + response[0].functions[i] + "\n";
+            }
+            $("#ifunbox").text(ftext);
+
+            logger(response[0].tissue);
+            drawNodeBarChart(response[0].tissue);
+
+            logger(response);
+        },
+        error: function (err) {
+            logger(err);
+
+        }
+    });
+}
+
 
 function startRandomWalk(restart_probability, nodes) {
   let data = {}

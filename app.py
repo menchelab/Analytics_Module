@@ -8,8 +8,15 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
+<<<<<<< HEAD
 #from .tables import *
 from tables import *
+=======
+if __name__ == '__main__':
+    from tables import *
+else:
+    from .tables import *
+>>>>>>> master
 from werkzeug.contrib.cache import SimpleCache
 
 
@@ -308,6 +315,12 @@ def attributes_for_node(db_namespace):
     else:
         return "no arguments supplied!"
 
+@app.route("/api/<string:db_namespace>/attribute/delete/<int:attr_id>",  methods=['GET'])
+@cross_origin()
+def delete_attribute(db_namespace, attr_id):
+    return Attribute.delete(db_namespace, attr_id)
+
+
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_attribute_taxonomy(db_namespace, root_node_id):
     zkey = 'attribute_taxonomy_parents-%s-%d' % (db_namespace, root_node_id)
@@ -412,6 +425,27 @@ def get_layout(db_namespace, layout_namespace):
 @cross_origin()
 def get_label(db_namespace, label_namespace):
     return jsonify(Label.fetch(db_namespace, label_namespace))
+
+
+##################
+# EXPORT RESULTS #
+##################
+
+@app.route('/api/<string:db_namespace>/export/results', methods=['POST'])
+@cross_origin()
+def export_dashboard_data(db_namespace):
+
+    data =request.get_json()
+    Exports.export_dashboard_data(db_namespace,data)
+    return 0
+
+
+@app.route('/api/<string:db_namespace>/import/results2swimmer')
+@cross_origin()
+def import_json2swimmer(db_namespace):
+
+    return Exports.import_json2swimmer(db_namespace)
+
 
 #############
 # SavedView #

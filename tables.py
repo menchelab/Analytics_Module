@@ -18,6 +18,9 @@ import random
 import networkx as nx
 import numpy as np
 
+
+
+
 # Cache database call for attribute taxonomy to prevent repeated queries.
 def get_cached_edges(cache, db_namespace):
     zkey = "edges_" + db_namespace
@@ -822,6 +825,25 @@ class Attribute:
 
 
     @staticmethod
+    def delete(db_namespace, attribute_id):
+        query1 = """
+            DELETE from %s.attribute_taxonomies
+            WHERE parent_id = %d" or child_id = %d;
+        """ %(db_namespace, attribute_id, attribute_id)
+
+        query2 = """
+            DELETE from %s.nodes_attributes
+            WHERE attribute_id = %d";
+        """ %(db_namespace, attribute_id)
+
+        query3 = """
+            DELETE from %s.attributes
+            WHERE id = %d;
+        """ %(db_namespace, attribute_id)
+        cursor = base.execute_queries([query1, query2, query3])
+
+
+    @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
         query = """
@@ -1145,6 +1167,58 @@ class Label:
         return [{'loc': [r["x_loc"], r["y_loc"], r["z_loc"]],
                  'text': r["text"]} for r in label]
 
+
+class Exports:
+
+    @staticmethod
+    def export_dashboard_data(db_namespace, json_str):
+
+        #DB query for edges
+        # print("Path from ", from_id," to ",to_id)
+        print(json_str)
+        query = """
+            INSERT INTO %s.current_utterances(json_str) VALUES ("%s")
+
+        """ % (db_namespace,json_str)
+
+        print(query)
+        cursor = Base.execute_query(query)
+
+        return 0
+
+    @staticmethod
+    def import_json2swimmer(db_namespace):
+
+        query = """
+            SELECT
+            replace(json_str,"\'",\'"\')
+
+            FROM %s.current_utterances
+            ORDER BY creation_time DESC
+            LIMIT 1
+        """ % (db_namespace)
+
+        # print(query)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        # print(str(data[0].values())[:100])
+        return list(data[0].values())[0]#.replace(''','"')
+
+        #
+        # query = """
+        #     INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
+        #     VALUES (%d, %d, 0, "SELECTION")
+        # """ % (db_namespace, attr_id, attr_id)
+        # cursor = Base.execute_query(query)
+        # query = """
+        #     INSERT INTO %s.nodes_attributes(node_id, attribute_id)
+        #     VALUES %s
+        # """ %(db_namespace, ",".join(['(%s, %d)' % (x, attr_id) for x in node_ids]))
+        # cursor = Base.execute_query(query)
+        # return {"status":"OK"}
+        #
+        #
+
 # class SavedView:
 #     @staticmethod
 #     def get(username, view_name):
@@ -1339,7 +1413,9 @@ def add_attributes_to_db(namespace, attributes):
     query = "INSERT INTO `tmp_%s`.attributes VALUES (%s)" % \
             (namespace,
              "),(".join([",".join(['"%s"' % i for x in attributes for i in x.split(",")])]))
+    #print(query)
     cursor = Base.execute_query(query)
+    #print(query)
     if run_db_attribute_validations(namespace):
         print("problem!")
     else:
@@ -1371,6 +1447,7 @@ def add_layout_to_db(namespace, filename, layout):
     """ % (namespace, ",".join(layout_rows))
     #print(query)
     cursor = Base.execute_query(query)
+    #print('query executed')
     if run_db_layout_validations(namespace):
         pass
         # return errors
@@ -1585,6 +1662,7 @@ class Upload:
         connection.commit()
         query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
         cursor = Base.execute_query(query)
+        #print('namespace created')
         #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
         #cursor = Base.execute_query(query)
 
@@ -1608,7 +1686,9 @@ class Upload:
             x = validate_layout(contents.split("\n"))
             print("layout errors are", x)
             if x[1] == 0:
+                #print('uploading layouts')
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
+                #print('layouts uploaded')
 
     def upload_edges(namespace, links_files):
         print("links_files", links_files)
@@ -1632,9 +1712,12 @@ class Upload:
         for file in attribute_files:
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
+            if not contents:
+                return
             x = validate_attributes(namespace, contents)
             print("attribute errors are", x)
             if x[1] == 0:
+                #print('loading attributes')
                 add_attributes_to_db(namespace, contents.rstrip().split("\n"))
 
     def upload_labels(namespace, labels_files):

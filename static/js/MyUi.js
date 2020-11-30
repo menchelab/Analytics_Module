@@ -119,6 +119,26 @@ $(function () {
     });
     });
 
+  $(function () {
+  $("#DeleteSelection").button();
+  $("#DeleteSelection").click(function (event) {
+
+    event.preventDefault();
+    var id = $('#selections').find(':selected').val();
+
+    path = dbprefix + "/api/"+ thisNamespace.namespace + "/attribute/delete/" + id ;
+    $.ajax({
+        type: "GET",
+        url: path,
+        contentType: "application/json",
+        dataType: "json",
+        headers: { "Authorization": "Basic " + btoa('steveballmer' + ":" + 'code peaceful canon shorter')},
+      success: function(response) {
+        console.log("success");
+      }
+    });
+    });
+    });
 
   // SLIDERS FOR RANDOMWALK tab-6
 
@@ -304,9 +324,22 @@ $("#searchPredicate1-button").hide();
   $("#clear_cart").button();
   $("#save_cart").button();
   $("#clear_cart").click(function (event) {
+    console.log("here");
+    let selection_name = $('#selection_name_input').val();
+    if (selection_name.length > 0) {
+    let selectionExists = CheckSelectionExists(selection_name);
+    console.log(selectionExists);
+    if (selectionExists) {
+      console.log("match found)");
+      $('<div/>',{
+        text: 'Div text',
+        class: 'className'
+      }).appendTo('#shopping_cart');
+    }};
     mySelection = [];
     PopulateShoppingCart();
   });
+
   $("#save_cart").click(function (event) {
     SaveSelectionDB({"selection_name": $('#selection_name_input').val(),
       "node_ids": mySelection.map(item => item.node_id)});
@@ -419,10 +452,11 @@ $.fn.slideFadeToggle = function(easing, callback) {
 };
 
 $("#show_attributes_list").click(function() {
-  $("#attributes_list").show();
-  $("#show_attributes_list").hide();
+  // $("#attributes_list").show();
+  // $("#show_attributes_list").hide();
   $('.pop').css({top:100, left:100, height:600, width:700})
 });
+
 $("#node_popup_close").click(function() {
   $("#show_attributes_list").show();
   $("#node_popup").hide();
