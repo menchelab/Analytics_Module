@@ -258,13 +258,15 @@ class Node:
 
     ## IP_CELINE: implement GSEA
     @staticmethod
-    def gsea(namespace, selectionNodes, currAnno):#, selectionNodes, currAnno):
+    def gsea(namespace, selectionNodes, currAnno):
 
         if selectionNodes is None:
             selectionNodes = (1,2,3,4,5,6,7,8)
-
         if currAnno is None:
             currAnno = 'molecular_function'
+        print(selectionNodes)
+        print(currAnno)
+        nodes_string = "(" + ",".join([str(node) for node in selectionNodes]) + ")"
 
         # for currAnno, make dictionary of terms > gene, genes > term
         t00 = time.time()
@@ -288,7 +290,6 @@ class Node:
             node2att[node].append(att)
         print('time to make background dictionaries: ' + str(time.time() - t00))
 
-
         # collect set of annoTerms in selectionNodes
         # also make translation dictionary between attribute ID and human readable
         t01 = time.time()
@@ -298,15 +299,13 @@ class Node:
             ON att.id = n_att.attribute_id
             WHERE n_att.node_id IN %s
             AND att.namespace = '%s';
-        """ %(namespace, namespace, selectionNodes, currAnno)
-
+        """ %(namespace, namespace, nodes_string, currAnno)
         cursor = Base.execute_query(query)
         data_sample = cursor.fetchall()
 
         att2node_s = defaultdict(list)
         node2att_s = defaultdict(list)
         dict_attID2humanreadable = {}
-
         for eaItem in data_sample:
             att = eaItem['attribute_id']
             att_human = eaItem['name']
