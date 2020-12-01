@@ -2,10 +2,10 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..")))
 
-#if sys.platform == "darwin":
-#    import db_config
-#else:
-from . import db_config
+if ((sys.platform == "darwin") or (sys.platform == "win32")):
+   import db_config
+else:
+    from . import db_config
 
 import pymysql
 import networkx as nx

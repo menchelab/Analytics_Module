@@ -1,5 +1,6 @@
 import random
 import datetime
+import time
 import sys
 import os
 import json
@@ -17,8 +18,8 @@ import pymysql.cursors
 import random
 import networkx as nx
 import numpy as np
-
-
+from collections import defaultdict
+from fisher import pvalue
 
 
 # Cache database call for attribute taxonomy to prevent repeated queries.
@@ -255,32 +256,83 @@ class Node:
 
         return gene_data
 
-    ## IP CELINE: implement GSEA
+    ## IP_CELINE: implement GSEA
     @staticmethod
     def gsea(namespace):#, selectionNodes, currAnno):
-        selectionNodes = [1, 2, 3, 4, 5]
+
+        selectionNodes = (1,2,3,4,5,6,7,8)
         currAnno = 'molecular_function'
-        # collect set of annoTerms in selectionNodes
+
+        # for currAnno, make dictionary of terms > gene, genes > term
+        t00 = time.time()
         query = """
-            SELECT att.id attribute_ids
-            FROM ppi.attributes att INNER JOIN ppi.nodes_attributes n_att
+            SELECT n_att.node_id, n_att.attribute_id
+            FROM %s.attributes att INNER JOIN %s.nodes_attributes n_att
             ON att.id = n_att.attribute_id
-            WHERE n_att.node_id IN (1,2,3,4,5)
-            AND att.namespace = 'molecular_function';
-        """ #% namespace, namespace, currAnno  # 3rd argument need 1,2,3,4
+            WHERE att.namespace = '%s';
+        """%(namespace, namespace, currAnno)
+
         cursor = Base.execute_query(query)
-        annoTerms = cursor.fetchall()
+        data_background = cursor.fetchall()
 
-        print(annoTerms)
+        att2node = defaultdict(list)
+        node2att = defaultdict(list)
 
-        # for eaTerm in annoTerms:
+        for eaItem in data_background:
+            att = eaItem['attribute_id']
+            node = eaItem['node_id']
+            att2node[att].append(node)
+            node2att[node].append(att)
+        print('time to make background dictionaries: ' + str(time.time() - t00))
+
+
+        # collect set of annoTerms in selectionNodes
+        # also make translation dictionary between attribute ID and human readable
+        t01 = time.time()
+        query = """
+            SELECT n_att.node_id, n_att.attribute_id, att.name
+            FROM %s.attributes att INNER JOIN %s.nodes_attributes n_att
+            ON att.id = n_att.attribute_id
+            WHERE n_att.node_id IN %s
+            AND att.namespace = '%s';
+        """ %(namespace, namespace, selectionNodes, currAnno)
+
+        cursor = Base.execute_query(query)
+        data_sample = cursor.fetchall()
+
+        att2node_s = defaultdict(list)
+        node2att_s = defaultdict(list)
+        dict_attID2humanreadable = {}
+
+        for eaItem in data_sample:
+            att = eaItem['attribute_id']
+            att_human = eaItem['name']
+            node = eaItem['node_id']
+            att2node_s[att].append(node)
+            node2att_s[node].append(att)
+            dict_attID2humanreadable[att] = att_human
+        print('time to make sample dictionaries: ' + str(time.time() - t01))
+        print('time to make dictionaries: ' + str(time.time() - t00))
+
+
+        # fisher tests!
+        fisherPs_attributes = []
+        for eaTerm in att2node_s:
             # count # of selectionNodes with eaTerm
-            # count # of nodes w
-            # calculate fisher test
-            # add result to dictionary
+            a = len(att2node_s[eaTerm])
+            # count # of selectionNodes wo eaTerm
+            b = len(node2att_s) - a
+            # count # of unSelectionNodes w eaTerm
+            c = len(set(att2node[eaTerm]) - set(att2node_s[eaTerm]))
+            # count # of unSelectionNodes wo eaTerm
+            d = len(node2att) - a - b - c
+            # calculate fisher test, correct by # tests (#gene), add to dictionary
+            currP = pvalue(a,b,c,d).right_tail * len(att2node_s)
+            fisherPs_attributes.append({'annoTerm': dict_attID2humanreadable[eaTerm],
+                                        'pvalue': currP})
         anno_fisherStats = [{'term': 'annotationTerm1', 'p-value': 0.01},
                             {'term': 'annotationTerm2', 'p-value': 0.01}]
-        return annoTerms
+        return fisherPs_attributes
 
 
     @staticmethod
