@@ -258,10 +258,13 @@ class Node:
 
     ## IP_CELINE: implement GSEA
     @staticmethod
-    def gsea(namespace):#, selectionNodes, currAnno):
+    def gsea(namespace, selectionNodes, currAnno):#, selectionNodes, currAnno):
 
-        selectionNodes = (1,2,3,4,5,6,7,8)
-        currAnno = 'molecular_function'
+        if selectionNodes is None:
+            selectionNodes = (1,2,3,4,5,6,7,8)
+
+        if currAnno is None:
+            currAnno = 'molecular_function'
 
         # for currAnno, make dictionary of terms > gene, genes > term
         t00 = time.time()
@@ -326,7 +329,7 @@ class Node:
             c = len(set(att2node[eaTerm]) - set(att2node_s[eaTerm]))
             # count # of unSelectionNodes wo eaTerm
             d = len(node2att) - a - b - c
-            # calculate fisher test, correct by # tests (#gene), add to dictionary
+            # calculate fisher test, correct by # tests (#gene), add to fisherPs_attributes
             currP = pvalue(a,b,c,d).right_tail * len(att2node_s)
             fisherPs_attributes.append({'annoTerm': dict_attID2humanreadable[eaTerm],
                                         'pvalue': currP})

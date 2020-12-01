@@ -159,9 +159,17 @@ def gsea(db_namespace):
         data = request.get_json()
         print('in POST')
     else:
-        data = request#.args
-        print([i for i in request.args.keys()])
-    return jsonify(Node.gsea(db_namespace))
+        data = request.args
+        print([i for i in data.keys()])
+    if 'node_ids' in data.keys():
+        selectionNodes = [int(x) for x in data['node_ids']]
+    else:
+        return 'must provide node_ids'
+    if 'annotation' in data.keys():
+        currAnno = data['annotation']
+    else:
+        return 'must provide annotation'
+    return jsonify(Node.gsea(db_namespace, selectionNodes, currAnno))
 
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])
 @cross_origin()
