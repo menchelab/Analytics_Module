@@ -263,22 +263,29 @@ class Node:
         if selectionNodes is None:
             selectionNodes = (1,2,3,4,5,6,7,8)
         if currAnno is None:
-            currAnno = 'molecular_function'
-        print(selectionNodes)
-        print(currAnno)
+            query = """
+                SELECT DISTINCT namespace FROM %s.attributes
+            """%(namespace)
+            cursor = Base.execute_query(query)
+            allAnnos = cursor.fetchall()
+            annos_string = "('" + "', '".join([item['namespace']  for item in allAnnos]) + "')"
+        else:
+            annos_string = "('" + currAnno + "')"
+        print('the anno string is ' + annos_string)
         nodes_string = "(" + ",".join([str(node) for node in selectionNodes]) + ")"
-
+        print('the nodes string is ' + nodes_string)
         # for currAnno, make dictionary of terms > gene, genes > term
         t00 = time.time()
         query = """
             SELECT n_att.node_id, n_att.attribute_id
             FROM %s.attributes att INNER JOIN %s.nodes_attributes n_att
             ON att.id = n_att.attribute_id
-            WHERE att.namespace = '%s';
-        """%(namespace, namespace, currAnno)
+            WHERE att.namespace IN %s;
+        """%(namespace, namespace, annos_string)
 
         cursor = Base.execute_query(query)
         data_background = cursor.fetchall()
+        print(len(data_background))
 
         att2node = defaultdict(list)
         node2att = defaultdict(list)
@@ -289,6 +296,7 @@ class Node:
             att2node[att].append(node)
             node2att[node].append(att)
         print('time to make background dictionaries: ' + str(time.time() - t00))
+        print(len(att2node))
 
         # collect set of annoTerms in selectionNodes
         # also make translation dictionary between attribute ID and human readable
@@ -298,8 +306,8 @@ class Node:
             FROM %s.attributes att INNER JOIN %s.nodes_attributes n_att
             ON att.id = n_att.attribute_id
             WHERE n_att.node_id IN %s
-            AND att.namespace = '%s';
-        """ %(namespace, namespace, nodes_string, currAnno)
+            AND att.namespace IN %s;
+        """ %(namespace, namespace, nodes_string, annos_string)
         cursor = Base.execute_query(query)
         data_sample = cursor.fetchall()
 
@@ -332,10 +340,8 @@ class Node:
             currP = pvalue(a,b,c,d).right_tail * len(att2node_s)
             fisherPs_attributes.append({'annoTerm': dict_attID2humanreadable[eaTerm],
                                         'pvalue': currP})
-        anno_fisherStats = [{'term': 'annotationTerm1', 'p-value': 0.01},
-                            {'term': 'annotationTerm2', 'p-value': 0.01}]
         return fisherPs_attributes
-
+        
 
     @staticmethod
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
