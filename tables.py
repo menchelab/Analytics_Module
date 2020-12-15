@@ -300,9 +300,10 @@ class Node:
 
         # collect set of annoTerms in selectionNodes
         # also make translation dictionary between attribute ID and human readable
+        # also make translation dictionary between attribute ID and annotype
         t01 = time.time()
         query = """
-            SELECT n_att.node_id, n_att.attribute_id, att.name
+            SELECT n_att.node_id, n_att.attribute_id, att.name, att.namespace
             FROM %s.attributes att INNER JOIN %s.nodes_attributes n_att
             ON att.id = n_att.attribute_id
             WHERE n_att.node_id IN %s
@@ -314,13 +315,16 @@ class Node:
         att2node_s = defaultdict(list)
         node2att_s = defaultdict(list)
         dict_attID2humanreadable = {}
+        dict_attID2annoType = {}
         for eaItem in data_sample:
-            att = eaItem['attribute_id']
+            att_id = eaItem['attribute_id']
             att_human = eaItem['name']
-            node = eaItem['node_id']
-            att2node_s[att].append(node)
-            node2att_s[node].append(att)
-            dict_attID2humanreadable[att] = att_human
+            att_type = eaItem['namespace']
+            node_id = eaItem['node_id']
+            att2node_s[att_id].append(node_id)
+            node2att_s[node].append(att_id)
+            dict_attID2humanreadable[att_id] = att_human
+            dict_attID2annoType[att_id] = att_type
         print('time to make sample dictionaries: ' + str(time.time() - t01))
         print('time to make dictionaries: ' + str(time.time() - t00))
 
@@ -339,9 +343,10 @@ class Node:
             # calculate fisher test, correct by # tests (#gene), add to fisherPs_attributes
             currP = pvalue(a,b,c,d).right_tail * len(att2node_s)
             fisherPs_attributes.append({'annoTerm': dict_attID2humanreadable[eaTerm],
+                                        'annoType': dict_attID2annoType[eaTerm],
                                         'pvalue': currP})
         return fisherPs_attributes
-        
+
 
     @staticmethod
     def random_walk(namespace, starting_nodes, variants, restart_probability, max_elements, cache):
