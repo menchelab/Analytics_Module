@@ -477,4 +477,4 @@ def import_json2swimmer(db_namespace):
 if __name__ == "__main__":
 
     app.debug = True
-    app.run()
+    app.run(port=1337)
