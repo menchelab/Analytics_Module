@@ -164,7 +164,7 @@ def gsea(db_namespace):
     # check if arguments are there
     print(data)
     if ('node_ids' in data.keys()) & ('annotation' in data.keys()):
-        selectionNodes = data.getlist('node_ids')
+        selectionNodes = data['node_ids']
         currAnno = data['annotation']
     elif ('node_ids' not in data.keys()) & ('annotation' not in data.keys()):
         return 'must provide node_ids and (optionally) annotation desired'
@@ -172,11 +172,11 @@ def gsea(db_namespace):
         return 'must provide node_ids'
     elif 'annotation' not in data.keys():
 #        return 'must provide annotation'
-        selectionNodes = data.getlist('node_ids')
+        selectionNodes = data['node_ids']
         #selectionNodes = tuple([int(x) for x in data['node_ids']])
         currAnno = None
     # real return
-    print(data.getlist('node_ids'))
+    print(data['node_ids'])
     return jsonify(Node.gsea(db_namespace, selectionNodes, currAnno))
 
 @app.route('/api/<string:db_namespace>/node/random_walk', methods=['GET', 'POST'])
