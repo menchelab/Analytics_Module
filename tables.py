@@ -18,6 +18,7 @@ import pymysql.cursors
 import random
 import networkx as nx
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 from fisher import pvalue
 
@@ -316,6 +317,7 @@ class Node:
 
         att2node_s = defaultdict(list)
         node2att_s = defaultdict(list)
+        dict_attType2attID = defaultdict(list)
         dict_attID2humanreadable = {}
         dict_attID2annoType = {}
         for eaItem in data_sample:
@@ -327,12 +329,19 @@ class Node:
             node2att_s[node].append(att_id)
             dict_attID2humanreadable[att_id] = att_human
             dict_attID2annoType[att_id] = att_type
+            dict_attType2attID[att_type].append(att_id)
         print('time to make sample dictionaries: ' + str(time.time() - t01))
         print('time to make dictionaries: ' + str(time.time() - t00))
+
+        print(dict_attType2attID['DISEASE'])
 
 
         # fisher tests!
         fisherPs_attributes = []
+        allTerms = []
+        allPs = []
+        annoList = []
+        numTests = []
         for eaTerm in att2node_s:
             # count # of selectionNodes with eaTerm
             a = len(att2node_s[eaTerm])
@@ -342,11 +351,30 @@ class Node:
             c = len(set(att2node[eaTerm]) - set(att2node_s[eaTerm]))
             # count # of unSelectionNodes wo eaTerm
             d = len(node2att) - a - b - c
-            # calculate fisher test, correct by # tests (#gene), add to fisherPs_attributes
-            currP = pvalue(a,b,c,d).right_tail * len(att2node_s)
-            fisherPs_attributes.append({'annoTerm': dict_attID2humanreadable[eaTerm],
-                                        'annoType': dict_attID2annoType[eaTerm],
-                                        'pvalue': currP})
+            # calculate fisher test, number of tests (#annotations)
+            allTerms.append(dict_attID2humanreadable[eaTerm])
+            allPs.append(pvalue(a,b,c,d).right_tail)
+            annoList.append(dict_attID2annoType[eaTerm])
+            numTests.append(len(dict_attType2attID[dict_attID2annoType[eaTerm]]))
+        # make dataframe
+        d = {'term': allTerms,
+             'pval': allPs,
+             'annoType': annoList,
+             'numTests': numTests}
+        df = pd.DataFrame(data=d)
+        # bonferroni correction
+        df['corrected'] = df.apply(lambda x: min(x['pval']*x['numTests'], 1), axis=1)
+        df['toPlot'] = 1 - df['corrected']
+        # sort and return top values
+        toReport = df.sort_values(by=['toPlot'], ascending=False)
+        toReport = toReport[:20]
+        for index, row in toReport.iterrows():
+            fisherPs_attributes.append({'term': row['term'],
+                                        'annoType': row['annoType'],
+                                        'toPlot': row['toPlot'],
+                                        'pval': row['pval'],
+                                        'numTests': row['numTests']})
+        #print(fisherPs_attributes)
         return fisherPs_attributes
 
 
