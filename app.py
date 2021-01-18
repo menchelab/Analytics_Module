@@ -472,6 +472,17 @@ def import_json2swimmer(db_namespace):
 #     data = request.form
 #     return jsonify(SavedView.create(data))
 
+@app.route('/api/<string:db_namespace>/MyNewRoute', methods=['POST'])
+@cross_origin()
+def my_new_route(db_namespace):
+    
+    data =request.get_json()
+    print(data)
+#    node_ids = data.node_ids
+    node_ids = [int(x) for x in data['node_ids']]
+    print(node_ids)
+    return jsonify(node_ids)
+
 
 
 if __name__ == "__main__":
