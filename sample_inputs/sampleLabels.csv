@@ -1,0 +1,44 @@
+x_loc,y_loc,z_loc,text,namespace
+0.5000000,0.5000000,0.5000000," C E L L U L A R  C O M P O N E N T S",5_cell
+0.2865250,0.3147390,0.8949590,cytoplasm,5_cell
+0.0803420,0.7728600,0.5103760,"endoplasmic reticulum",5_cell
+0.8600890,0.1093510,0.4013370,"nuclear chromatin",5_cell
+0.8677030,0.3522720,0.5158090,"nuclear lumen",5_cell
+0.3157510,0.6131160,0.0561150,nucleus,5_cell
+0.4270620,0.9578820,0.6013700,"mitochondrial envelope",5_cell
+0.6127050,0.4924910,0.3590930,"microtubule cytoskeleton",5_cell
+0.3725480,0.8269770,0.3148420,"extracellular vesicle",5_cell
+0.7398000,0.8182090,0.1911690,"secretory vesicle",5_cell
+0.6288660,0.9976060,0.5890110,"mitochondrial matrix",5_cell
+0.7809600,0.8754070,0.5632740,"cytosolic ribosomal subunit",5_cell
+0.7994400,0.2417370,0.4726410,chromosome,5_cell
+0.3936480,0.7827140,0.8862840,cytosol,5_cell
+0.6366620,0.6526800,0.9944890,"nuclear body",5_cell
+0.6276800,0.4363430,0.6180860,nucleoplasm,5_cell
+0.2255590,0.5445780,0.6705410,"plasma membrane",5_cell
+0.3627590,0.7596230,0.3233590,"extracellular exosome",5_cell
+0.6928060,0.7332310,0.2518040,"cytoplasmic vesicle",5_cell
+0.9105290,0.2336930,0.7067130,"nuclear body",5_cell
+0.5098520,0.4874890,0.7379160,"intracellular organelle",5_cell
+0.1554260,0.3898680,0.3600940,"cytoplasmic side of membrane",5_cell
+0.2656710,0.3960020,0.5466040,"secretory granule lumen",5_cell
+0.1947380,0.6665860,0.6100790,"integral component of plasma membrane",5_cell
+0.7347100,0.8423640,0.7747650,"cytosolic large ribosomal subunit",5_cell
+0.0390120,0.3273260,0.7302690,"cell periphery",5_cell
+0.4723840,0.4695090,0.0065940,"coated/clathrin-coated vesicle",5_cell
+0.5287340,0.0125730,0.8462280,"phosphatase complex",5_cell
+0.1465170,0.6207640,0.8043910,"plasma membrane bounded cell projection",5_cell
+0.4154240,0.6022000,0.1374310,"secretory granule/cytoplasmic vesicle lumen",5_cell
+0.6226130,0.2237260,0.9465730,"intracellular membrane-bounded organelle",5_cell
+0.8088210,0.6337890,0.6286320,"intracellular organelle lumen",5_cell
+0.8284750,0.6530280,0.2517700,"nuclear chromosome",5_cell
+0.7844980,0.5998820,0.8905730,"nuclear speck",5_cell
+0.6001640,0.4662290,0.4598010,"ficolin-1-rich granule",5_cell
+0.1367620,0.6240930,0.3694780,"bounding membrane of organelle",5_cell
+0.8119610,0.5344300,0.4910100,"intracellular non-membrane-bounded organelle",5_cell
+0.0191190,0.5131130,0.6785510,"endoplasmic reticulum part",5_cell
+0.4326070,0.2554550,0.3049030,"ion channel complex",5_cell
+0.2289530,0.5920070,0.3411910,"membrane raft",5_cell
+0.0441270,0.3320220,0.6685270,"plasma membrane protein complex",5_cell
+0.5566130,0.1100770,0.7249940,"transferase complex",5_cell
+0.5258790,0.6799960,0.5435520,cytoskeleton,5_cell
