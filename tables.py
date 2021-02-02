@@ -1450,7 +1450,7 @@ def validate_layout(layout):
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
     print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
-    print(bad_lines)
+    print("bad lines: ", bad_lines)
     print(len(layout), total_errors, bad_lines)
     return(len(layout), total_errors, bad_lines)
 
@@ -1473,14 +1473,14 @@ def validate_attributes(namespace, attributes):
     # Columns are node_id, attribute_id, attribute_namespace, attribute_name, attribute_description
     column_errors = []
     num_col_errors = 0
-    print(attributes)
+    #print(attributes)
 
     for i, line in enumerate(attributes.split("\n")):
         if not line:
             continue  # Ignore empty lines.
         line = line.split(",")
-        print("line is ")
-        print(line)
+    #    print("line is ")
+    #    print(line)
         # Validate number of columns
         if len(line) != 5:
             num_col_errors += 1
@@ -1505,12 +1505,16 @@ def add_attributes_to_db(namespace, attributes):
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     ''' % namespace
     )
-    query = "INSERT INTO `tmp_%s`.attributes VALUES (%s)" % \
-            (namespace,
-             "),(".join([",".join(['"%s"' % i for x in attributes for i in x.split(",")])]))
-    #print(query)
+    # celine amendments 20210127
+    attribute_rows = attributes.split("\n")
+    formatted_rows = ",".join(["(%s, %s, \"%s\", \"%s\", \"%s\")" % tuple(eaLine.split(",")) for eaLine in attribute_rows])
+
+    query = """
+    INSERT INTO `tmp_%s`.attributes (node_id, attribute_id, attribute_namespace, attribute_name, attribute_description)
+    VALUES %s
+    """ % (namespace, formatted_rows)
+
     cursor = Base.execute_query(query)
-    #print(query)
     if run_db_attribute_validations(namespace):
         print("problem!")
     else:
@@ -1813,7 +1817,8 @@ class Upload:
             print("attribute errors are", x)
             if x[1] == 0:
                 #print('loading attributes')
-                add_attributes_to_db(namespace, contents.rstrip().split("\n"))
+                #add_attributes_to_db(namespace, contents.rstrip().split("\n"))
+                add_attributes_to_db(namespace, contents)
 
     def upload_labels(namespace, labels_files):
         print("labels_files", labels_files)

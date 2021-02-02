@@ -1,0 +1,14 @@
+id	external_id	name	symbol	node_id	attribute_id
+15266	8484	galanin receptor 3	GALR3	15266	87917
+12388	1750	distal-less homeobox 6	DLX6	12388	87917
+2661	29988	solute carrier family 2 member 8	SLC2A8	2661	87917
+12583	121256	transmembrane protein 132D	TMEM132D	12583	87917
+9224	79930	docking protein 3	DOK3	9224	87917
+18026	56654	neural proliferation, differentiation and control 1	NPDC1	18026	87917
+9259	345062	protease, serine 48	PRSS48	9259	87917
+2988	59339	pleckstrin homology domain containing A2	PLEKHA2	2988	87917
+16688	8808	interleukin 1 receptor like 2	IL1RL2	16688	87917
+464	6433	splicing factor SWAP homolog	SFSWAP	464	87917
+4530	64794	DEAD-box helicase 31	DDX31	4530	87917
+12890	1794	dedicator of cytokinesis 2	DOCK2	12890	87917
+1054	6837	mediator complex subunit 22	MED22	1054	87917

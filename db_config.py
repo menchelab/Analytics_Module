@@ -9,13 +9,7 @@ IMPORTANT: DO NOT put passwords in this file.
 
 # DATABASES
 
-asimov = {  "host":     "asimov.westeurope.cloudapp.azure.com",
-            'user':     'readonly',
-            'password':  'ra4Roh7ohdee',
-            'database': 'Datadivr_jen',
-}
-
-menche = {  "host":     "menchelabdb.int.cemm.at",
+vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
             'user':     'readonly',
             'password':  'ra4Roh7ohdee',
             'database': 'Datadivr_jen',
@@ -27,4 +21,4 @@ test = {  # TODO, but probably best sqlite3 since that ships with anaconda.
 }
 
 # Update this variable to switch db used by the platform
-DATABASE = asimov
+DATABASE = vrnetzer
