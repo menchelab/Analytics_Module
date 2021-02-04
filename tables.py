@@ -102,7 +102,7 @@ class Data:
     @staticmethod
     def summary():
         query = """
-            SELECT name FROM Datadivr_meta.namespaces
+            SELECT name FROM Vrnetzer_meta.namespaces
         """
         cursor = Base.execute_query(query)
         namespaces = [x["name"] for x in cursor.fetchall()]
@@ -1319,7 +1319,7 @@ class Exports:
 #     def get(username, view_name):
 #         query = """
 #         SELECT saved_views.username, saved_views.view_name, saved_views.session_info
-#         FROM Datadivr_sessions.saved_views
+#         FROM Vrnetzer_sessions.saved_views
 #         WHERE saved_views.username = '%s'
 #         AND saved_views.view_name = '%s'
 #         """ % (username, view_name)
@@ -1332,7 +1332,7 @@ class Exports:
 #         view_name = data["view_name"]
 #         session_info = data["session_info"]
 #         query = """
-#         INSERT INTO Datadivr_sessions.saved_views (username, view_name, session_info)
+#         INSERT INTO Vrnetzer_sessions.saved_views (username, view_name, session_info)
 #         VALUES ('%s', '%s', '%s')
 #         """ % (username, view_name, session_info)
 #         cursor = Base.execute_query(query)
@@ -1743,7 +1743,7 @@ class Upload:
     def create_new_namespace(namespace):
         query = "DROP DATABASE IF EXISTS %s" % namespace
         cursor = Base.execute_query(query)
-        query = "DELETE FROM Datadivr_meta.namespaces WHERE name = \"%s\"" % namespace
+        query = "DELETE FROM Vrnetzer_meta.namespaces WHERE name = \"%s\"" % namespace
         cursor = Base.execute_query(query)
 
         query = "CREATE DATABASE %s" % namespace
@@ -1759,7 +1759,7 @@ class Upload:
         #print(query)
         populate_db_data_agnostic.create_tables(cursor)
         connection.commit()
-        query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
+        query = "INSERT INTO Vrnetzer_meta.namespaces (name) VALUES (\"%s\")" % namespace
         cursor = Base.execute_query(query)
         #print('namespace created')
         #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
