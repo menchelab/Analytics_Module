@@ -1589,7 +1589,8 @@ def add_labels_to_db(namespace, filename, labels):
     )
     lines = labels.split("\n")
     query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
-            (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")  + [filename]) for line in lines]))
+            (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")) for line in lines]))
+    print(query)
     cursor = Base.execute_query(query)
     if run_db_label_validations(namespace):
         pass
