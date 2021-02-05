@@ -104,18 +104,18 @@ def get_summary():
     return jsonify(Data.summary())
 
 
-@app.route("/api/<string:db_namespace>/subgraph",  methods=['GET'])
-@cross_origin()
-def get_subgraph(db_namespace):
-    nodes = request.args.getlist('node_ids')
-    attribute = request.args.getlist('attribute_id')
-    if attribute:
-        nodes = [node["id"] for node in Node.nodes_for_attribute(db_namespace, attribute)]
-    if not nodes:
-        return "Fail"
-    edges = Edge.for_nodelist(db_namespace, nodes)
-    nodes = Node.get(db_namespace, nodes)
-    return jsonify({"nodes": nodes, "edges": edges})
+# @app.route("/api/<string:db_namespace>/subgraph",  methods=['GET'])
+# @cross_origin()
+# def get_subgraph(db_namespace):
+#     nodes = request.args.getlist('node_ids')
+#     attribute = request.args.getlist('attribute_id')
+#     if attribute:
+#         nodes = [node["id"] for node in Node.nodes_for_attribute(db_namespace, attribute)]
+#     if not nodes:
+#         return "Fail"
+#     edges = Edge.for_nodelist(db_namespace, nodes)
+#     nodes = Node.get(db_namespace, nodes)
+#     return jsonify({"nodes": nodes, "edges": edges})
 
 
 
