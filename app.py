@@ -11,7 +11,7 @@ from flask_cors import CORS, cross_origin
 if __name__ == '__main__':
     from tables import *
 else:
-    from .tables import *
+    from tables import *
 from werkzeug.contrib.cache import SimpleCache
 
 
