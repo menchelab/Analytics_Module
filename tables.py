@@ -856,10 +856,9 @@ class Node:
             GROUP BY 1, 2, 3
             """ % (db_namespace, db_namespace, db_namespace, " OR ".join(filter_clauses))
             query = name_attribute_select_clause
+            #print(query)
             cursor = Base.execute_query(query)
             attr_table = cursor.fetchall()
-            print(attr_table)
-            print(query)
             nodes_to_attributes = {x["node_id"]: x["attribute_id"].split(",") for x in attr_table}
             nodes_to_names = {x["node_id"]: {'name': x['name'], 'symbol': x['symbol']} for x in attr_table}
         #nodes_to_attributes = {**nodes_to_attributes, **nodes_to_attributes_d}
@@ -1189,6 +1188,7 @@ class Edge:
         """ % namespace
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
+        print(query)
         return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
 
     @staticmethod
@@ -1712,10 +1712,10 @@ def write_edges(namespace):
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
     LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
-    WHERE e.id IS NULL
 
     """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
+
     query = """
     INSERT INTO %s.edges(node1_id, node2_id, namespace)
     SELECT n2.id, n1.id, tmp.namespace
@@ -1723,10 +1723,21 @@ def write_edges(namespace):
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
     LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
-    WHERE e.id IS NULL
 
     """ % (namespace, namespace, namespace, namespace, namespace)
+
+    # query = """
+    # INSERT INTO %s.edges(node1_id, node2_id, namespace)
+    # SELECT n2.id, n1.id, tmp.namespace
+    # FROM tmp_%s.edges_tmp tmp
+    # JOIN %s.nodes n1 on n1.external_id = tmp.node1
+    # JOIN %s.nodes n2 on n2.external_id = tmp.node2
+    # LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
+    # WHERE e.id IS NULL
+    #
+    # """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
+    print('write edges end')
 
 
 def write_labels(namespace):

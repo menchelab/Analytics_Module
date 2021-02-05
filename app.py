@@ -413,6 +413,7 @@ def article(namespace):
 def get_edge(namespace):
     data = request.args
     node_ids = data.get("node_id")
+    print(node_ids)
     if node_ids:
         return jsonify(Edge.for_nodelist(node_ids))
     return jsonify(Edge.all(namespace))
