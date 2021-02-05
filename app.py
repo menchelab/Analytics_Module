@@ -52,7 +52,7 @@ def upload_file():
         return "namespace fail"
     Upload.create_new_temp_namespace(namespace)
     layout_files = request.files.getlist("layouts")
-    print(layout_files)
+    #print(layout_files)
     if len(layout_files) > 0 and len(layout_files[0].filename) > 0:
         print("loading layouts", len(layout_files))
         Upload.upload_layouts(namespace, layout_files)
@@ -133,7 +133,7 @@ def nodes(db_namespace):
     neighbors = request.args.getlist("neighbor")
     random = request.args.get('random') or None
     attribute_ids = request.args.getlist("attribute_id")
-    print(node_ids)
+    #print(node_ids)
     if random:
         return jsonify(Node.show_random(random, db_namespace))
     if node_ids:

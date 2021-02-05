@@ -958,7 +958,7 @@ class Attribute:
             WHERE attributes.external_id in ('%s')
             %s
         """ % (db_namespace, "','".join(external_ids), namespace_clause)
-        print(query)
+        #print(query)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -1188,7 +1188,7 @@ class Edge:
         """ % namespace
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
-        print(query)
+        #print(query)
         return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
 
     @staticmethod
@@ -1210,7 +1210,7 @@ class Edge:
         FROM (select node1_id, node2_id from  %s.edges UNION ALL select node2_id as node1_id, node1_id as node2_id from %s.edges) tbl
         GROUP BY 1
         """ % (namespace, namespace)
-        print(query)
+        #print(query)
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
         print(results[:10])
@@ -1276,7 +1276,7 @@ class Exports:
 
         """ % (db_namespace,json_str)
 
-        print(query)
+        #print(query)
         cursor = Base.execute_query(query)
 
         return 0
