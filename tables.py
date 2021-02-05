@@ -102,7 +102,7 @@ class Data:
     @staticmethod
     def summary():
         query = """
-            SELECT name FROM Datadivr_meta.namespaces
+            SELECT name FROM Vrnetzer_meta.namespaces
         """
         cursor = Base.execute_query(query)
         namespaces = [x["name"] for x in cursor.fetchall()]
@@ -856,10 +856,9 @@ class Node:
             GROUP BY 1, 2, 3
             """ % (db_namespace, db_namespace, db_namespace, " OR ".join(filter_clauses))
             query = name_attribute_select_clause
+            #print(query)
             cursor = Base.execute_query(query)
             attr_table = cursor.fetchall()
-            print(attr_table)
-            print(query)
             nodes_to_attributes = {x["node_id"]: x["attribute_id"].split(",") for x in attr_table}
             nodes_to_names = {x["node_id"]: {'name': x['name'], 'symbol': x['symbol']} for x in attr_table}
         #nodes_to_attributes = {**nodes_to_attributes, **nodes_to_attributes_d}
@@ -1189,6 +1188,7 @@ class Edge:
         """ % namespace
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
+        print(query)
         return {"start": [r["node1_id"] for r in results], "end": [r["node2_id"] for r in results]}
 
     @staticmethod
@@ -1319,7 +1319,7 @@ class Exports:
 #     def get(username, view_name):
 #         query = """
 #         SELECT saved_views.username, saved_views.view_name, saved_views.session_info
-#         FROM Datadivr_sessions.saved_views
+#         FROM Vrnetzer_sessions.saved_views
 #         WHERE saved_views.username = '%s'
 #         AND saved_views.view_name = '%s'
 #         """ % (username, view_name)
@@ -1332,7 +1332,7 @@ class Exports:
 #         view_name = data["view_name"]
 #         session_info = data["session_info"]
 #         query = """
-#         INSERT INTO Datadivr_sessions.saved_views (username, view_name, session_info)
+#         INSERT INTO Vrnetzer_sessions.saved_views (username, view_name, session_info)
 #         VALUES ('%s', '%s', '%s')
 #         """ % (username, view_name, session_info)
 #         cursor = Base.execute_query(query)
@@ -1450,7 +1450,7 @@ def validate_layout(layout):
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
     print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
-    print(bad_lines)
+    print("bad lines: ", bad_lines)
     print(len(layout), total_errors, bad_lines)
     return(len(layout), total_errors, bad_lines)
 
@@ -1473,14 +1473,14 @@ def validate_attributes(namespace, attributes):
     # Columns are node_id, attribute_id, attribute_namespace, attribute_name, attribute_description
     column_errors = []
     num_col_errors = 0
-    print(attributes)
+    #print(attributes)
 
     for i, line in enumerate(attributes.split("\n")):
         if not line:
             continue  # Ignore empty lines.
         line = line.split(",")
-        print("line is ")
-        print(line)
+    #    print("line is ")
+    #    print(line)
         # Validate number of columns
         if len(line) != 5:
             num_col_errors += 1
@@ -1505,12 +1505,16 @@ def add_attributes_to_db(namespace, attributes):
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1
     ''' % namespace
     )
-    query = "INSERT INTO `tmp_%s`.attributes VALUES (%s)" % \
-            (namespace,
-             "),(".join([",".join(['"%s"' % i for x in attributes for i in x.split(",")])]))
-    #print(query)
+    # celine amendments 20210127
+    attribute_rows = attributes.split("\n")
+    formatted_rows = ",".join(["(%s, %s, \"%s\", \"%s\", \"%s\")" % tuple(eaLine.split(",")) for eaLine in attribute_rows])
+
+    query = """
+    INSERT INTO `tmp_%s`.attributes (node_id, attribute_id, attribute_namespace, attribute_name, attribute_description)
+    VALUES %s
+    """ % (namespace, formatted_rows)
+
     cursor = Base.execute_query(query)
-    #print(query)
     if run_db_attribute_validations(namespace):
         print("problem!")
     else:
@@ -1585,7 +1589,8 @@ def add_labels_to_db(namespace, filename, labels):
     )
     lines = labels.split("\n")
     query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
-            (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")  + [filename]) for line in lines]))
+            (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")) for line in lines]))
+    print(query)
     cursor = Base.execute_query(query)
     if run_db_label_validations(namespace):
         pass
@@ -1707,10 +1712,10 @@ def write_edges(namespace):
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
     LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
-    WHERE e.id IS NULL
 
     """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
+
     query = """
     INSERT INTO %s.edges(node1_id, node2_id, namespace)
     SELECT n2.id, n1.id, tmp.namespace
@@ -1718,10 +1723,21 @@ def write_edges(namespace):
     JOIN %s.nodes n1 on n1.external_id = tmp.node1
     JOIN %s.nodes n2 on n2.external_id = tmp.node2
     LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
-    WHERE e.id IS NULL
 
     """ % (namespace, namespace, namespace, namespace, namespace)
+
+    # query = """
+    # INSERT INTO %s.edges(node1_id, node2_id, namespace)
+    # SELECT n2.id, n1.id, tmp.namespace
+    # FROM tmp_%s.edges_tmp tmp
+    # JOIN %s.nodes n1 on n1.external_id = tmp.node1
+    # JOIN %s.nodes n2 on n2.external_id = tmp.node2
+    # LEFT JOIN %s.edges e on n1.id = e.node1_id and n2.id = e.node2_id
+    # WHERE e.id IS NULL
+    #
+    # """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
+    print('write edges end')
 
 
 def write_labels(namespace):
@@ -1739,7 +1755,7 @@ class Upload:
     def create_new_namespace(namespace):
         query = "DROP DATABASE IF EXISTS %s" % namespace
         cursor = Base.execute_query(query)
-        query = "DELETE FROM Datadivr_meta.namespaces WHERE name = \"%s\"" % namespace
+        query = "DELETE FROM Vrnetzer_meta.namespaces WHERE name = \"%s\"" % namespace
         cursor = Base.execute_query(query)
 
         query = "CREATE DATABASE %s" % namespace
@@ -1755,7 +1771,7 @@ class Upload:
         #print(query)
         populate_db_data_agnostic.create_tables(cursor)
         connection.commit()
-        query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
+        query = "INSERT INTO Vrnetzer_meta.namespaces (name) VALUES (\"%s\")" % namespace
         cursor = Base.execute_query(query)
         #print('namespace created')
         #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
@@ -1813,7 +1829,8 @@ class Upload:
             print("attribute errors are", x)
             if x[1] == 0:
                 #print('loading attributes')
-                add_attributes_to_db(namespace, contents.rstrip().split("\n"))
+                #add_attributes_to_db(namespace, contents.rstrip().split("\n"))
+                add_attributes_to_db(namespace, contents)
 
     def upload_labels(namespace, labels_files):
         print("labels_files", labels_files)

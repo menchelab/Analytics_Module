@@ -1,0 +1,272 @@
+id	external_id	name	symbol	node_id	attribute_id
+6657	57217	tetratricopeptide repeat domain 7A	TTC7A	6657	87916
+5121	987	LPS responsive beige-like anchor protein	LRBA	5121	87916
+1029	6813	syntaxin binding protein 2	STXBP2	1029	87916
+19462	5993	regulatory factor X5	RFX5	19462	87916
+19463	8625	regulatory factor X associated ankyrin containing protein	RFXANK	19463	87916
+19464	5994	regulatory factor X associated protein	RFXAP	19464	87916
+17929	10725	nuclear factor of activated T-cells 5	NFAT5	17929	87916
+17417	10747	mannan binding lectin serine peptidase 2	MASP2	17417	87916
+11787	91442	Fanconi anemia core complex associated protein 24	FAAP24	11787	87916
+12820	1789	DNA methyltransferase 3 beta	DNMT3B	12820	87916
+12821	28956	late endosomal/lysosomal adaptor, MAPK and MTOR activator 2	LAMTOR2	12821	87916
+17944	4790	nuclear factor kappa B subunit 1	NFKB1	17944	87916
+2073	7535	zeta chain of T cell receptor associated protein kinase 70	ZAP70	2073	87916
+17946	4792	NFKB inhibitor alpha	NFKBIA	17946	87916
+18459	537	ATPase H+ transporting accessory protein 1	ATP6AP1	18459	87916
+18978	5551	perforin 1	PRF1	18978	87916
+10274	84876	ORAI calcium release-activated calcium modulator 1	ORAI1	10274	87916
+16424	3507	immunoglobulin heavy constant mu	IGHM	16424	87916
+9769	1075	cathepsin C	CTSC	9769	87916
+7209	55636	chromodomain helicase DNA binding protein 7	CHD7	7209	87916
+17457	4173	minichromosome maintenance complex component 4	MCM4	17457	87916
+15413	6890	transporter 1, ATP binding cassette subfamily B member	TAP1	15413	87916
+17462	4179	CD46 molecule	CD46	17462	87916
+6204	130340	adaptor related protein complex 1 sigma 3 subunit	AP1S3	6204	87916
+15937	3070	helicase, lymphoid-specific	HELLS	15937	87916
+19009	5580	protein kinase C delta	PRKCD	19009	87916
+4675	966	CD59 molecule	CD59	4675	87916
+76	6097	RAR related orphan receptor C	RORC	76	87916
+3663	11005	serine peptidase inhibitor, Kazal type 5	SPINK5	3663	87916
+15952	3075	complement factor H	CFH	15952	87916
+8277	79633	FAT atypical cadherin 4	FAT4	8277	87916
+3159	11311	vacuolar protein sorting 45 homolog	VPS45	3159	87916
+4700	10456	HCLS1 associated protein X-1	HAX1	4700	87916
+9823	81790	ring finger protein 170	RNF170	9823	87916
+1121	6892	TAP binding protein	TAPBP	1121	87916
+18020	4860	purine nucleoside phosphorylase	PNP	18020	87916
+17510	10095	actin related protein 2/3 complex subunit 1B	ARPC1B	17510	87916
+1129	6901	tafazzin	TAZ	1129	87916
+5225	64858	DNA cross-link repair 1B	DCLRE1B	5225	87916
+5226	64421	DNA cross-link repair 1C	DCLRE1C	5226	87916
+8300	201294	unc-13 homolog D	UNC13D	8300	87916
+4717	10525	hypoxia up-regulated 1	HYOU1	4717	87916
+8305	83706	fermitin family member 3	FERMT3	8305	87916
+1137	29110	TANK binding kinase 1	TBK1	1137	87916
+16499	8546	adaptor related protein complex 3 beta 1 subunit	AP3B1	16499	87916
+3190	83879	cell division cycle associated 7	CDCA7	3190	87916
+13430	81570	ClpB homolog, mitochondrial AAA ATPase chaperonin	CLPB	13430	87916
+1144	6899	T-box 1	TBX1	1144	87916
+17528	4261	class II major histocompatibility complex transactivator	CIITA	17528	87916
+10874	1604	CD55 molecule (Cromer blood group)	CD55	10874	87916
+18555	5184	peptidase D	PEPD	18555	87916
+15482	6891	transporter 2, ATP binding cassette subfamily B member	TAP2	15482	87916
+18047	472	ATM serine/threonine kinase	ATM	18047	87916
+16512	3514	immunoglobulin kappa constant	IGKC	16512	87916
+10883	165918	ring finger protein 168	RNF168	10883	87916
+5767	1051	CCAAT/enhancer binding protein beta	CEBPB	5767	87916
+11401	1675	complement factor D	CFD	11401	87916
+5772	148022	toll like receptor adaptor molecule 1	TICAM1	5772	87916
+19085	5663	presenilin 1	PSEN1	19085	87916
+141	629	complement factor B	CFB	141	87916
+18577	5199	complement factor properdin	CFP	18577	87916
+5780	84818	interleukin 17 receptor C	IL17RC	5780	87916
+2710	83737	itchy E3 ubiquitin protein ligase	ITCH	2710	87916
+1179	6929	transcription factor 3	TCF3	1179	87916
+17564	8085	lysine methyltransferase 2D	KMT2D	17564	87916
+4766	973	CD79a molecule	CD79A	4766	87916
+1696	11277	three prime repair exonuclease 1	TREX1	1696	87916
+6305	23586	DExD/H-box helicase 58	DDX58	6305	87916
+1189	10312	T-cell immune regulator 1, ATPase H+ transporting V0 subunit a3	TCIRG1	1189	87916
+7846	28962	osteopetrosis associated transmembrane protein 1	OSTM1	7846	87916
+1704	710	serpin family G member 1	SERPING1	1704	87916
+4776	974	CD79b molecule	CD79B	4776	87916
+1194	6948	transcobalamin 2	TCN2	1194	87916
+5802	51816	cat eye syndrome chromosome region, candidate 1	CECR1	5802	87916
+5293	115650	TNF receptor superfamily member 13C	TNFRSF13C	5293	87916
+18610	5238	phosphoglucomutase 3	PGM3	18610	87916
+11447	340061	transmembrane protein 173	TMEM173	11447	87916
+8892	84153	ribonuclease H2 subunit C	RNASEH2C	8892	87916
+4798	975	CD81 molecule	CD81	4798	87916
+16063	3162	heme oxygenase 1	HMOX1	16063	87916
+3779	51594	neuroblastoma amplified sequence	NBAS	3779	87916
+4302	930	CD19 molecule	CD19	4302	87916
+1234	7015	telomerase reverse transcriptase	TERT	1234	87916
+16595	3543	immunoglobulin lambda like polypeptide 1	IGLL1	16595	87916
+19157	5728	phosphatase and tensin homolog	PTEN	19157	87916
+15065	2357	formyl peptide receptor 1	FPR1	15065	87916
+9437	7841	mannosyl-oligosaccharide glucosidase	MOGS	9437	87916
+7904	359948	interferon regulatory factor 2 binding protein 2	IRF2BP2	7904	87916
+12516	57724	ectopic P-granules autophagy protein 5 homolog	EPG5	12516	87916
+18663	5293	phosphatidylinositol-4,5-bisphosphate 3-kinase catalytic subunit delta	PIK3CD	18663	87916
+9959	55135	WD repeat containing antisense to TP53	WRAP53	9959	87916
+1768	54	acid phosphatase 5, tartrate resistant	ACP5	1768	87916
+746	50485	SWI/SNF related, matrix associated, actin dependent regulator of chromatin, subfamily a like 1	SMARCAL1	746	87916
+18665	5295	phosphoinositide-3-kinase regulatory subunit 1	PIK3R1	18665	87916
+17644	931	membrane spanning 4-domains A1	MS4A1	17644	87916
+4846	925	CD8a molecule	CD8A	4846	87916
+751	6603	SWI/SNF related, matrix associated, actin dependent regulator of chromatin, subfamily d, member 2	SMARCD2	751	87916
+4336	64170	caspase recruitment domain family member 9	CARD9	4336	87916
+1777	712	complement C1q A chain	C1QA	1777	87916
+2290	10320	IKAROS family zinc finger 1	IKZF1	2290	87916
+16627	331	X-linked inhibitor of apoptosis	XIAP	16627	87916
+4338	84433	caspase recruitment domain family member 11	CARD11	4338	87916
+17653	2956	mutS homolog 6	MSH6	17653	87916
+13045	55851	presenilin enhancer gamma-secretase subunit	PSENEN	13045	87916
+1782	713	complement C1q B chain	C1QB	1782	87916
+2294	718	complement C3	C3	2294	87916
+4347	112744	interleukin 17F	IL17F	4347	87916
+8444	1380	complement C3d receptor 2	CR2	8444	87916
+7935	157680	vacuolar protein sorting 13 homolog B	VPS13B	7935	87916
+6912	55343	solute carrier family 35 member C1	SLC35C1	6912	87916
+5888	10535	ribonuclease H2 subunit A	RNASEH2A	5888	87916
+2306	60	actin beta	ACTB	2306	87916
+1283	7056	thrombomodulin	THBD	1283	87916
+1795	7297	tyrosine kinase 2	TYK2	1795	87916
+2310	57379	activation induced cytidine deaminase	AICDA	2310	87916
+1800	714	complement C1q C chain	C1QC	1800	87916
+10506	80169	CST telomere replication complex component 1	CTC1	10506	87916
+2827	60468	BTB domain and CNC homolog 2	BACH2	2827	87916
+16652	8517	inhibitor of kappa light polypeptide gene enhancer in B-cells, kinase gamma	IKBKG	16652	87916
+1805	715	complement C1r	C1R	1805	87916
+16654	3587	interleukin 10 receptor subunit alpha	IL10RA	16654	87916
+16653	3586	interleukin 10	IL10	16653	87916
+19216	5788	protein tyrosine phosphatase, receptor type C	PTPRC	19216	87916
+16655	3588	interleukin 10 receptor subunit beta	IL10RB	16655	87916
+2322	720	complement C4A (Rodgers blood group)	C4A	2322	87916
+1811	716	complement C1s	C1S	1811	87916
+16660	3593	interleukin 12B	IL12B	16660	87916
+17172	3981	DNA ligase 4	LIG4	17172	87916
+16661	3594	interleukin 12 receptor subunit beta 1	IL12RB1	16661	87916
+16846	3716	Janus kinase 1	JAK1	16846	87916
+17168	3978	DNA ligase 1	LIG1	17168	87916
+17695	4522	methylenetetrahydrofolate dehydrogenase, cyclohydrolase and formyltetrahydrofolate synthetase 1	MTHFD1	17695	87916
+973	6777	signal transducer and activator of transcription 5B	STAT5B	973	87916
+12575	114803	Myb like, SWIRM and MPN domains 1	MYSM1	12575	87916
+16674	23765	interleukin 17 receptor A	IL17RA	16674	87916
+291	641	Bloom syndrome RecQ like helicase	BLM	291	87916
+6949	1186	chloride voltage-gated channel 7	CLCN7	6949	87916
+1318	26277	TERF1 interacting nuclear factor 2	TINF2	1318	87916
+10536	79991	STN1, CST complex subunit	STN1	10536	87916
+4876	23385	nicastrin	NCSTN	4876	87916
+1994	7454	Wiskott-Aldrich syndrome	WAS	1994	87916
+12597	147372	collagen and calcium binding EGF domains 1	CCBE1	12597	87916
+16698	3559	interleukin 2 receptor subunit alpha	IL2RA	16698	87916
+5948	100	adenosine deaminase	ADA	5948	87916
+16701	3561	interleukin 2 receptor subunit gamma	IL2RG	16701	87916
+1341	7098	toll like receptor 3	TLR3	1341	87916
+2369	727	complement C5	C5	2369	87916
+10050	7852	C-X-C motif chemokine receptor 4	CXCR4	10050	87916
+1478	7174	tripeptidyl peptidase 2	TPP2	1478	87916
+11077	375748	ERCC excision repair 6 like 2	ERCC6L2	11077	87916
+14149	1991	elastase, neutrophil expressed	ELANE	14149	87916
+16713	3575	interleukin 7 receptor	IL7R	16713	87916
+1999	7456	WAS/WASL interacting protein family member 1	WIPF1	1999	87916
+11081	84522	jagunal homolog 1	JAGN1	11081	87916
+2897	29760	B-cell linker	BLNK	2897	87916
+19282	5873	RAB27A, member RAS oncogene family	RAB27A	19282	87916
+3925	10616	RANBP2-type and C3HC4-type zinc finger containing 1	RBCK1	3925	87916
+5463	51135	interleukin 1 receptor associated kinase 4	IRAK4	5463	87916
+1883	7374	uracil DNA glycosylase	UNG	1883	87916
+15195	9636	ISG15 ubiquitin-like modifier	ISG15	15195	87916
+12124	1736	dyskerin pseudouridine synthase 1	DKC1	12124	87916
+15199	2539	glucose-6-phosphate dehydrogenase	G6PD	15199	87916
+18783	5395	PMS1 homolog 2, mismatch repair system component	PMS2	18783	87916
+15201	2542	solute carrier family 37 member 4	SLC37A4	15201	87916
+18788	567	beta-2-microglobulin	B2M	18788	87916
+9572	1493	cytotoxic T-lymphocyte associated protein 4	CTLA4	9572	87916
+11109	54617	INO80 complex subunit	INO80	11109	87916
+2408	729	complement C6	C6	2408	87916
+17768	4615	myeloid differentiation primary response 88	MYD88	17768	87916
+3947	51750	regulator of telomere elongation helicase 1	RTEL1	3947	87916
+3436	29887	sorting nexin 10	SNX10	3436	87916
+1390	8792	TNF receptor superfamily member 11a	TNFRSF11A	1390	87916
+9587	65057	ACD, shelterin complex subunit and telomerase recruitment factor	ACD	9587	87916
+10100	79621	ribonuclease H2 subunit B	RNASEH2B	10100	87916
+19316	5880	ras-related C3 botulinum toxin substrate 2 (rho family, small GTP binding protein Rac2)	RAC2	19316	87916
+1911	11274	ubiquitin specific peptidase 18	USP18	1911	87916
+9080	1438	colony stimulating factor 2 receptor alpha subunit	CSF2RA	9080	87916
+1401	958	CD40 molecule	CD40	1401	87916
+18811	5426	DNA polymerase epsilon, catalytic subunit	POLE	18811	87916
+16764	50943	forkhead box P3	FOXP3	16764	87916
+2428	10758	TRAF3 interacting protein 2	TRAF3IP2	2428	87916
+1403	355	Fas cell surface death receptor	FAS	1403	87916
+18812	5427	DNA polymerase epsilon 2, accessory subunit	POLE2	18812	87916
+7547	9841	zinc finger and BTB domain containing 24	ZBTB24	7547	87916
+1409	8600	tumor necrosis factor superfamily member 11	TNFSF11	1409	87916
+3457	843	caspase 10	CASP10	3457	87916
+1410	8742	tumor necrosis factor superfamily member 12	TNFSF12	1410	87916
+9089	1439	colony stimulating factor 2 receptor beta common subunit	CSF2RB	9089	87916
+5509	11322	transmembrane channel like 6	TMC6	5509	87916
+6534	51119	SBDS ribosome assembly guanine nucleotide exchange factor	SBDS	6534	87916
+19335	5896	recombination activating 1	RAG1	19335	87916
+19336	5897	recombination activating 2	RAG2	19336	87916
+1417	959	CD40 ligand	CD40LG	1417	87916
+1418	356	Fas ligand	FASLG	1418	87916
+9099	1441	colony stimulating factor 3 receptor	CSF3R	9099	87916
+16780	3665	interferon regulatory factor 7	IRF7	16780	87916
+2444	730	complement C7	C7	2444	87916
+3981	25939	SAM and HD domain containing deoxynucleoside triphosphate triphosphohydrolase 1	SAMHD1	3981	87916
+1931	7403	lysine demethylase 6A	KDM6A	1931	87916
+5064	51095	tRNA nucleotidyl transferase 1	TRNT1	5064	87916
+1419	970	CD70 molecule	CD70	1419	87916
+2452	81622	unc-93 homolog B1 (C. elegans)	UNC93B1	2452	87916
+19350	5903	RAN binding protein 2	RANBP2	19350	87916
+407	9723	semaphorin 3E	SEMA3E	407	87916
+9628	90268	OTU deubiquitinase with linear linkage specificity	OTULIN	9628	87916
+14750	8772	Fas associated via death domain	FADD	14750	87916
+12192	9837	GINS complex subunit 1	GINS1	12192	87916
+16290	29851	inducible T-cell costimulator	ICOS	16290	87916
+16291	3394	interferon regulatory factor 8	IRF8	16291	87916
+3493	841	caspase 8	CASP8	3493	87916
+11173	134218	DnaJ heat shock protein family (Hsp40) member C21	DNAJC21	11173	87916
+10151	79840	non-homologous end joining factor 1	NHEJ1	10151	87916
+8106	103	adenosine deaminase, RNA specific	ADAR	8106	87916
+2986	57591	megakaryoblastic leukemia (translocation) 1	MKL1	2986	87916
+16811	3689	integrin subunit beta 2	ITGB2	16811	87916
+941	695	Bruton tyrosine kinase	BTK	941	87916
+17837	4683	nibrin	NBN	17837	87916
+8108	11151	coronin 1A	CORO1A	8108	87916
+2477	731	complement C8 alpha chain	C8A	2477	87916
+19379	10125	RAS guanyl releasing protein 1	RASGRP1	19379	87916
+17844	4688	neutrophil cytosolic factor 2	NCF2	17844	87916
+17845	4689	neutrophil cytosolic factor 4	NCF4	17845	87916
+15286	2624	GATA binding protein 2	GATA2	15286	87916
+16310	3426	complement factor I	CFI	16310	87916
+14775	326	autoimmune regulator	AIRE	14775	87916
+2485	732	complement C8 beta chain	C8B	2485	87916
+16826	3702	IL2 inducible T-cell kinase	ITK	16826	87916
+4538	915	CD3d molecule	CD3D	4538	87916
+16316	3431	SP110 nuclear body protein	SP110	16316	87916
+11197	146206	capping protein regulator and myosin 1 linker 2	CARMIL2	11197	87916
+2495	733	complement C8 gamma chain	C8G	2495	87916
+4544	916	CD3e molecule	CD3E	4544	87916
+10176	1535	cytochrome b-245 alpha chain	CYBA	10176	87916
+17857	56160	NSE3 homolog, SMC5-SMC6 complex component	NSMCE3	17857	87916
+16835	8542	apolipoprotein L1	APOL1	16835	87916
+4550	917	CD3g molecule	CD3G	4550	87916
+6599	1130	lysosomal trafficking regulator	LYST	6599	87916
+968	6772	signal transducer and activator of transcription 1	STAT1	968	87916
+14793	204	adenylate kinase 2	AK2	14793	87916
+12233	9842	pleckstrin homology and RUN domain containing M1	PLEKHM1	12233	87916
+969	6773	signal transducer and activator of transcription 2	STAT2	969	87916
+10184	1536	cytochrome b-245 beta chain	CYBB	10184	87916
+14792	2214	Fc fragment of IgG receptor IIIa	FCGR3A	14792	87916
+970	6774	signal transducer and activator of transcription 3	STAT3	970	87916
+14799	8547	ficolin 3	FCN3	14799	87916
+7120	147138	transmembrane channel like 8	TMC8	7120	87916
+3025	55651	NHP2 ribonucleoprotein	NHP2	3025	87916
+3026	55505	NOP10 ribonucleoprotein	NOP10	3026	87916
+4563	919	CD247 molecule	CD247	4563	87916
+1492	7187	TNF receptor associated factor 3	TRAF3	1492	87916
+16340	3455	interferon alpha and beta receptor subunit 2	IFNAR2	16340	87916
+17366	9020	mitogen-activated protein kinase kinase kinase 14	MAP3K14	17366	87916
+10196	79650	U6 snRNA biogenesis phosphodiesterase 1	USB1	10196	87916
+16848	3718	Janus kinase 3	JAK3	16848	87916
+16345	3460	interferon gamma receptor 2 (interferon gamma transducer 1)	IFNGR2	16345	87916
+985	6786	stromal interaction molecule 1	STIM1	985	87916
+2523	735	complement C9	C9	2523	87916
+2006	9948	WD repeat domain 1	WDR1	2006	87916
+17373	399	ras homolog family member H	RHOH	17373	87916
+16343	3459	interferon gamma receptor 1	IFNGR1	16343	87916
+2015	8456	forkhead box N1	FOXN1	2015	87916
+6114	1080	cystic fibrosis transmembrane conductance regulator	CFTR	6114	87916
+486	4068	SH2 domain containing 1A	SH2D1A	486	87916
+4074	55072	ring finger protein 31	RNF31	4074	87916
+19435	5971	RELB proto-oncogene, NF-kB subunit	RELB	19435	87916
+18419	5073	poly(A)-specific ribonuclease	PARN	18419	87916
+1015	8676	syntaxin 11	STX11	1015	87916
+5621	23495	TNF receptor superfamily member 13B	TNFRSF13B	5621	87916
+6135	64135	interferon induced with helicase C domain 1	IFIH1	6135	87916
+6136	27040	linker for activation of T-cells	LAT	6136	87916
+15356	2672	growth factor independent 1 transcriptional repressor	GFI1	15356	87916
