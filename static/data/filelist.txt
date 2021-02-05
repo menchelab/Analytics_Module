@@ -1,5 +1,0 @@
-{
-    "nodes": ["somenodefile.txt","somenodefile1.txt","somenodefile2.txt"],
-    "links": ["somelinkfile.txt","somelinkfile1.txt","somelinkfile2.txt"],
-    "selections": ["select.txt","select1.txt","select2.txt"]
-}
