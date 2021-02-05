@@ -12,11 +12,8 @@ IMPORTANT: DO NOT put passwords in this file.
 vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
             'user':     'readonly',
             'password':  'ra4Roh7ohdee',
-<<<<<<< HEAD
-            'database': 'Datadivr',
-=======
-            'database': 'Vrnetzer',
->>>>>>> master
+            'database': 'Vrnetzer'
+
 }
 
 
