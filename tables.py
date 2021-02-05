@@ -4,14 +4,14 @@ import time
 import sys
 import os
 import json
-#from .db_config import DATABASE as dbconf
-from db_config import DATABASE as dbconf
-#from .table_utils.taxonomy import *
-from table_utils.taxonomy import *
-#from . import populate_db_data_agnostic
-import populate_db_data_agnostic
-# from db_config import DATABASE as dbconf
-# from table_utils.taxonomy import *
+try:
+    from db_config import DATABASE as dbconf
+    from table_utils.taxonomy import *
+    import populate_db_data_agnostic
+except:
+    from .db_config import DATABASE as dbconf
+    from .table_utils.taxonomy import *
+    from .populate_db_data_agnostic import *
 import logging
 import pymysql
 import pymysql.cursors

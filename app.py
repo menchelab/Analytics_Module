@@ -8,9 +8,9 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from flask_cors import CORS, cross_origin
-if __name__ == '__main__':
+try:
     from tables import *
-else:
+except:
     from .tables import *
 from werkzeug.contrib.cache import SimpleCache
 

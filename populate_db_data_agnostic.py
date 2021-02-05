@@ -2,9 +2,9 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..")))
 
-if ((sys.platform == "darwin") or (sys.platform == "win32")):
+try:
    import db_config
-else:
+except:
     from . import db_config
 
 import pymysql
