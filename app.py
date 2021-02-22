@@ -448,16 +448,25 @@ def get_label(db_namespace, label_namespace):
 def export_dashboard_data(db_namespace):
 
     data =request.get_json()
-    Exports.export_dashboard_data(db_namespace,data)
-    return 0
+    Exports.saveSidepanel(db_namespace,data)
+    return '0'
 
 
-@app.route('/api/<string:db_namespace>/import/results2swimmer')
+@app.route('/api/<string:db_namespace>/import/results')
 @cross_origin()
-def import_json2swimmer(db_namespace):
+def load_filenamesSidepanel(db_namespace):
 
-    return Exports.import_json2swimmer(db_namespace)
+    return jsonify(Exports.load_filenamesSidepanel(db_namespace))
 
+
+@app.route('/api/<string:db_namespace>/import/resultsfilename', methods=['GET'])
+@cross_origin()
+def load_Sidepanelbyfilename(db_namespace):
+
+    f_name = request.args.get("fname")
+    
+
+    return jsonify(Exports.load_Sidepanelbyfilename(db_namespace,f_name))
 
 #############
 # SavedView #

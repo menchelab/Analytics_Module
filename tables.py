@@ -1266,39 +1266,59 @@ class Label:
 class Exports:
 
     @staticmethod
-    def export_dashboard_data(db_namespace, json_str):
+    def saveSidepanel(db_namespace, json_str):
 
         #DB query for edges
         # print("Path from ", from_id," to ",to_id)
-        print(json_str)
+        # print(json_str)
+        filename = json_str['filename']
         query = """
-            INSERT INTO %s.current_utterances(json_str) VALUES ("%s")
+            INSERT INTO Vrnetzer_sessions.user_files (filename,json_str) VALUES ("%s","%s")
 
-        """ % (db_namespace,json_str)
+        """ % (filename,json_str)
 
-        #print(query)
+        print(query)
         cursor = Base.execute_query(query)
 
-        return 0
+        return filename
 
     @staticmethod
-    def import_json2swimmer(db_namespace):
+    def load_filenamesSidepanel(db_namespace):
 
         query = """
             SELECT
-            replace(json_str,"\'",\'"\')
+                filename
+            FROM Vrnetzer_sessions.user_files
+        """ 
 
-            FROM %s.current_utterances
-            ORDER BY creation_time DESC
-            LIMIT 1
-        """ % (db_namespace)
-
-        # print(query)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        # print(str(data[0].values())[:100])
-        return list(data[0].values())[0]#.replace(''','"')
 
+        # print(data)
+        fname = [x["filename"] for x in data]
+        
+        return {'filename': fname}
+        
+    @staticmethod
+    
+    def load_Sidepanelbyfilename(db_namespace,f_name):
+
+        query = """
+            SELECT
+            	json_str
+            FROM Vrnetzer_sessions.user_files
+            WHERE filename = %s
+        """ %f_name
+        print(query)
+        cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+
+        print(type(data))
+        # fname = [x["filename"] for x in data]
+        
+        return data
+        
+        
         #
         # query = """
         #     INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
