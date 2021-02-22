@@ -19,7 +19,7 @@ vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
 gibson = {  "host":     "gibson.westeurope.cloudapp.azure.com",
             'user':     'readonly',
             'password':  'ra4Roh7ohdee',
-            'database': 'autocoretest'
+            'database': 'ppi'
 
 }
 
