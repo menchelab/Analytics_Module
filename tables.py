@@ -47,6 +47,7 @@ class Base:
     def execute_query(query, db = None):
         if not db:
             db = dbconf['database']
+        print(db)
         connection = pymysql.connect(host=dbconf["host"],
                              user=dbconf["user"],
                              password=dbconf["password"],
@@ -85,28 +86,29 @@ class Base:
 
 class Data:
     @staticmethod
-    def describe_namespace(namespace):
+    def describe_namespace(db_namespace):
+        print(db_namespace)
         query = """
             SELECT DISTINCT namespace from %s.layouts
-        """ % namespace
+        """ % db_namespace
         cursor = Base.execute_query(query)
         layouts = cursor.fetchall()
         query = """
             SELECT DISTINCT namespace from %s.labels
-        """ % namespace
+        """ % db_namespace
         cursor = Base.execute_query(query)
         labels = cursor.fetchall()
-        return {"namespace": namespace,
+        return {"namespace": db_namespace,
                 "layouts": [x["namespace"] for x in layouts],
                 "labels": [x["namespace"] for x in labels]}
     @staticmethod
-    def summary():
+    def summary():          
         query = """
-            SELECT name FROM Vrnetzer_meta.namespaces
+            SELECT name FROM Datadivr_meta.namespaces
         """
         cursor = Base.execute_query(query)
         namespaces = [x["name"] for x in cursor.fetchall()]
-
+        print(namespaces)
         return [Data.describe_namespace(namespace) for namespace in namespaces]
 
 
@@ -1775,7 +1777,7 @@ class Upload:
     def create_new_namespace(namespace):
         query = "DROP DATABASE IF EXISTS %s" % namespace
         cursor = Base.execute_query(query)
-        query = "DELETE FROM Vrnetzer_meta.namespaces WHERE name = \"%s\"" % namespace
+        query = "DELETE FROM Datadivr_meta.namespaces WHERE name = \"%s\"" % namespace
         cursor = Base.execute_query(query)
 
         query = "CREATE DATABASE %s" % namespace
@@ -1791,7 +1793,7 @@ class Upload:
         #print(query)
         populate_db_data_agnostic.create_tables(cursor)
         connection.commit()
-        query = "INSERT INTO Vrnetzer_meta.namespaces (name) VALUES (\"%s\")" % namespace
+        query = "INSERT INTO Datadivr_meta.namespaces (name) VALUES (\"%s\")" % namespace
         cursor = Base.execute_query(query)
         #print('namespace created')
         #query = "GRANT ALL PRIVILEGES ON `%s`.* TO `%s`;" % (namespace, dbconf["user"])
