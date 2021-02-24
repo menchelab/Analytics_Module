@@ -1313,8 +1313,9 @@ class Exports:
         """ %f_name
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-
-        return data[0]
+        print(type(data[0]))
+        out_str = eval(data[0]['json_str'])
+        return out_str
         
         
         #
