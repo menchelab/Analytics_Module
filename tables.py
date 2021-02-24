@@ -1311,14 +1311,10 @@ class Exports:
             FROM Vrnetzer_sessions.user_files
             WHERE filename = %s
         """ %f_name
-        print(query)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
 
-        print(type(data))
-        # fname = [x["filename"] for x in data]
-        
-        return data
+        return data[0]
         
         
         #
