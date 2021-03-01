@@ -131,7 +131,7 @@ RETURNS
 RECEIVING JSON BY FILENAME
 GET REQUEST
 App CALL via
-http://127.0.0.1:1337/api/ppi/import/resultsfilename?fname='filename_x'
+http://127.0.0.1:1337/api/ppi/import/resultsfilename?fname='somefilename'
 RETURNS
 json
 

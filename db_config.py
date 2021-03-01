@@ -16,17 +16,10 @@ vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
 
 }
 
-gibson = {  "host":     "gibson.westeurope.cloudapp.azure.com",
-            'user':     'readonly',
-            'password':  'ra4Roh7ohdee',
-            'database': 'ppi'
-
-}
-
 
 test = {  # TODO, but probably best sqlite3 since that ships with anaconda.
 
 }
 
 # Update this variable to switch db used by the platform
-DATABASE = gibson
+DATABASE = vrnetzer
