@@ -151,7 +151,8 @@ def nodes(db_namespace):
 
 
 ## IP_CELINE: implement GSEA
-@app.route('/api/<string:db_namespace>/node/gsea', methods=['GET', 'POST'])
+#@app.route('/api/<string:db_namespace>/node/gsea', methods=['GET', 'POST'])
+@app.route('/api/<string:db_namespace>/node/gsea', methods=['POST'])
 @cross_origin()
 def gsea(db_namespace):
     if request.method == 'POST':
@@ -164,7 +165,8 @@ def gsea(db_namespace):
     # check if arguments are there
     print(data)
     if ('node_ids' in data.keys()) & ('annotation' in data.keys()):
-        selectionNodes = data.getlist('node_ids')
+        #selectionNodes = data.getlist('node_ids')
+        selectionNodes = data['node_ids']
         currAnno = data['annotation']
     elif ('node_ids' not in data.keys()) & ('annotation' not in data.keys()):
         return 'must provide node_ids and (optionally) annotation desired'
@@ -172,7 +174,8 @@ def gsea(db_namespace):
         return 'must provide node_ids'
     elif 'annotation' not in data.keys():
 #        return 'must provide annotation'
-        selectionNodes = data.getlist('node_ids')
+        #selectionNodes = data.getlist('node_ids')
+        selectionNodes = data['node_ids']
         #selectionNodes = tuple([int(x) for x in data['node_ids']])
         currAnno = None
     # real return
@@ -184,7 +187,7 @@ def gsea(db_namespace):
 def random_walk(db_namespace):
     if request.method == 'POST':
         #data = request.form
-        data =request.get_json()
+        data = request.get_json()
     else:
         data = request.args
 #    node_ids = data.node_ids
@@ -464,7 +467,7 @@ def load_filenamesSidepanel(db_namespace):
 def load_Sidepanelbyfilename(db_namespace):
 
     f_name = request.args.get("fname")
-    
+
 
     return jsonify(Exports.load_Sidepanelbyfilename(db_namespace,f_name))
 

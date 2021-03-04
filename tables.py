@@ -924,21 +924,22 @@ class Attribute:
     def delete(db_namespace, attribute_id):
         query1 = """
             DELETE from %s.attribute_taxonomies
-            WHERE parent_id = %d" or child_id = %d;
+            WHERE parent_id = %d or child_id = %d;
         """ %(db_namespace, attribute_id, attribute_id)
 
         query2 = """
             DELETE from %s.nodes_attributes
-            WHERE attribute_id = %d";
+            WHERE attribute_id = %d;
         """ %(db_namespace, attribute_id)
 
         query3 = """
             DELETE from %s.attributes
             WHERE id = %d;
         """ %(db_namespace, attribute_id)
+            
         cursor = base.execute_queries([query1, query2, query3])
-
-
+            
+            
     @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
@@ -1090,8 +1091,7 @@ class Article:
     def article_for_pubid(namespace, pub_id):
         query = """
             SELECT articles.authors_list, articles.abstract, articles.title,
-                DATE_FORMAT(CURDATE(), '%s') AS publication_date,
-                "Fake Journal" AS publication, 10000 as citation_count
+                DATE_FORMAT(CURDATE(), '%s') AS publication_date
             FROM %s.articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
@@ -1103,8 +1103,7 @@ class Article:
     def articles_for_node(namespace, node_id):
         query = """
             SELECT articles.external_id, articles.title,
-                DATE_FORMAT(CURDATE(), '%s') AS publication_date,
-                "Fake Journal" AS publication, 10000 as citation_count
+                DATE_FORMAT(CURDATE(), '%s') AS publication_date
             FROM %s.articles
             JOIN %s.nodes_articles ON nodes_articles.article_id = articles.id
             JOIN %s.nodes ON nodes.id = nodes_articles.node_id
