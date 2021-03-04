@@ -17,9 +17,8 @@ vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
 }
 
 
-test = {  # TODO, but probably best sqlite3 since that ships with anaconda.
 
-}
+
 
 # Update this variable to switch db used by the platform
 DATABASE = vrnetzer
