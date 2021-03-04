@@ -405,6 +405,8 @@ def article(namespace):
         return jsonify(Article.article_for_pubid(namespace, pubid))
     node_id = request.args.get("node_id") or 0
     return jsonify(Article.articles_for_node(namespace, node_id))
+    
+
 
 
 ########

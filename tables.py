@@ -1091,11 +1091,11 @@ class Article:
     def article_for_pubid(namespace, pub_id):
         query = """
             SELECT articles.authors_list, articles.abstract, articles.title,
-                DATE_FORMAT(CURDATE(), '%s') AS publication_date
+                publication_date AS publication_date
             FROM %s.articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
-        """ % ("%Y-%m-%d", namespace, pub_id)
+        """ % ( namespace, pub_id)
         cursor = Base.execute_query(query)
         return cursor.fetchone()
 
@@ -1103,14 +1103,14 @@ class Article:
     def articles_for_node(namespace, node_id):
         query = """
             SELECT articles.external_id, articles.title,
-                DATE_FORMAT(CURDATE(), '%s') AS publication_date
-            FROM %s.articles
+               publication_date AS publication_date
+                FROM %s.articles
             JOIN %s.nodes_articles ON nodes_articles.article_id = articles.id
             JOIN %s.nodes ON nodes.id = nodes_articles.node_id
             WHERE articles.type = 'pubmed'
             AND nodes.id = '%s'
             ORDER BY articles.publication_date desc
-        """ % ("%Y-%m-%d", namespace, namespace, namespace, node_id)
+        """ % ( namespace, namespace, namespace, node_id)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
