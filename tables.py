@@ -1091,7 +1091,8 @@ class Article:
     def article_for_pubid(namespace, pub_id):
         query = """
             SELECT articles.authors_list, articles.abstract, articles.title,
-                publication_date AS publication_date
+                publication_date AS publication_date,
+                url
             FROM %s.articles
             WHERE articles.type = "pubmed"
             AND articles.external_id = '%s'
