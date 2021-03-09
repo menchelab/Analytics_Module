@@ -679,13 +679,11 @@ class Node:
             s = x[0]
             t = x[1]
             G.add_edge(s,t)
-
-
         G_sub = nx.subgraph(G,nodes)
 
         Glcc = G_sub.subgraph(max(nx.connected_components(G_sub), key=len))  # extract lcc graph
 
-        pos = nx.spring_layout(Glcc,dim=3)
+        pos = nx.spring_layout(Glcc,dim=3,iterations=20)
 
 
         # NORMALIZAION
