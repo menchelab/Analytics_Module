@@ -30,7 +30,7 @@ def get_cached_edges(cache, db_namespace):
     zkey = "edges_" + db_namespace
     dtc = cache.get(zkey)
     if dtc is None:
-        print("!!!!!!! querying")
+        # print("!!!!!!! querying")
         query = """
         SELECT edges.node1_id, edges.node2_id
         FROM %s.edges
@@ -47,7 +47,7 @@ class Base:
     def execute_query(query, db = None):
         if not db:
             db = dbconf['database']
-        print(db)
+        # print(db)
         connection = pymysql.connect(host=dbconf["host"],
                              user=dbconf["user"],
                              password=dbconf["password"],
@@ -81,13 +81,12 @@ class Base:
     @staticmethod
     def sanitize_string(string):
         string = string.replace("'", r"\'")
-        print("helloz", string)
         return string
 
 class Data:
     @staticmethod
     def describe_namespace(db_namespace):
-        print(db_namespace)
+        # print(db_namespace)
         query = """
             SELECT DISTINCT namespace from %s.layouts
         """ % db_namespace
@@ -108,7 +107,7 @@ class Data:
         """
         cursor = Base.execute_query(query)
         namespaces = [x["name"] for x in cursor.fetchall()]
-        print(namespaces)
+        # print(namespaces)
         return [Data.describe_namespace(namespace) for namespace in namespaces]
 
 
@@ -132,13 +131,13 @@ class Node:
 
     @staticmethod
     def get_sym_name(db_namespace, node_ids):
-        print('get functions gets:', node_ids)
+        # print('get functions gets:', node_ids)
         # print('and makes sql strg:', ",".join(node_ids))
         spc = [str(x)+',' for x in node_ids]
         spl_str = ''
         spl_str = spl_str.join(spc)
         spl_str = '(' + spl_str[:-1] + ')'
-        print(spl_str)
+        # print(spl_str)
         query = """
             SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id in %s
         """ % (db_namespace,spl_str)
@@ -148,7 +147,7 @@ class Node:
     # CS: get single one
     @staticmethod
     def get_single_sym_name(db_namespace, node_id):
-        print('get functions gets:', node_id)
+        # print('get functions gets:', node_id)
         query = """
             SELECT DISTINCT name, symbol, id as node_id FROM %s.nodes where id = %s
         """ % (db_namespace,node_id)
@@ -276,9 +275,9 @@ class Node:
             annos_string = "('" + "', '".join([item['namespace']  for item in allAnnos]) + "')"
         else:
             annos_string = "('" + currAnno + "')"
-        print('the anno string is ' + annos_string)
+        # print('the anno string is ' + annos_string)
         nodes_string = "(" + ",".join([str(node) for node in selectionNodes]) + ")"
-        print('the nodes string is ' + nodes_string)
+        # print('the nodes string is ' + nodes_string)
         # for currAnno, make dictionary of terms > gene, genes > term
         t00 = time.time()
         query = """
@@ -290,7 +289,7 @@ class Node:
 
         cursor = Base.execute_query(query)
         data_background = cursor.fetchall()
-        print(len(data_background))
+        # print(len(data_background))
 
         att2node = defaultdict(list)
         node2att = defaultdict(list)
@@ -300,8 +299,8 @@ class Node:
             node = eaItem['node_id']
             att2node[att].append(node)
             node2att[node].append(att)
-        print('time to make background dictionaries: ' + str(time.time() - t00))
-        print(len(att2node))
+        # print('time to make background dictionaries: ' + str(time.time() - t00))
+        # print(len(att2node))
 
         # collect set of annoTerms in selectionNodes
         # also make translation dictionary between attribute ID and human readable
@@ -332,10 +331,10 @@ class Node:
             dict_attID2humanreadable[att_id] = att_human
             dict_attID2annoType[att_id] = att_type
             dict_attType2attID[att_type].append(att_id)
-        print('time to make sample dictionaries: ' + str(time.time() - t01))
-        print('time to make dictionaries: ' + str(time.time() - t00))
+        # print('time to make sample dictionaries: ' + str(time.time() - t01))
+        # print('time to make dictionaries: ' + str(time.time() - t00))
 
-        print(dict_attType2attID['DISEASE'])
+        # print(dict_attType2attID['DISEASE'])
 
 
         # fisher tests!
@@ -447,7 +446,7 @@ class Node:
     @staticmethod
     def shortest_path(db_namespace, from_id, to_id):
         #DB query for edges
-        print("Path from ", from_id," to ",to_id)
+        # print("Path from ", from_id," to ",to_id)
         query = """
                 SELECT edges.node1_id, edges.node2_id
                 FROM %s.edges
@@ -460,7 +459,7 @@ class Node:
             t = x['node2_id']
             G.add_edge(s,t)
         sp = nx.shortest_path(G, source=int(from_id), target=int(to_id))
-        print('path nodes:', sp)
+        # print('path nodes:', sp)
 
         # get symbol and name, but in order (CSedit: 20200710)
         # TODO: do this in not stupid way.
@@ -470,28 +469,11 @@ class Node:
             out_str += str(json.dumps(sym_name_data))[1:-1] + ','
         json_out = '{"nodes":[' + out_str[:-1] + ']}'
 
-        # # get symbol and name
-        # sym_name_data = Node.get_sym_name(db_namespace, sp)
-        # # jsonify output
-        # out_str = ''
-        # for x in sym_name_data:
-        #     out_str += str(json.dumps(x)) + ','
-        # json_out = '{"nodes":[' + out_str[:-1] + ']}'
-
         return json_out
 
 
     @staticmethod
     def connect_set_dfs(db_namespace, seeds, variants, cache):
-
-        # PPI GENERATOR
-        #DB query for edges
-        # query = """
-        #         SELECT edges.node1_id, edges.node2_id
-        #         FROM %s.edges
-        # """ % db_namespace
-        # cursor = Base.execute_query(query)
-        # edges = cursor.fetchall()
         edges = get_cached_edges(cache, db_namespace)
 
         G = nx.Graph()
@@ -501,11 +483,6 @@ class Node:
             s = x[0]
             t = x[1]
             G.add_edge(s,t)
-
-        print(G.number_of_nodes())
-        print(G.number_of_edges())
-
-        print(seeds)
 
         l_linkerset = []
         for start_variant in variants:
@@ -597,15 +574,6 @@ class Node:
             add_variants.sort(key=lambda x: x['frequency'], reverse=True)
             # print('added variants', add_variants)
             kept_values +=  add_variants
-            # print('added variants', add_variants)
-
-        # kept_node_ids = [x['id'] for x in kept_values]
-        #
-        # edges_kept = [(x,y) for x,y in edges if (x in kept_node_ids and y in kept_node_ids)]
-        # print('edges:', edges_kept)
-        # l_edges_kept = [{'source':s,'target':t,'values':1} for s,t in edges_kept]
-        # d_data_kept = {'nodes': kept_values,'links': l_edges_kept}
-
 
         ##########################
         # Attach variants to seeds with deep-first-search
@@ -620,7 +588,7 @@ class Node:
         # print(G.number_of_nodes())
         # print(G.number_of_edges())
         seeds = starting_nodes
-        print(seeds)
+        # print(seeds)
 
         l_linkerset = []
         for start_variant in variants:
@@ -664,14 +632,6 @@ class Node:
     @staticmethod
     def layout(db_namespace, nodes,cache):
 
-        # PPI GENERATOR
-        #DB query for edges
-        # query = """
-        #         SELECT edges.node1_id, edges.node2_id
-        #         FROM %s.edges
-        # """ % db_namespace
-        # cursor = Base.execute_query(query)
-        # edges = cursor.fetchall()
         edges = get_cached_edges(cache, db_namespace)
 
         G = nx.Graph()
@@ -683,7 +643,7 @@ class Node:
 
         Glcc = G_sub.subgraph(max(nx.connected_components(G_sub), key=len))  # extract lcc graph
 
-        pos = nx.spring_layout(Glcc,dim=3,iterations=20)
+        pos = nx.spring_layout(Glcc,dim=3,iterations=50)
 
 
         # NORMALIZAION
@@ -704,14 +664,6 @@ class Node:
         for i,gene in enumerate(sorted(pos.keys())):
             pos_norm[gene] = (l_xn[i],l_yn[i],l_zn[i])
 
-        # query2 = """
-        #     SELECT DISTINCT name, symbol, id FROM %s.nodes
-        # """ % db_namespace
-        # cursor = Base.execute_query(query2)
-        # d_i_name = cursor.fetchall()
-        # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
-
-        # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in pos_norm.items()]
         result = [{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in pos_norm.items()]
 
         # print('result:', result)
@@ -721,9 +673,7 @@ class Node:
 
     @staticmethod
     def scale_selection(db_namespace, nodes,layout,cache):
-        # scaling factor
         a = .2
-
         str_nodes = ",".join(nodes)
         # print(str_nodes)
         query = """
@@ -738,7 +688,7 @@ class Node:
         """ %(db_namespace,layout,str_nodes)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        print(data)
+        # print(data)
         d_node_xyz = {x["node_id"]: (x["x_loc"],x["y_loc"],x["z_loc"]) for x in data}
         xm = np.mean([x['x_loc'] for x in data])
         ym = np.mean([x['y_loc'] for x in data])
@@ -754,32 +704,21 @@ class Node:
             zs =  a*z + (1-a)*zm
             d_node_xyz_scaled[node] = (xs,ys,zs)
 
-        # query2 = """
-        #     SELECT DISTINCT name, symbol, id FROM %s.nodes
-        # """ % db_namespace
-        # cursor = Base.execute_query(query2)
-        # d_i_name = cursor.fetchall()
-        # d_i_name = {x["id"]: x["symbol"] for x in d_i_name}
 
-        # result = [{'id': i,'symbol': d_i_name[i], 'x': xyz[0], 'y': xyz[1], 'z': xyz[2]} for i, xyz in d_node_xyz_scaled.items()]
         result = [{'a': [str(i)], 'v': [xyz[0],xyz[1],xyz[2],0,0,0,0]} for i, xyz in d_node_xyz_scaled.items()]
-
-        # print('result:', result)
-        #
-
         return result
 
 
     @staticmethod
     def search(db_namespace, clauses):
-        print(clauses)
+        # print(clauses)
         have_name = False
         have_attributes = False
         filter_clauses = []
         select_clauses = []
 
         def filter_clause(subject, object):
-            print(subject)
+            # print(subject)
             if subject == "name_like":
                 have_name = True
                 return [" LOWER(nodes.symbol) like LOWER('%s') " % (Base.sanitize_string(object) + "%"),
@@ -841,8 +780,8 @@ class Node:
             nodes = cursor.fetchall()
             return({"nodes": nodes})
 
-        print(filter_clauses)
-        print(have_attributes)
+        # print(filter_clauses)
+        # print(have_attributes)
         nodes_to_names = {}
         nodes_to_attributes = {}
         if have_attributes:
@@ -869,8 +808,8 @@ class Node:
         for clause in select_clauses:
             keep_nodes = set()
             for subclause in clause:
-                print(clause)
-                print(subclause)
+                # print(clause)
+                # print(subclause)
                 if subclause[0] == "name":
                     new_candidates = [x for x in candidate_nodes if subclause[1].lower() in nodes_to_names[x]["name"]]
                 else:
@@ -1051,7 +990,7 @@ class Attribute:
         """ % (db_namespace,db_namespace,db_namespace,att_id)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        print(data)
+        # print(data)
         # return [x["namespace"] for x in namespaces]
         return data
 
@@ -1193,7 +1132,7 @@ class Edge:
 
     @staticmethod
     def for_nodelist(namespace, nodes):
-        print(nodes)
+        # print(nodes)
         query = """
         SELECT node1_id, node2_id
         FROM %s.edges
@@ -1213,7 +1152,7 @@ class Edge:
         #print(query)
         cursor = Base.execute_query(query)
         results = cursor.fetchall()
-        print(results[:10])
+        # print(results[:10])
 
 class Layout:
     @staticmethod
@@ -1311,7 +1250,7 @@ class Exports:
         """ %f_name
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        print(type(data[0]))
+        # print(type(data[0]))
         out_str = eval(data[0]['json_str'])
         return out_str
         
@@ -1372,8 +1311,8 @@ def asciitable(headers, rows):
     pattern = " | ".join(formats)
     hpattern = " | ".join(hformats)
     separator = "-+-".join(['-' * n for n in lens])
-    print(hpattern % tuple(headers))
-    print (separator)
+    # print(hpattern % tuple(headers))
+    # print (separator)
     for line in rows:
         print (pattern % tuple(str(t) for t in line))
   elif len(rows) == 1:
@@ -1607,12 +1546,12 @@ def add_labels_to_db(namespace, filename, labels):
     lines = labels.split("\n")
     query = "insert into `tmp_%s`.labels_tmp (x_loc, y_loc, z_loc, text, namespace) values %s" % \
             (namespace, ",".join(["(%s, %s, %s,\"%s\",\"%s\")" % tuple(line.split(",")) for line in lines]))
-    print(query)
+    # print(query)
     cursor = Base.execute_query(query)
     if run_db_label_validations(namespace):
         pass
         # return errors
-        print("namespace already in DB!")
+        # print("namespace already in DB!")
     else:
         write_labels(namespace)
 
