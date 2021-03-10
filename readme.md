@@ -1,3 +1,5 @@
+The Readme for the whole VRNetzer platform is [HERE](https://github.com/menchelab/vrnetzer)
+
 # DataServer
 
 *The DataServer is a flexible interface between the MySQL database
