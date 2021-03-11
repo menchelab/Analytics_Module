@@ -23,16 +23,7 @@ cache = SimpleCache()
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
-@app.route("/")
-def hello():
-    g.namespaces = Data.summary()
-    if g.namespaces:
-        g.selected_namespace = g.namespaces[0]
-    g.subnetwork = {"nodes": [1, 2, 3, 4, 5], "edges": [[1, 2], [2, 4], [3, 5], [2, 5]]}
-    g.subnetwork2 = {}
-    g.subnetwork2["nodes"] = [{"id": str(x), "group": str(x)} for x in  g.subnetwork["nodes"]]
-    g.subnetwork2["links"] = [{"source": x[0], "target": x[1]} for x in  g.subnetwork["edges"]]
-    return render_template('dashboard_demo.html', name="jen")
+ 
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -81,18 +72,7 @@ def upload_file():
         return redirect(url_for('uploaded_file',
                                 filename=filename))
 
-@app.route('/uploaded_file', methods=['GET'])
-def uploaded_file():
-    filename = request.args.get('filename')
-    return render_template('uploaded_file.html', filename=filename)
 
-@app.route('/<string:db_namespace>/search', methods=['GET'])
-def old_swimmer(db_namespace):
-    return render_template('dd_dash.html')
-
-@app.route('/swimmer', methods=['GET'])
-def swimmer():
-    return render_template('dd_dash.html')
 
 ########
 # Data #
