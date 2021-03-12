@@ -1801,7 +1801,7 @@ class Upload:
                 add_attributes_to_db(namespace, contents)
 
     def upload_labels(namespace, labels_files):
-        print("labels_files", labels_files)
+        #print("labels_files", labels_files)
         for file in labels_files:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
