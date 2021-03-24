@@ -1382,6 +1382,7 @@ def validate_layout(layout):
                     continue
                 if not validate_coordinate(line[x]):
                     num_xyz_errors += 1
+                    print('error at line %s' %i)
                     if num_xyz_errors > ERRORS_TO_SHOW:
                         bad_lines["xyz"].append(["illegal XYZ values", "float 0 <= f <= 1", line[x], i, ",".join(line)])
         except:
@@ -1476,6 +1477,49 @@ def add_attributes_to_db(namespace, attributes):
     else:
         write_attributes(namespace)
 
+def add_nodes_to_db(namespace, filename, nodes):
+    Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`nodes_tmp`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`nodes_tmp` (
+      `id` varchar(255) not null,
+      `symbol` varchar(255) DEFAULT NULL,
+      `name` varchar(255) DEFAULT NULL,
+      `description` varchar(32767) DEFAULT NULL,
+      `namespace` varchar(255) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+
+    # nodes_rows = ["(" + ",".join(line.split(",")[:-1]) + ',' + line.split(",")[-1] + ")" for line in nodes]
+    nodes_rows = [",".join(line.split(",")[:]) for line in nodes]
+
+    print(nodes_rows)
+    nodes = [x.replace("\n","") for x in nodes_rows]
+    print(nodes)
+    formatted_rows = ",".join(["( %s, \"%s\", \"%s\", \"%s\", \"%s\" )" % tuple(eaLine.strip().split(",")) for eaLine in nodes])
+    print(formatted_rows)
+    
+    
+    query = """
+    insert into `tmp_%s`.nodes_tmp (id, symbol, name, description, namespace)
+    values %s
+    """ % (namespace, formatted_rows)
+    print(query)
+    cursor = Base.execute_query(query)
+    
+    add_node_info(namespace)
+    #print('query executed')
+    
+    # TODO validations
+    # if run_db_layout_validations(namespace):
+    #     pass
+    #     # return errors
+    #     print("layouts already in DB!")
+    # else:
+    #     write_layouts(namespace)
+    # add_node_info(namespace)
+    
+    
 def add_layout_to_db(namespace, filename, layout):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
     Base.execute_query('''
@@ -1496,11 +1540,12 @@ def add_layout_to_db(namespace, filename, layout):
     #                "".join([',"',line.split(",")[-1], '","', filename, '")']) \
     #                for i , line in enumerate(layout)]
     layout_rows = ["(" + ",".join(line.split(",")[:-1]) + ',"' + line.split(",")[-1] + '"' + ")" for line in layout]
+    print(layout_rows)
     query = """
     insert into `tmp_%s`.layouts_tmp (id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
     values %s
     """ % (namespace, ",".join(layout_rows))
-    #print(query)
+    print(query)
     cursor = Base.execute_query(query)
     #print('query executed')
     if run_db_layout_validations(namespace):
@@ -1620,6 +1665,17 @@ def write_layouts(namespace):
     cursor = Base.execute_query(query)
 
 
+def add_node_info(namespace):
+    query = """
+    UPDATE %s.nodes n
+    INNER JOIN tmp_%s.nodes_tmp tmp on n.external_id = tmp.id
+    SET n.name = tmp.name,
+        n.symbol = tmp.symbol
+    WHERE n.external_id = tmp.id
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+
+
 def write_attributes(namespace):
     queries = []
     query = """
@@ -1717,12 +1773,14 @@ class Upload:
         query = "CREATE DATABASE %s" % namespace
         cursor = Base.execute_query(query)
 
-        connection = pymysql.connect(host=dbconf["host"],
+        connection = pymysql.connect(
+                             host=dbconf["host"],
                              user=dbconf["user"],
                              password=dbconf["password"],
                              db=namespace,
                              charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
+                             cursorclass=pymysql.cursors.DictCursor
+                             )
         cursor = connection.cursor()
         #print(query)
         populate_db_data_agnostic.create_tables(cursor)
@@ -1750,12 +1808,29 @@ class Upload:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
+            # print(contents)
             x = validate_layout(contents.split("\n"))
             print("layout errors are", x)
             if x[1] == 0:
                 #print('uploading layouts')
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
                 #print('layouts uploaded')
+
+    def upload_nodes(namespace, node_files):
+        print("node files", node_files)
+        for file in node_files:
+            # TODO: fix the below line to account for dots in filenames
+            name = file.filename.split(".")[0]
+            contents = file.read().decode('utf-8')
+            # print(contents)
+            # TODO : VALIDATOR 
+            # x = validate_layout(contents.split("\n"))
+            # print("layout errors are", x)
+            # if x[1] == 0:
+                #print('uploading layouts')
+            add_nodes_to_db(namespace, name, contents.rstrip().split("\n"))
+                #print('layouts uploaded')
+
 
     def upload_edges(namespace, links_files):
         print("links_files", links_files)

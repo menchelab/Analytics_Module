@@ -42,17 +42,30 @@ def upload_file():
     if not namespace:
         return "namespace fail"
     Upload.create_new_temp_namespace(namespace)
+    
+    # GET LAYOUT
     layout_files = request.files.getlist("layouts")
-    #print(layout_files)
     if len(layout_files) > 0 and len(layout_files[0].filename) > 0:
         print("loading layouts", len(layout_files))
         Upload.upload_layouts(namespace, layout_files)
+
+    # GET NODES
+    node_files = request.files.getlist("nodes")
+    if len(node_files) > 0 and len(node_files[0].filename) > 0:
+        print("loading nodes", len(node_files))
+        Upload.upload_nodes(namespace, node_files)
+        
+    # GET EDGES
     edge_files = request.files.getlist("links")
     if len(edge_files) > 0 and len(edge_files[0].filename) > 0:
         Upload.upload_edges(namespace, edge_files)
+        
+    # GET ATTRIBUTES        
     attribute_files = request.files.getlist("attributes")
     if len(attribute_files) > 0:
         Upload.upload_attributes(namespace, attribute_files)
+        
+        
     label_files = request.files.getlist("labels")
     if len(label_files) > 0:
         Upload.upload_labels(namespace, request.files.getlist("labels"))
