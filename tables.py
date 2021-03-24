@@ -100,6 +100,7 @@ class Data:
         return {"namespace": db_namespace,
                 "layouts": [x["namespace"] for x in layouts],
                 "labels": [x["namespace"] for x in labels]}
+
     @staticmethod
     def summary():          
         query = """
@@ -1406,10 +1407,21 @@ def validate_layout(layout):
         except:
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
-    print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
-    print("bad lines: ", bad_lines)
-    print(len(layout), total_errors, bad_lines)
+    
+    if total_errors == 0:
+        print('-------------------------------')
+        print('Layout uploaded successfully!')
+        print('-------------------------------')
+
+    else:
+        print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
+        print("bad lines: ", bad_lines)
+        print(len(layout), total_errors, bad_lines)
+    
     return(len(layout), total_errors, bad_lines)
+        
+    
+    
 
 def validate_edges(namespace, links):
     column_errors = []
@@ -1803,14 +1815,14 @@ class Upload:
 
     @staticmethod
     def upload_layouts(namespace, layout_files):
-        print("layout files", layout_files)
+        #print("layout files", layout_files)
         for file in layout_files:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
             # print(contents)
             x = validate_layout(contents.split("\n"))
-            print("layout errors are", x)
+            #print("layout errors are", x)
             if x[1] == 0:
                 #print('uploading layouts')
                 add_layout_to_db(namespace, name, contents.rstrip().split("\n"))
@@ -1864,7 +1876,7 @@ class Upload:
                 add_attributes_to_db(namespace, contents)
 
     def upload_labels(namespace, labels_files):
-        print("labels_files", labels_files)
+        #print("labels_files", labels_files)
         for file in labels_files:
             # TODO: fix the below line to account for dots in filenames
             name = file.filename.split(".")[0]
@@ -1892,5 +1904,6 @@ if __name__ == '__main__':
     #print(Disease.diseases_for_gene(19))
     #print(Gene.gene_search("", "undefined", "GO:0019835"))
     #print(Attribute.attributes_for_node( 4, "DISEASE"))
+    
     print(Layout.all_namespaces())
     print(Layout.fetch("spring"))

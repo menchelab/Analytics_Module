@@ -31,9 +31,9 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("namespace", request.args.get("namespace"))
+    #print("namespace", request.args.get("namespace"))
     form = request.form.to_dict()
-    print(request.files)
+    #print(request.files)
     if form["namespace"] == "New":
         namespace = form["new_name"]
         Upload.create_new_namespace(form["new_name"])
@@ -46,7 +46,7 @@ def upload_file():
     # GET LAYOUT
     layout_files = request.files.getlist("layouts")
     if len(layout_files) > 0 and len(layout_files[0].filename) > 0:
-        print("loading layouts", len(layout_files))
+        #print("loading layouts", len(layout_files))
         Upload.upload_layouts(namespace, layout_files)
 
     # GET NODES

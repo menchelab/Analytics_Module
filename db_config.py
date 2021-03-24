@@ -24,8 +24,5 @@ lem = {  "host":     "lem.westeurope.cloudapp.azure.com",
 }
 
 
-
-
-
 # Update this variable to switch db used by the platform
 DATABASE = lem
