@@ -1160,9 +1160,9 @@ class Layout:
     def all_namespaces(db_namespace):
         query = """
         SELECT DISTINCT namespace, count(*)
-        FROM layouts
+        FROM %s.layouts
         GROUP BY 1
-        """
+        """ % (db_namespace)
         cursor = Base.execute_query(query)
         return cursor.fetchall()
 
@@ -1171,9 +1171,9 @@ class Layout:
         query = """
         SELECT node_id, n.symbol, n.name, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val
         FROM %s.layouts
-        JOIN nodes n on n.id = layouts.node_id
+        JOIN %s.nodes n on n.id = layouts.node_id
         WHERE namespace = "%s"
-        """ % (db_namespace, layout_namespace)
+        """ % (db_namespace,db_namespace, layout_namespace)
         cursor = Base.execute_query(query)
         layout = cursor.fetchall()
         return [{'v': [r["x_loc"], r["y_loc"], r["z_loc"], r["r_val"], r["g_val"], r["b_val"], r["a_val"] ],
