@@ -180,16 +180,38 @@ def create_labels(cursor):
     '''
     )
 
+
+def create_gene_card(cursor):
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS `gene_card` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `node_id` varchar(50) DEFAULT NULL,
+      `external_id` varchar(50) DEFAULT NULL,
+      `name` varchar(155) DEFAULT NULL,
+      `symbol` varchar(155) DEFAULT NULL,
+      `degree` int(11) DEFAULT NULL,
+      `functions` varchar(155) DEFAULT NULL,
+      `diseases` varchar(155) DEFAULT NULL,
+      `namespace` varchar(255) NOT NULL,
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `ix_nodes_external_id` (`external_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    '''
+    )
+
+# triggered by tables.py
 def create_tables(cursor):
     create_nodes(cursor)
     create_edges(cursor)
     create_attributes(cursor)
     create_nodes_attributes(cursor)
     create_attribute_taxonomies(cursor)
-    create_articles(cursor)
-    create_nodes_articles(cursor)
+    # create_articles(cursor)
+    # create_nodes_articles(cursor)
     create_layouts(cursor)
     create_labels(cursor)
+    create_gene_card(cursor)
+
 
 def populate_genes(cursor):
     query = '''

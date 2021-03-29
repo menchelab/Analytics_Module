@@ -1519,7 +1519,10 @@ def add_nodes_to_db(namespace, filename, nodes):
     print(query)
     cursor = Base.execute_query(query)
     
-    add_node_info(namespace)
+    write_nodes(namespace)
+    
+    write_genecard(namespace)
+    
     #print('query executed')
     
     # TODO validations
@@ -1529,7 +1532,7 @@ def add_nodes_to_db(namespace, filename, nodes):
     #     print("layouts already in DB!")
     # else:
     #     write_layouts(namespace)
-    # add_node_info(namespace)
+    # write_nodes(namespace)
     
     
 def add_layout_to_db(namespace, filename, layout):
@@ -1677,7 +1680,7 @@ def write_layouts(namespace):
     cursor = Base.execute_query(query)
 
 
-def add_node_info(namespace):
+def write_nodes(namespace):
     query = """
     UPDATE %s.nodes n
     INNER JOIN tmp_%s.nodes_tmp tmp on n.external_id = tmp.id
@@ -1772,6 +1775,17 @@ def write_labels(namespace):
     FROM tmp_%s.labels_tmp tmp
     """ % (namespace, namespace)
     cursor = Base.execute_query(query)
+
+
+def write_genecard(namespace):
+    # PREPARE GENE CARD FROM NODES TABLE 
+    query = """
+    INSERT INTO %s.gene_card 
+    SELECT n.id,n.id node_id, external_id, name, symbol, NULL, NULL, NULL, '%s'
+    FROM %s.nodes n
+    """ % (namespace, namespace, namespace)
+    cursor = Base.execute_query(query)
+
 
 
 class Upload:
