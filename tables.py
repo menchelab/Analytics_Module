@@ -223,7 +223,7 @@ class Node:
         """ %(namespace,node)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        # print(data)
+        print(data)
         nid = [x["node_id"] for x in data][0]
         symbol = [x["symbol"] for x in data][0]
         name = [x["gene_name"] for x in data][0]
@@ -231,14 +231,14 @@ class Node:
         funs = [x["functions"] for x in data][0]
         dis = [x["diseases"] for x in data][0]
         # print(nid,symbol,name,k)
-
+        print(funs)
         l_functions = []
-        if funs != 'NULL':
+        if funs != None:
             for fs in funs.split('|'):
                 l_functions.append(fs)
                 
         l_diseases = []                
-        if dis != 'NULL':
+        if dis != None:
             for ds in dis.split('|'):
                 l_diseases.append(ds)
 
