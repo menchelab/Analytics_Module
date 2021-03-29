@@ -187,7 +187,7 @@ def create_gene_card(cursor):
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `node_id` varchar(50) DEFAULT NULL,
       `external_id` varchar(50) DEFAULT NULL,
-      `name` varchar(155) DEFAULT NULL,
+      `gene_name` varchar(155) DEFAULT NULL,
       `symbol` varchar(155) DEFAULT NULL,
       `degree` int(11) DEFAULT NULL,
       `functions` varchar(155) DEFAULT NULL,
@@ -206,8 +206,8 @@ def create_tables(cursor):
     create_attributes(cursor)
     create_nodes_attributes(cursor)
     create_attribute_taxonomies(cursor)
-    # create_articles(cursor)
-    # create_nodes_articles(cursor)
+    create_articles(cursor)
+    create_nodes_articles(cursor)
     create_layouts(cursor)
     create_labels(cursor)
     create_gene_card(cursor)

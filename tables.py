@@ -233,12 +233,14 @@ class Node:
         # print(nid,symbol,name,k)
 
         l_functions = []
-        for fs in funs.split('|'):
-            l_functions.append(fs)
-
-        l_diseases = []
-        for ds in dis.split('|'):
-            l_diseases.append(ds)
+        if funs != 'NULL':
+            for fs in funs.split('|'):
+                l_functions.append(fs)
+                
+        l_diseases = []                
+        if dis != 'NULL':
+            for ds in dis.split('|'):
+                l_diseases.append(ds)
 
         # print('gene_data', gene_data)
         query2 = """
@@ -1786,6 +1788,24 @@ def write_genecard(namespace):
     """ % (namespace, namespace, namespace)
     cursor = Base.execute_query(query)
 
+def add2genecard(namespace):
+
+    # add degree for each node
+    edges = get_cached_edges(cache, db_namespace)
+
+    G = nx.Graph()
+    for x in edges:
+        s = x[0]
+        t = x[1]
+        G.add_edge(s,t)
+
+    for n, k in dict(nx.degree(G)):
+        query = """
+        UPDATE %s.gene_card g
+        SET g.name = '%s',
+        WHERE g.node_id = '%s'
+        """ % (namespace, k, n)
+        cursor = Base.execute_query(query)
 
 
 class Upload:
