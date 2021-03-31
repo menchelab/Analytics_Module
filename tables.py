@@ -1523,13 +1523,7 @@ def add_nodes_to_db(namespace, filename, nodes):
 
     nodes = [x.replace("\n","") for x in nodes_rows]
     formatted_rows = ",".join(["( %s, \"%s\", \"%s\", \"%s\", \"%s\" )" % tuple(eaLine.strip().split(",")) for eaLine in nodes])
-<<<<<<< HEAD
-    
-=======
-    print(formatted_rows)
 
-
->>>>>>> 7ebf06697ab901c27f383bd8db35cd6400790267
     query = """
     insert into `tmp_%s`.nodes_tmp (id, symbol, name, description, namespace)
     values %s
@@ -1540,12 +1534,6 @@ def add_nodes_to_db(namespace, filename, nodes):
     write_nodes(namespace)
 
     write_genecard(namespace)
-<<<<<<< HEAD
-    
-
-    
-    
-=======
 
     #print('query executed')
 
@@ -1559,7 +1547,6 @@ def add_nodes_to_db(namespace, filename, nodes):
     # write_nodes(namespace)
 
 
->>>>>>> 7ebf06697ab901c27f383bd8db35cd6400790267
 def add_layout_to_db(namespace, filename, layout):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
     Base.execute_query('''
