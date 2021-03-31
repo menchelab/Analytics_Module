@@ -223,7 +223,7 @@ class Node:
         """ %(namespace,node)
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
-        print(data)
+        # print(data)
         nid = [x["node_id"] for x in data][0]
         symbol = [x["symbol"] for x in data][0]
         name = [x["gene_name"] for x in data][0]
@@ -231,7 +231,7 @@ class Node:
         funs = [x["functions"] for x in data][0]
         dis = [x["diseases"] for x in data][0]
         # print(nid,symbol,name,k)
-        print(funs)
+        # print(funs)
         l_functions = []
         if funs != None:
             for fs in funs.split('|'):
@@ -1157,6 +1157,18 @@ class Edge:
         results = cursor.fetchall()
         # print(results[:10])
 
+    @staticmethod
+    def get_edges(namespace):
+        # print("!!!!!!! querying")
+        query = """
+        SELECT edges.node1_id, edges.node2_id
+        FROM %s.edges
+        """ % namespace
+        cursor = Base.execute_query(query)
+        edges = cursor.fetchall()
+        dtc = [[x["node1_id"], x["node2_id"]] for x in edges]
+        return dtc
+
 class Layout:
     @staticmethod
     def all_namespaces(db_namespace):
@@ -1219,7 +1231,7 @@ class Exports:
 
         """ % (filename,json_str)
 
-        print(query)
+        # print(query)
         cursor = Base.execute_query(query)
 
         return filename
@@ -1507,34 +1519,21 @@ def add_nodes_to_db(namespace, filename, nodes):
     # nodes_rows = ["(" + ",".join(line.split(",")[:-1]) + ',' + line.split(",")[-1] + ")" for line in nodes]
     nodes_rows = [",".join(line.split(",")[:]) for line in nodes]
 
-    print(nodes_rows)
     nodes = [x.replace("\n","") for x in nodes_rows]
-    print(nodes)
     formatted_rows = ",".join(["( %s, \"%s\", \"%s\", \"%s\", \"%s\" )" % tuple(eaLine.strip().split(",")) for eaLine in nodes])
-    print(formatted_rows)
-    
     
     query = """
     insert into `tmp_%s`.nodes_tmp (id, symbol, name, description, namespace)
     values %s
     """ % (namespace, formatted_rows)
-    print(query)
+    # print(query)
     cursor = Base.execute_query(query)
     
     write_nodes(namespace)
     
     write_genecard(namespace)
     
-    #print('query executed')
-    
-    # TODO validations
-    # if run_db_layout_validations(namespace):
-    #     pass
-    #     # return errors
-    #     print("layouts already in DB!")
-    # else:
-    #     write_layouts(namespace)
-    # write_nodes(namespace)
+
     
     
 def add_layout_to_db(namespace, filename, layout):
@@ -1557,12 +1556,12 @@ def add_layout_to_db(namespace, filename, layout):
     #                "".join([',"',line.split(",")[-1], '","', filename, '")']) \
     #                for i , line in enumerate(layout)]
     layout_rows = ["(" + ",".join(line.split(",")[:-1]) + ',"' + line.split(",")[-1] + '"' + ")" for line in layout]
-    print(layout_rows)
+    # print(layout_rows)
     query = """
     insert into `tmp_%s`.layouts_tmp (id, x_loc, y_loc, z_loc, r_val, g_val, b_val, a_val, namespace)
     values %s
     """ % (namespace, ",".join(layout_rows))
-    print(query)
+    # print(query)
     cursor = Base.execute_query(query)
     #print('query executed')
     if run_db_layout_validations(namespace):
@@ -1704,7 +1703,7 @@ def write_attributes(namespace):
     WHERE attrs.id IS NULL
     GROUP BY 1, 2
     """ % (namespace, namespace, namespace)
-    print(query)
+    # print(query)
     queries.append(query)
 
     query = """
@@ -1716,7 +1715,7 @@ def write_attributes(namespace):
         AND at.child_id = attrs.id AND at.namespace = attrs.namespace
         WHERE at.id IS NULL
     """ % (namespace, namespace, namespace, namespace)
-    print(query)
+    # print(query)
     queries.append(query)
 
     query = """
@@ -1767,6 +1766,7 @@ def write_edges(namespace):
     # """ % (namespace, namespace, namespace, namespace, namespace)
     cursor = Base.execute_query(query)
     print('write edges end')
+    add2genecard(namespace)
 
 
 def write_labels(namespace):
@@ -1788,10 +1788,13 @@ def write_genecard(namespace):
     """ % (namespace, namespace, namespace)
     cursor = Base.execute_query(query)
 
+
 def add2genecard(namespace):
 
     # add degree for each node
-    edges = get_cached_edges(cache, db_namespace)
+    # edges = get_cached_edges(cache, namespace)
+    
+    edges = Edge.get_edges(namespace)
 
     G = nx.Graph()
     for x in edges:
@@ -1799,12 +1802,71 @@ def add2genecard(namespace):
         t = x[1]
         G.add_edge(s,t)
 
-    for n, k in dict(nx.degree(G)):
+#########################
+#   TMP TABLE FOR 
+#   external ID | degree
+
+    Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`degree_tmp`" % namespace)
+    Base.execute_query('''
+    CREATE TABLE IF NOT EXISTS `tmp_%s`.`degree_tmp` (
+      `id` varchar(255) not NULL,
+      `degree` varchar(255) not NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1
+    ''' % namespace
+    )
+    
+    degree_tabl_string = ''
+    for n, k in dict(nx.degree(G)).items():
+        degree_tabl_string += '(' + str(n) +',' + str(k) + '),'
+
+    query = """
+    insert into `tmp_%s`.degree_tmp (id,degree)
+    values %s
+    """ % (namespace, degree_tabl_string[:-1])
+    # print(query)
+    cursor = Base.execute_query(query)
+#
+###################
+
+
+    query = """
+    UPDATE %s.gene_card g
+    INNER JOIN tmp_%s.degree_tmp tmp on g.node_id = tmp.id
+    SET g.degree = tmp.degree
+    WHERE g.node_id = tmp.id
+    """ % (namespace, namespace)
+    cursor = Base.execute_query(query)
+
+    # for n, k in dict(nx.degree(G)).items():
+    #     query = """
+    #     UPDATE %s.gene_card g
+    #     SET g.degree = %s
+    #     WHERE g.node_id = %s
+    #     """ % (namespace, k, n)
+    #     cursor = Base.execute_query(query)
+    #
+    # # TODO
+    # # OPTIONAL ADDITION OF FUNCTIONS / DISEASES / OTHER STUFF
+    # # FROM NODE FILE TO GENE CARD
+    #
+    # Check in nodes_tmp table for non-empty descriptiobn column 
+    query = """
+    SELECT description FROM tmp_mini.nodes_tmp
+    """ 
+    cursor = Base.execute_query(query)
+    data = cursor.fetchall()
+    l_descr = [list(x.values())[0] for x in data]
+    if list(set(l_descr))[0] == None:
+        print('NO FURTHER NODE DESCRIPTIONS DELIVERED')
+    else:
+        print('Adding node descriptions to node panel')
+
         query = """
         UPDATE %s.gene_card g
-        SET g.name = '%s',
-        WHERE g.node_id = '%s'
-        """ % (namespace, k, n)
+        INNER JOIN tmp_%s.nodes_tmp tmp on g.external_id = tmp.id
+        SET g.functions = tmp.description
+        WHERE g.external_id = tmp.id
+        """ % (namespace, namespace)
         cursor = Base.execute_query(query)
 
 
