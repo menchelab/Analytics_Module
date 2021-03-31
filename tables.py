@@ -358,7 +358,6 @@ class Node:
             d = len(node2att) - a - b - c
             # calculate fisher test, number of tests (#annotations)
             allTerms.append(dict_attID2humanreadable[eaTerm])
-#            allPs.append(pvalue(a,b,c,d).right_tail)
             oddsratio, pvalue = stats.fisher_exact([[a, b], [c, d]])
             allPs.append(pvalue)
             annoList.append(dict_attID2annoType[eaTerm])
