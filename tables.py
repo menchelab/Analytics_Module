@@ -20,7 +20,8 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 from collections import defaultdict
-from fisher import pvalue
+#from fisher import pvalue
+import scipy.stats as stats
 
 
 
@@ -102,7 +103,7 @@ class Data:
                 "labels": [x["namespace"] for x in labels]}
 
     @staticmethod
-    def summary():          
+    def summary():
         query = """
             SELECT name FROM Vrnetzer_meta.namespaces
         """
@@ -236,8 +237,8 @@ class Node:
         if funs != None:
             for fs in funs.split('|'):
                 l_functions.append(fs)
-                
-        l_diseases = []                
+
+        l_diseases = []
         if dis != None:
             for ds in dis.split('|'):
                 l_diseases.append(ds)
@@ -357,7 +358,8 @@ class Node:
             d = len(node2att) - a - b - c
             # calculate fisher test, number of tests (#annotations)
             allTerms.append(dict_attID2humanreadable[eaTerm])
-            allPs.append(pvalue(a,b,c,d).right_tail)
+            oddsratio, pvalue = stats.fisher_exact([[a, b], [c, d]])
+            allPs.append(pvalue)
             annoList.append(dict_attID2annoType[eaTerm])
             numTests.append(len(dict_attType2attID[dict_attID2annoType[eaTerm]]))
         # make dataframe
@@ -876,10 +878,10 @@ class Attribute:
             DELETE from %s.attributes
             WHERE id = %d;
         """ %(db_namespace, attribute_id)
-            
+
         cursor = base.execute_queries([query1, query2, query3])
-            
-            
+
+
     @staticmethod
     def attributes_for_autocomplete(db_namespace, name_prefix, attr_namespace=None):
         namespace_clause = " AND namespace = \"%s\"" % attr_namespace if attr_namespace else ""
@@ -1243,18 +1245,18 @@ class Exports:
             SELECT
                 filename
             FROM Vrnetzer_sessions.user_files
-        """ 
+        """
 
         cursor = Base.execute_query(query)
         data = cursor.fetchall()
 
         # print(data)
         fname = [x["filename"] for x in data]
-        
+
         return {'filename': fname}
-        
+
     @staticmethod
-    
+
     def load_Sidepanelbyfilename(db_namespace,f_name):
 
         query = """
@@ -1268,8 +1270,8 @@ class Exports:
         # print(type(data[0]))
         out_str = eval(data[0]['json_str'])
         return out_str
-        
-        
+
+
         #
         # query = """
         #     INSERT INTO %s.attribute_taxonomies(child_id, parent_id, distance, namespace)
@@ -1421,7 +1423,7 @@ def validate_layout(layout):
         except:
             pass
     total_errors = num_id_errors + num_col_errors + num_xyz_errors + num_rgb_errors
-    
+
     if total_errors == 0:
         print('-------------------------------')
         print('Layout uploaded successfully!')
@@ -1431,11 +1433,11 @@ def validate_layout(layout):
         print("errors", num_id_errors, num_col_errors, num_xyz_errors, num_rgb_errors)
         print("bad lines: ", bad_lines)
         print(len(layout), total_errors, bad_lines)
-    
+
     return(len(layout), total_errors, bad_lines)
-        
-    
-    
+
+
+
 
 def validate_edges(namespace, links):
     column_errors = []
@@ -1521,21 +1523,43 @@ def add_nodes_to_db(namespace, filename, nodes):
 
     nodes = [x.replace("\n","") for x in nodes_rows]
     formatted_rows = ",".join(["( %s, \"%s\", \"%s\", \"%s\", \"%s\" )" % tuple(eaLine.strip().split(",")) for eaLine in nodes])
+<<<<<<< HEAD
     
+=======
+    print(formatted_rows)
+
+
+>>>>>>> 7ebf06697ab901c27f383bd8db35cd6400790267
     query = """
     insert into `tmp_%s`.nodes_tmp (id, symbol, name, description, namespace)
     values %s
     """ % (namespace, formatted_rows)
     # print(query)
     cursor = Base.execute_query(query)
-    
+
     write_nodes(namespace)
-    
+
     write_genecard(namespace)
+<<<<<<< HEAD
     
 
     
     
+=======
+
+    #print('query executed')
+
+    # TODO validations
+    # if run_db_layout_validations(namespace):
+    #     pass
+    #     # return errors
+    #     print("layouts already in DB!")
+    # else:
+    #     write_layouts(namespace)
+    # write_nodes(namespace)
+
+
+>>>>>>> 7ebf06697ab901c27f383bd8db35cd6400790267
 def add_layout_to_db(namespace, filename, layout):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`layouts_tmp`" % namespace)
     Base.execute_query('''
@@ -1780,9 +1804,9 @@ def write_labels(namespace):
 
 
 def write_genecard(namespace):
-    # PREPARE GENE CARD FROM NODES TABLE 
+    # PREPARE GENE CARD FROM NODES TABLE
     query = """
-    INSERT INTO %s.gene_card 
+    INSERT INTO %s.gene_card
     SELECT n.id,n.id node_id, external_id, name, symbol, NULL, NULL, NULL, '%s'
     FROM %s.nodes n
     """ % (namespace, namespace, namespace)
@@ -1837,15 +1861,6 @@ def add2genecard(namespace):
     """ % (namespace, namespace)
     cursor = Base.execute_query(query)
 
-    # for n, k in dict(nx.degree(G)).items():
-    #     query = """
-    #     UPDATE %s.gene_card g
-    #     SET g.degree = %s
-    #     WHERE g.node_id = %s
-    #     """ % (namespace, k, n)
-    #     cursor = Base.execute_query(query)
-    #
-    # # TODO
     # # OPTIONAL ADDITION OF FUNCTIONS / DISEASES / OTHER STUFF
     # # FROM NODE FILE TO GENE CARD
     #
@@ -1931,7 +1946,7 @@ class Upload:
             name = file.filename.split(".")[0]
             contents = file.read().decode('utf-8')
             # print(contents)
-            # TODO : VALIDATOR 
+            # TODO : VALIDATOR
             # x = validate_layout(contents.split("\n"))
             # print("layout errors are", x)
             # if x[1] == 0:
@@ -2000,6 +2015,6 @@ if __name__ == '__main__':
     #print(Disease.diseases_for_gene(19))
     #print(Gene.gene_search("", "undefined", "GO:0019835"))
     #print(Attribute.attributes_for_node( 4, "DISEASE"))
-    
+
     print(Layout.all_namespaces())
     print(Layout.fetch("spring"))

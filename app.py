@@ -23,7 +23,7 @@ cache = SimpleCache()
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
- 
+
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -42,7 +42,7 @@ def upload_file():
     if not namespace:
         return "namespace fail"
     Upload.create_new_temp_namespace(namespace)
-    
+
     # GET LAYOUT
     layout_files = request.files.getlist("layouts")
     if len(layout_files) > 0 and len(layout_files[0].filename) > 0:
@@ -54,18 +54,18 @@ def upload_file():
     if len(node_files) > 0 and len(node_files[0].filename) > 0:
         print("loading nodes", len(node_files))
         Upload.upload_nodes(namespace, node_files)
-        
+
     # GET EDGES
     edge_files = request.files.getlist("links")
     if len(edge_files) > 0 and len(edge_files[0].filename) > 0:
         Upload.upload_edges(namespace, edge_files)
-        
-    # GET ATTRIBUTES        
+
+    # GET ATTRIBUTES
     attribute_files = request.files.getlist("attributes")
     if len(attribute_files) > 0:
         Upload.upload_attributes(namespace, attribute_files)
-        
-        
+
+
     label_files = request.files.getlist("labels")
     if len(label_files) > 0:
         Upload.upload_labels(namespace, request.files.getlist("labels"))
@@ -159,6 +159,7 @@ def gsea(db_namespace):
     print(data)
     if ('node_ids' in data.keys()) & ('annotation' in data.keys()):
         #selectionNodes = data.getlist('node_ids')
+        #selectionNodes = [int(x) for x in data['node_ids']]
         selectionNodes = data['node_ids']
         currAnno = data['annotation']
     elif ('node_ids' not in data.keys()) & ('annotation' not in data.keys()):
@@ -168,6 +169,7 @@ def gsea(db_namespace):
     elif 'annotation' not in data.keys():
 #        return 'must provide annotation'
         #selectionNodes = data.getlist('node_ids')
+#        selectionNodes = [int(x) for x in data['node_ids']]
         selectionNodes = data['node_ids']
         #selectionNodes = tuple([int(x) for x in data['node_ids']])
         currAnno = None
@@ -398,7 +400,7 @@ def article(namespace):
         return jsonify(Article.article_for_pubid(namespace, pubid))
     node_id = request.args.get("node_id") or 0
     return jsonify(Article.articles_for_node(namespace, node_id))
-    
+
 
 
 
