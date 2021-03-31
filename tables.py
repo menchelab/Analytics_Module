@@ -1853,8 +1853,8 @@ def add2genecard(namespace):
     #
     # Check in nodes_tmp table for non-empty descriptiobn column 
     query = """
-    SELECT description FROM tmp_mini.nodes_tmp
-    """ 
+    SELECT description FROM tmp_%s.nodes_tmp
+    """ % (namespace)
     cursor = Base.execute_query(query)
     data = cursor.fetchall()
     l_descr = [list(x.values())[0] for x in data]
