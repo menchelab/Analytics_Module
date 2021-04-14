@@ -1468,13 +1468,13 @@ def validate_attributes(namespace, attributes):
     #    print(line)
         # Validate number of columns
         if len(line) != 5:
-            num_col_errors += 1
+            num_col_errors += 1 
             if num_col_errors < ERRORS_TO_SHOW:
                 column_errors.append(["Illegal number of columns", 5, len(line), i, ",".join(line)])
-        elif len(line[0]) < 1 or len(line[1]) < 1 or len(line[2]) < 1:
+        elif len(line[0]) < 1 or len(line[2]) < 1:# or len(line[2]) < 1:
             num_col_errors += 1
             if num_col_errors < ERRORS_TO_SHOW:
-                column_errors.append(["Missing values", "First three columns must be nonempty", "", i, ",".join(line)])
+                column_errors.append(["Missing values", "First and third columns must be nonempty", "", i, ",".join(line)])
     return(len(attributes), num_col_errors, column_errors)
 
 
@@ -1482,8 +1482,8 @@ def add_attributes_to_db(namespace, attributes):
     Base.execute_query("DROP TABLE IF EXISTS `tmp_%s`.`attributes`" % namespace)
     Base.execute_query('''
     CREATE TABLE IF NOT EXISTS `tmp_%s`.`attributes` (
-      `node_id` varchar(255) not null,
-      `attribute_id` varchar(255) not null,
+      `node_id` varchar(255) NOT NULL,
+      `attribute_id` varchar(255) NOT NULL,
       `attribute_namespace` varchar(255) NOT NULL,
       `attribute_name` varchar(255) DEFAULT NULL,
       `attribute_description` varchar(255) DEFAULT NULL
@@ -1492,13 +1492,13 @@ def add_attributes_to_db(namespace, attributes):
     )
     # celine amendments 20210127
     attribute_rows = attributes.split("\n")
-    formatted_rows = ",".join(["(%s, %s, \"%s\", \"%s\", \"%s\")" % tuple(eaLine.split(",")) for eaLine in attribute_rows])
+    formatted_rows = ",".join(["(%s, \"%s\", \"%s\", \"%s\", \"%s\")" % tuple(eaLine.split(",")) for eaLine in attribute_rows])
 
     query = """
     INSERT INTO `tmp_%s`.attributes (node_id, attribute_id, attribute_namespace, attribute_name, attribute_description)
     VALUES %s
     """ % (namespace, formatted_rows)
-
+    print(query)
     cursor = Base.execute_query(query)
     if run_db_attribute_validations(namespace):
         print("problem!")
@@ -1855,21 +1855,27 @@ def add2genecard(namespace):
     query = """
     SELECT description FROM tmp_%s.nodes_tmp
     """ % (namespace)
-    cursor = Base.execute_query(query)
-    data = cursor.fetchall()
-    l_descr = [list(x.values())[0] for x in data]
-    if list(set(l_descr))[0] == None:
-        print('NO FURTHER NODE DESCRIPTIONS DELIVERED')
-    else:
-        print('Adding node descriptions to node panel')
-
-        query = """
-        UPDATE %s.gene_card g
-        INNER JOIN tmp_%s.nodes_tmp tmp on g.external_id = tmp.id
-        SET g.functions = tmp.description
-        WHERE g.external_id = tmp.id
-        """ % (namespace, namespace)
+    try: 
         cursor = Base.execute_query(query)
+        data = cursor.fetchall()
+        l_descr = [list(x.values())[0] for x in data]
+        if list(set(l_descr))[0] == None:
+            print('NO FURTHER NODE DESCRIPTIONS DELIVERED')
+        else:
+            print('Adding node descriptions to node panel')
+
+            query = """
+            UPDATE %s.gene_card g
+            INNER JOIN tmp_%s.nodes_tmp tmp on g.external_id = tmp.id
+            SET g.functions = tmp.description
+            WHERE g.external_id = tmp.id
+            """ % (namespace, namespace)
+            cursor = Base.execute_query(query)
+
+    except:
+        print('SQL error - table tmp_%s.nodes_tmp does not exist' %namespace)
+    
+
 
 
 class Upload:
