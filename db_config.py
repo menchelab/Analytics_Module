@@ -16,13 +16,5 @@ vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
 
 }
 
-lem = {  "host":     "lem.westeurope.cloudapp.azure.com",
-            'user':     'readonly',
-            'password':  'ra4Roh7ohdee',
-            'database': 'ppi'
-
-}
-
-
 # Update this variable to switch db used by the platform
-DATABASE = lem
+DATABASE = vrnetzer
