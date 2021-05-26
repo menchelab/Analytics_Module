@@ -468,6 +468,23 @@ def load_Sidepanelbyfilename(db_namespace):
 
     return jsonify(Exports.load_Sidepanelbyfilename(db_namespace,f_name))
 
+	
+	
+	
+	
+	
+	
+#EXPERIMENTAL
+#MAP SERVING
+
+@app.route('/maps/<filename>/')
+def get_image(filename):
+	# https://stackoverflow.com/questions/53202636/render-dynamically-changing-images-with-same-filenames-in-flask
+	print('display_image filename: ' + filename)
+	return redirect(url_for('static', filename='maps/' + filename), code=301)
+
+
+
 #############
 # SavedView #
 #############
