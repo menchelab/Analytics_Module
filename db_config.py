@@ -9,7 +9,7 @@ IMPORTANT: DO NOT put passwords in this file.
 
 # DATABASES
 
-vrnetzer = {  "host":     "vrnetzer.westeurope.cloudapp.azure.com",
+vrnetzer = {  "host":     "lem.westeurope.cloudapp.azure.com",
             'user':     'readonly',
             'password':  'ra4Roh7ohdee',
             'database': 'ppi'
